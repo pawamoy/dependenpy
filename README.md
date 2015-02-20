@@ -1,8 +1,7 @@
 dependenpy
 =======
 
-This Python module can build two dimensions arrays (lists of lists or matrices)
-representing the dependencies between other Python modules.
+This Python module can build the dependency matrices of a project's packages, based on `import` and `from ... import ...` commands in their modules.
 For now, its purpose is purely informational.
 
 Usage
@@ -35,13 +34,10 @@ m_max = dm.get_matrix(0)
 # Print size of the square matrix
 print len(m_max)
 
-# Output matrix on stdout
-m_max.print_data()
+# Output matrix as JSON
+print m_max.to_json()
 ```
 
-A Bash script and Python script are provided to improve the display of the matrices.
-To use them, just update the module list in `depmat.py` and run `./pretty_matrix.sh [DEPTH]`.
-
 This module was originally design to work in a Django project.
-A Django package might be built using this tool to let admins
-see dependency matrices of the project and keep a history of them.
+The Django package django-dpdpy has been built with it to display the matrices with D3JS.
+
