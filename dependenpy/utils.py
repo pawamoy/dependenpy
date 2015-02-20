@@ -36,10 +36,10 @@ class DependencyMatrix:
         """
         if isinstance(packages, str):
             self.packages = [[packages]]
-            self.groups = None
+            self.groups = ['']
         elif isinstance(packages, list):
             self.packages = [packages]
-            self.groups = None
+            self.groups = ['']
         elif isinstance(packages, collections.OrderedDict):
             self.packages = packages.values()
             self.groups = packages.keys()
@@ -99,7 +99,7 @@ class DependencyMatrix:
             if m['name'] == module+'.__init__':
                 return idx
             idx += 1
-        # case 3: module is a sub-module of a target
+        # case 3: module is the sub-module of a target
         idx = 0
         for m in self.modules:
             if module.startswith(m['name']+'.'):
