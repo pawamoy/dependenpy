@@ -2,7 +2,8 @@
 import os
 import sys
 import ast
-import pprint
+import json
+import csv
 import collections
 
 
@@ -10,6 +11,7 @@ class Elem:
     """An element in the matrix, containing a list of imports.
     It is generally associated to a single file (or python module).
     """
+
     def __init__(self):
         self._imports = []
 
@@ -24,11 +26,18 @@ class Elem:
         """
         self._imports.append(imports)
 
+    def serialize(self):
+        return self._imports
+
+    def to_json(self):
+        return json.dumps(self.serialize())
+
 
 class Matrix:
     """A matrix of elements containing lists of imports.
     Each instance is the matrix of a dependency matrix for a specific depth.
     """
+
     def __init__(self, imports_dict, max_depth=False):
         self._keys = imports_dict.keys()
         l = len(self._keys)
@@ -67,55 +76,56 @@ class Matrix:
                 # from value is equal to the key or is a sub-module of it.
                 j = 0
                 for k in self._keys:
-                    if value['from'] == k or value['from'].startswith(k+'.'):
+                    if value['from'] == k or value['from'].startswith(k + '.'):
                         self._data[i][j].add(value)
                         break
                     j += 1
             i += 1
 
-    def print_data(self):
-        """Print the matrix data on stdout.
-        """
-        m, p = 99, 2
-        mx = 0
-        for row in self._data:
-            for elem in row:
-                if len(elem) > mx:
-                    mx = len(elem)
-        if mx < 10:
-            m, p = 9, 1
+    def serialize(self, grouping=None):
+        nodes = []
+        if grouping:
+            for k in self._keys:
+                gi = 1
+                for group in grouping:
+                    b = False
+                    for g in group:
+                        if k == g or k.startswith(g + '.'):
+                            nodes.append({"name": k, "group": gi})
+                            b = True
+                            break
+                    if b:
+                        break
+                    gi += 1
+        else:
+            for k in self._keys:
+                nodes.append({"name": k, "group": 1})
 
+        links = []
+        i = 0
         for row in self._data:
-            sys.stdout.write('[')
-            for i in row[0:-1]:
-                l = len(i)
-                if l > m:
-                    for s in range(p):
-                        sys.stdout.write('+')
-                    sys.stdout.write('|')
-                elif l > 0:
-                    sys.stdout.write('%s|' % str(l).rjust(p, '_'))
-                else:
-                    for s in range(p):
-                        sys.stdout.write('_')
-                    sys.stdout.write('|')
-            l = len(row[-1])
-            if l > m:
-                for s in range(p):
-                    sys.stdout.write('+')
-                print ']'
-            elif l > 0:
-                print '%s]' % str(l).rjust(p, '_')
-            else:
-                for s in range(p):
-                    sys.stdout.write('_')
-                print ']'
+            j = 0
+            for e in row:
+                l = len(e)
+                if l > 0:
+                    links.append({"source": i, "target": j, "value": l})
+                j += 1
+            i += 1
+        return {"nodes": nodes, "links": links}
 
-    def print_keys(self):
-        """Print the matrix keys on stdout.
-        """
-        pp = pprint.PrettyPrinter(indent=2)
-        pp.pprint(self._keys)
+    def to_json(self, grouping=None):
+        return json.dumps(self.serialize(grouping))
+
+    def to_csv(self):
+        array = [self._keys]
+        i = 0
+        for row in self._data:
+            line = [self._keys[i]]
+            for e in row:
+                line.append(len(e))
+            i += 1
+            array.append(line)
+        return str(array).replace('[', '').replace(']', '\n')
 
 
 class DependencyMatrix:
@@ -127,13 +137,21 @@ class DependencyMatrix:
     a square matrix allowing to zoom in and in into elements until max depth
     has been reached.
     """
+
     def __init__(self, app_list, path_method=None):
         """Instantiate a DependencyMatrix object.
         :param app_list: *required* (tuple); the list of apps you want to scan
         :param path_method: *optional* (callable); the method to determine a module path within python path
         """
         self._all_modules = []
-        self._inside_modules = app_list
+        if isinstance(app_list[0], list):
+            self._inside_modules = []
+            for app in app_list:
+                self._inside_modules.extend(app)
+            self._order = app_list
+        else:
+            self._inside_modules = app_list
+            self._order = None
         self.imports = {}
         self.max_depth = 0
         if path_method:
@@ -149,12 +167,13 @@ class DependencyMatrix:
         """Build the matrices for all depths. Call is explicit because users
         might not want to build matrices, but just get imports dictionnary.
         """
-        self.matrices[self.max_depth-1] = Matrix(self.imports, max_depth=True)
-        depth = self.max_depth-1
+        self.matrices[self.max_depth - 1] = Matrix(self.imports,
+                                                   max_depth=True)
+        depth = self.max_depth - 1
         depth_dict = self.imports
         while depth > 0:
             depth_dict = DependencyMatrix._get_depth_dict(depth_dict, depth)
-            self.matrices[depth-1] = Matrix(depth_dict)
+            self.matrices[depth - 1] = Matrix(depth_dict)
             depth -= 1
 
     def get_matrix(self, depth=0):
@@ -164,7 +183,7 @@ class DependencyMatrix:
         """
         if depth >= self.max_depth or depth == 0:
             depth = self.max_depth
-        return self.matrices[depth-1]
+        return self.matrices[depth - 1]
 
     def _get_modules(self):
         """Build the extended module list by walking over the initial modules.
@@ -177,7 +196,8 @@ class DependencyMatrix:
             module = os.path.dirname(module)
             for f in DependencyMatrix._walk(module):
                 if f.endswith('.py'):
-                    mod_name = app+'.'+os.path.splitext(f)[0].replace('/', '.')
+                    mod_name = app + '.' + os.path.splitext(f)[0].replace('/',
+                                                                          '.')
                     self._all_modules.append(mod_name)
         # We remove duplicates
         seen = set()
@@ -201,6 +221,16 @@ class DependencyMatrix:
                     mod_name = mod
                 self.imports[mod_name] = self._get_from_import(
                     mod_path, mod_name)
+        # We reorder the imports only ONE time, here,
+        # and it will be passed to all sub-depth dicts
+        if self._order:
+            ordered_dict = collections.OrderedDict()
+            for part in self._order:
+                roots = [module.split('.')[0] for module in part]
+                for key in self.imports.keys():
+                    if key.split('.')[0] in roots:
+                        ordered_dict[key] = self.imports.pop(key)
+            self.imports = ordered_dict
 
     def _get_max_depth(self):
         """Compute max depth based on imports dictionary's keys.
@@ -245,7 +275,7 @@ class DependencyMatrix:
         :param max_depth: *required* (int); regroup all sub-modules deeper than max_depth
         :return: (dict); the new updated dictionary
         """
-        new_dict = {}
+        new_dict = collections.OrderedDict()
         for key in imports.keys():
             value = imports[key]
             new_key = '.'.join(key.split('.')[:max_depth])
@@ -253,9 +283,7 @@ class DependencyMatrix:
                 new_dict[new_key].extend(value)
             else:
                 new_dict[new_key] = value
-        # FIXME: do we really need sorted dicts ?
-        return collections.OrderedDict(sorted(new_dict.items()))
-        # return new_dict
+        return new_dict
 
     @staticmethod
     def _get_module_path_(mod):
@@ -270,7 +298,7 @@ class DependencyMatrix:
                 if os.path.exists(mod_path):
                     return mod_path
                 return None
-            elif os.path.exists(mod_path+'.py'):
+            elif os.path.exists(mod_path + '.py'):
                 return mod_path + '.py'
         return None
 
@@ -300,7 +328,21 @@ class DependencyMatrix:
             sub_item = os.path.join(path, item)
             if os.path.isdir(sub_item):
                 result.extend(DependencyMatrix._walk(
-                    sub_item, prefix+os.path.basename(sub_item)+'/'))
+                    sub_item, prefix + os.path.basename(sub_item) + '/'))
             else:
-                result.append(prefix+item)
+                result.append(prefix + item)
         return result
+
+    def serialize(self):
+        return {
+            'max_depth': self.max_depth,
+            'matrix': [m.serialize(self._order) for m in self.matrices]
+        }
+
+    def to_json(self):
+        return json.dumps(self.serialize())
+
+    def to_csv(self):
+        return str([m.to_csv()
+                    for m in self.matrices
+                    ]).replace('[', '').replace(']', '\n')
