@@ -47,3 +47,12 @@ Here is an example of colorized CSV output:
 This module was originally design to work in a Django project.
 The Django package django-dpdpy has been built with it to display the matrices with D3JS.
 
+
+License
+-------
+
+Copyright (c) 2014 Timothée Mazzucotelli
+
+This Source Code is subject to the terms of the Mozilla Public
+License, v. 2.0. See the LICENSE.txt file for more details.
+
