@@ -8,125 +8,16 @@ import csv
 import collections
 
 
-class Elem:
-    """An element in the matrix, containing a list of imports.
-    It is generally associated to a single file (or python module).
-    """
-
-    def __init__(self):
-        self._imports = []
-
-    def __len__(self):
-        l = 0
-        for i in self._imports:
-            l += len(i['import'])
-        return l
-
-    def add(self, imports):
-        """Add imports to this matrix element.
-        """
-        self._imports.append(imports)
-
-    def serialize(self):
-        return self._imports
-
-    def to_json(self):
-        return json.dumps(self.serialize())
-
-
-class Matrix:
-    """A matrix of elements containing lists of imports.
-    Each instance is the matrix of a dependency matrix for a specific depth.
-    """
-
-    def __init__(self, imports_dict, max_depth=False):
-        self._keys = imports_dict.keys()
-        l = len(self._keys)
-        self._data = [[Elem() for x in range(l)] for x in range(l)]
-        if max_depth:
-            self._fill_max_depth(imports_dict)
-        else:
-            self._fill(imports_dict)
-
-    def __len__(self):
-        return len(self._keys)
-
-    def _fill_max_depth(self, imports_dict):
-        """Fill the matrix without doing any module regrouping.
-        """
-        # This is the max depth matrix, we just have to fill
-        # the matrix with all values in imports_dict.
-        i = 0
-        for values in imports_dict.values():
-            for value in values:
-                try:
-                    j = self._keys.index(value['from'])
-                    self._data[i][j].add(value)
-                except ValueError:
-                    pass
-            i += 1
-
-    def _fill(self, imports_dict):
-        """Fill the matrix by doing module regrouping on the given keys.
-        """
-        i = 0
-        for values in imports_dict.values():
-            for value in values:
-                # Here we cannot search the from value in keys since it might
-                # not be in, so instead we loop over the keys and check if the
-                # from value is equal to the key or is a sub-module of it.
-                j = 0
-                for k in self._keys:
-                    if value['from'] == k or value['from'].startswith(k + '.'):
-                        self._data[i][j].add(value)
-                        break
-                    j += 1
-            i += 1
-
-    def serialize(self, grouping=None):
-        nodes = []
-        if grouping:
-            for k in self._keys:
-                gi = 1
-                for group in grouping:
-                    b = False
-                    for g in group:
-                        if k == g or k.startswith(g + '.'):
-                            nodes.append({"name": k, "group": gi})
-                            b = True
-                            break
-                    if b:
-                        break
-                    gi += 1
-        else:
-            for k in self._keys:
-                nodes.append({"name": k, "group": 1})
-
-        links = []
-        i = 0
-        for row in self._data:
-            j = 0
-            for e in row:
-                l = len(e)
-                if l > 0:
-                    links.append({"source": i, "target": j, "value": l})
-                j += 1
-            i += 1
-        return {"nodes": nodes, "links": links}
-
-    def to_json(self, grouping=None):
-        return json.dumps(self.serialize(grouping))
-
-    def to_csv(self):
-        array = [self._keys]
-        i = 0
-        for row in self._data:
-            line = [self._keys[i]]
-            for e in row:
-                line.append(len(e))
-            i += 1
-            array.append(line)
-        return str(array).replace('[', '').replace(']', '\n')
+DEFAULT_OPTIONS = {
+    'group_name': True,
+    'group_index': True,
+    'source_name': True,
+    'source_index': True,
+    'target_name': True,
+    'target_index': True,
+    'imports': True,
+    'cardinal': True,
+}
 
 
 class DependencyMatrix:
@@ -139,155 +30,173 @@ class DependencyMatrix:
     has been reached.
     """
 
-    def __init__(self, app_list, path_method=None):
+    def __init__(self, packages, options=DEFAULT_OPTIONS):
         """Instantiate a DependencyMatrix object.
-        :param app_list: *required* (tuple); the list of apps you want to scan
-        :param path_method: *optional* (callable); the method to determine a module path within python path
+        :param packages: string / list / OrderedDict containing packages to scan
         """
-        self._all_modules = []
-        if isinstance(app_list[0], list):
-            self._inside_modules = []
-            for app in app_list:
-                self._inside_modules.extend(app)
-            self._order = app_list
-        else:
-            self._inside_modules = app_list
-            self._order = None
-        self.imports = {}
+        if isinstance(packages, str):
+            self.packages = [[packages]]
+            self.groups = None
+        elif isinstance(packages, list):
+            self.packages = [packages]
+            self.groups = None
+        elif isinstance(packages, collections.OrderedDict):
+            self.packages = packages.values()
+            self.groups = packages.keys()
+        self.options = options
+        self.modules = []
+        self.imports = []
         self.max_depth = 0
-        if path_method:
-            self._get_module_path = path_method
-        else:
-            self._get_module_path = DependencyMatrix._get_module_path_
-        self._get_modules()
-        self._get_imports()
-        self._get_max_depth()
-        self.matrices = [None for x in range(self.max_depth)]
+        self._inside = {}
 
-    def compute_matrix(self):
-        """Build the matrices for all depths. Call is explicit because users
-        might not want to build matrices, but just get imports dictionnary.
-        """
-        self.matrices[self.max_depth - 1] = Matrix(self.imports,
-                                                   max_depth=True)
-        depth = self.max_depth - 1
-        depth_dict = self.imports
-        while depth > 0:
-            depth_dict = DependencyMatrix._get_depth_dict(depth_dict, depth)
-            self.matrices[depth - 1] = Matrix(depth_dict)
-            depth -= 1
-
-    def get_matrix(self, depth=0):
-        """Returns the built matrix for the specified depth.
-        :param depth: *optional* (int); Which matrix to return. Default 0 (=max)
-        :return: A Matrix instance for the specified depth.
-        """
-        if depth >= self.max_depth or depth == 0:
-            depth = self.max_depth
-        return self.matrices[depth - 1]
-
-    def _get_modules(self):
+    def init_modules(self):
         """Build the extended module list by walking over the initial modules.
         Do not add external modules (only sub-modules of initial ones).
         """
-        for app in self._inside_modules:
-            module = self._get_module_path(app)
-            if not module:
-                continue
-            module = os.path.dirname(module)
-            for f in DependencyMatrix._walk(module):
-                if f.endswith('.py'):
-                    mod_name = app + '.' + os.path.splitext(f)[0].replace('/',
-                                                                          '.')
-                    self._all_modules.append(mod_name)
-        # We remove duplicates
-        seen = set()
-        seen_add = seen.add
-        am = self._all_modules
-        self._all_modules = [x for x in am if not (x in seen or seen_add(x))]
+        group = 0
+        for package_group in self.packages:
+            for package in package_group:
+                module_path = self.resolve_path(package)
+                if not module_path:
+                    continue
+                module_path = os.path.dirname(module_path)
+                self.modules.extend(
+                    self._walk(package, module_path, group))
+            group += 1
+        self.max_depth = max([len(m['name'].split('.')) for m in self.modules])
 
-    def _get_imports(self):
-        """Build the imports dictionary from the extended module list. Parse
-        every module and retrieve its imports.
-        """
-        for mod in self._all_modules:
-            mod_path = self._get_module_path(mod)
-            if mod_path:
-                # We append .__init__ if necessary
-                if '__init__' in mod:
-                    mod_name = mod
-                elif '__init__' in mod_path:
-                    mod_name = mod + '.__init__'
-                else:
-                    mod_name = mod
-                self.imports[mod_name] = self._get_from_import(
-                    mod_path, mod_name)
-        # We reorder the imports only ONE time, here,
-        # and it will be passed to all sub-depth dicts
-        if self._order:
-            ordered_dict = collections.OrderedDict()
-            for part in self._order:
-                roots = [module.split('.')[0] for module in part]
-                for key in self.imports.keys():
-                    if key.split('.')[0] in roots:
-                        ordered_dict[key] = self.imports.pop(key)
-            self.imports = ordered_dict
+    def init_imports(self):
+        if self.max_depth < 1:
+            return
+        source_index = 0
+        for module in self.modules:
+            imports_dicts = self._parse_imports(module)
+            for key in imports_dicts.keys():
+                target_index = self.module_index(key)
+                self.imports.append({
+                    'source_name': module['name'],
+                    'source_index': source_index,
+                    'target_index': target_index,
+                    'target_name': self.modules[target_index]['name'],
+                    'imports': imports_dicts[key],
+                    'cardinal': len(imports_dicts[key]['import'])
+                })
+            source_index += 1
 
-    def _get_max_depth(self):
-        """Compute max depth based on imports dictionary's keys.
-        """
-        self.max_depth = DependencyMatrix._max_depth(self.imports.keys())
+    def module_index(self, module):
+        # we don't need to store results, since we have unique keys
+        # see _parse_imports -> sum_from
 
-    @staticmethod
-    def _get_from_import(py_file, module):
+        # case 1: module is already a target
+        idx = 0
+        for m in self.modules:
+            if module == m['name']:
+                return idx
+            idx += 1
+        # case 2: module is an __init__ target
+        idx = 0
+        for m in self.modules:
+            if m['name'] == module+'.__init__':
+                return idx
+            idx += 1
+        # case 3: module is a sub-module of a target
+        idx = 0
+        for m in self.modules:
+            if module.startswith(m['name']+'.'):
+                return idx
+            idx += 1
+        # should never reach this (see _parse_imports -> if is_inside(mod))
+        return None
+
+    def is_inside(self, module):
+        pre_computed = self._inside.get(module, None)
+        if pre_computed is not None:
+            return pre_computed
+        else:
+            for package_group in self.packages:
+                for package in package_group:
+                    if module == package or module.startswith(package+'.'):
+                        self._inside[module] = True
+                        return True
+            self._inside[module] = False
+            return False
+
+    def _parse_imports(self, module):
         """Return a list of dictionaries with importing module (by)
         and imported modules (from and import).
-        :param py_file: *required* (string); file to parse
-        :param module: *required* (string); file's name as a python module
-        :return:
+        :param module: dict containing module's path and name
+        :return: the list of imports (as dicts following given options)
         """
-        result = []
-        code = open(py_file).read()
+        sum_from = collections.OrderedDict()
+        code = open(module['path']).read()
         for node in ast.parse(code).body:
             if isinstance(node, ast.ImportFrom):
                 if not node.module:
                     continue
                 mod = node.module
-                # We rebuild the module name when it is like .* or ..* or ...*
+                # We rebuild the module name if it is a relative import
                 level = node.level
                 if level > 0:
-                    mod = os.path.splitext(module)[0]
+                    mod = os.path.splitext(module['name'])[0]
                     level -= 1
                     while level != 0:
                         mod = os.path.splitext(mod)[0]
                         level -= 1
                     mod += '.' + node.module
-                temp_list = []
-                for name in node.names:
-                    temp_list.append(name.name)
+                if self.is_inside(mod):
+                    if sum_from.get(mod, None):
+                        sum_from[mod]['import'] += [n.name for n in node.names]
+                    else:
+                        sum_from[mod] = {
+                            'by': module['name'],
+                            'from': mod,
+                            'import': [n.name for n in node.names]}
+        return sum_from
+
+    # @staticmethod
+    # def _get_depth_dict(imports, max_depth):
+    #     """Update a dictionary for a specific depth based on another dictionary.
+    #     :param imports: *required* (dict); base dictionary
+    #     :param max_depth: *required* (int); regroup all sub-modules deeper than max_depth
+    #     :return: (dict); the new updated dictionary
+    #     """
+    #     new_dict = collections.OrderedDict()
+    #     for key in imports.keys():
+    #         value = imports[key]
+    #         new_key = '.'.join(key.split('.')[:max_depth])
+    #         if new_dict.get(new_key, None):
+    #             new_dict[new_key].extend(value)
+    #         else:
+    #             new_dict[new_key] = value
+    #     return new_dict
+
+    def _walk(self, name, path, group, prefix=''):
+        """Walk recursively into subdirectories of a directory and return a
+        list of all Python files found (*.py).
+        :param path: *required* (string); directory to scan
+        :param prefix: *optional* (string); file paths prepended string
+        :return: (list); the list of Python files
+        """
+        result = []
+        for item in os.listdir(path):
+            sub_item = os.path.join(path, item)
+            if os.path.isdir(sub_item):
+                result.extend(self._walk(
+                    name, sub_item, group,
+                    '%s%s/' % (prefix, os.path.basename(sub_item))))
+            elif item.endswith('.py'):
                 result.append({
-                    'by': module, 'from': mod, 'import': temp_list})
+                    'name': '%s.%s' % (
+                        name, os.path.splitext(
+                            prefix+item)[0].replace('/', '.')),
+                    'path': sub_item,
+                    'group_index': group,
+                    'group_name': self.groups[group]
+                })
         return result
 
     @staticmethod
-    def _get_depth_dict(imports, max_depth):
-        """Update a dictionary for a specific depth based on another dictionary.
-        :param imports: *required* (dict); base dictionary
-        :param max_depth: *required* (int); regroup all sub-modules deeper than max_depth
-        :return: (dict); the new updated dictionary
-        """
-        new_dict = collections.OrderedDict()
-        for key in imports.keys():
-            value = imports[key]
-            new_key = '.'.join(key.split('.')[:max_depth])
-            if new_dict.get(new_key, None):
-                new_dict[new_key].extend(value)
-            else:
-                new_dict[new_key] = value
-        return new_dict
-
-    @staticmethod
-    def _get_module_path_(mod):
+    def resolve_path(mod):
         """Built-in method for getting a module's path within Python path.
         :param mod: *required* (string); the partial basename of the module
         :return: (string); the path to this module or None if not found
@@ -302,48 +211,3 @@ class DependencyMatrix:
             elif os.path.exists(mod_path + '.py'):
                 return mod_path + '.py'
         return None
-
-    @staticmethod
-    def _max_depth(seq):
-        """Return the maximum depth of a module in a list of modules.
-        :param seq: *required* (list); python modules list (*.*.*)
-        :return: (int); the maximum depth
-        """
-        d = 0
-        for m in seq:
-            m_depth = len(m.split('.'))
-            if m_depth > d:
-                d = m_depth
-        return d
-
-    @staticmethod
-    def _walk(path, prefix=''):
-        """Walk recursively into subdirectories of a directory and return a
-        list of all found Python files (*.py).
-        :param path: *required* (string); directory to scan
-        :param prefix: *optional* (string); file paths prepended string
-        :return: (list); the list of Python files
-        """
-        result = []
-        for item in os.listdir(path):
-            sub_item = os.path.join(path, item)
-            if os.path.isdir(sub_item):
-                result.extend(DependencyMatrix._walk(
-                    sub_item, prefix + os.path.basename(sub_item) + '/'))
-            else:
-                result.append(prefix + item)
-        return result
-
-    def serialize(self):
-        return {
-            'max_depth': self.max_depth,
-            'matrix': [m.serialize(self._order) for m in self.matrices]
-        }
-
-    def to_json(self):
-        return json.dumps(self.serialize())
-
-    def to_csv(self):
-        return str([m.to_csv()
-                    for m in self.matrices
-                    ]).replace('[', '').replace(']', '\n')
