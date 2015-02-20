@@ -38,6 +38,12 @@ print len(m_max)
 print m_max.to_json()
 ```
 
+Here is an example of colorized CSV output:
+
+![alt tag](http://imageshack.com/a/img537/3731/myhqOU.png)
+
+
+
 This module was originally design to work in a Django project.
 The Django package django-dpdpy has been built with it to display the matrices with D3JS.
 
