@@ -51,7 +51,7 @@ The Django package django-dpdpy has been built with it to display the matrices w
 License
 -------
 
-Copyright (c) 2014 Timothée Mazzucotelli
+Copyright (c) 2015 Timothée Mazzucotelli
 
 This Source Code is subject to the terms of the Mozilla Public
 License, v. 2.0. See the LICENSE.txt file for more details.
