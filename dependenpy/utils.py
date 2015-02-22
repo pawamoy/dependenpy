@@ -27,18 +27,18 @@ DEFAULT_OPTIONS = {
 
 
 class DependencyMatrix:
-    """A DependencyMatrix instance walks over modules in app_list to build
-    its imports dictionnary. The call to compute_matrix will then build
-    the matrices for all depths, i.e. the range from 1 to the maximum depth
-    of all modules. A matrix for a specific depth regroups sub-modules that
-    are deeper that this depth into their parent module. See this class as
-    a square matrix allowing to zoom in and in into elements until max depth
-    has been reached.
+    """A new instance of DependencyMatrix contains the list of packages you
+    specified, optionally the associated groups, the options you passed, and
+    attributes for the maximum depth of the modules, the list of these
+    modules, and their imports (or dependencies). These last three attributes
+    are initialized to 0 or an empty list. To compute them, use the init
+    methods of the instance (init_modules, then init_imports).
     """
 
     def __init__(self, packages, options=DEFAULT_OPTIONS):
         """Instantiate a DependencyMatrix object.
         :param packages: string / list / OrderedDict containing packages to scan
+        :param options: a dict containing a boolean for each option
         """
         if isinstance(packages, str):
             self.packages = [[packages]]
@@ -90,8 +90,15 @@ class DependencyMatrix:
             source_index += 1
 
     def module_index(self, module):
+        """Return the index of the given module in the built list of modules.
+        :param module: a string representing the module name (pack.mod.submod)
+        """
         # we don't need to store results, since we have unique keys
         # see _parse_imports -> sum_from
+
+        # FIXME: what is the more performant? 3 loops with 1 comparison
+        # or 1 loop with 3 comparisons? In the second case: are we sure
+        # we get an EXACT result?
 
         # case 1: module is already a target
         idx = 0
@@ -115,6 +122,10 @@ class DependencyMatrix:
         return None
 
     def is_inside(self, module):
+        """Check if the specified module is part of the package list given
+        to this object. Return True if yes, False if not.
+        :param module: a string representing the module name (pack.mod.submod)
+        """
         pre_computed = self._inside.get(module, None)
         if pre_computed is not None:
             return pre_computed
@@ -128,10 +139,10 @@ class DependencyMatrix:
             return False
 
     def _parse_imports(self, module):
-        """Return a list of dictionaries with importing module (by)
-        and imported modules (from and import).
+        """Return a dictionary of dictionaries with importing module (by)
+        and imported modules (from and import). Keys are the importing modules.
         :param module: dict containing module's path and name
-        :return: the list of imports (as dicts following given options)
+        :return: dict of dict
         """
         sum_from = collections.OrderedDict()
         code = open(module['path']).read()
