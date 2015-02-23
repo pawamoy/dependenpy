@@ -242,7 +242,7 @@ class DependencyMatrix:
         modules_indexes = {}
         index_old, index_new = 0, -1
         for m in self.matrices[down_level]['modules']:
-            up_module = m['name'].split('.')[:down_level]
+            up_module = '.'.join(m['name'].split('.')[:down_level])
             # FIXME: We could maybe get rid of path...
             if seen_module.get(up_module, None) is not None:
                 # seen_module[up_module]['path'] += ', ' + m['path']
