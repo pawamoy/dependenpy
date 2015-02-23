@@ -55,7 +55,8 @@ class DependencyMatrix:
     def __init__(self, packages, path_resolver=resolve_path):
         """Instantiate a DependencyMatrix object.
         :param packages: string / list / OrderedDict containing packages to scan
-        :param options: a dict containing a boolean for each option
+        :param path_resolver: a callable that can find the absolute path given
+        a module name
         """
         if isinstance(packages, str):
             self.packages = [[packages]]
@@ -69,7 +70,7 @@ class DependencyMatrix:
         else:
             self.packages = packages
             self.groups = ['']
-        self.path_resolver = resolve_path
+        self.path_resolver = path_resolver
         self.modules = []
         self.imports = []
         self.max_depth = 0
