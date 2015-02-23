@@ -13,6 +13,22 @@ import json
 import csv
 import collections
 
+def resolve_path(module):
+    """Built-in method for getting a module's path within Python path.
+    :param mod: *required* (string); the partial basename of the module
+    :return: (string); the path to this module or None if not found
+    """
+    for path in sys.path:
+        module_path = os.path.join(path, module.replace('.', '/'))
+        if os.path.isdir(module_path):
+            module_path += '/__init__.py'
+            if os.path.exists(module_path):
+                return module_path
+            return None
+        elif os.path.exists(module_path + '.py'):
+            return module_path + '.py'
+    return None
+
 
 DEFAULT_OPTIONS = {
     'group_name': True,
@@ -26,16 +42,17 @@ DEFAULT_OPTIONS = {
 }
 
 
+# TODO: Add exclude option
 class DependencyMatrix:
     """A new instance of DependencyMatrix contains the list of packages you
     specified, optionally the associated groups, the options you passed, and
     attributes for the maximum depth of the modules, the list of these
     modules, and their imports (or dependencies). These last three attributes
-    are initialized to 0 or an empty list. To compute them, use the init
-    methods of the instance (init_modules, then init_imports).
+    are initialized to 0 or an empty list. To compute them, use the build
+    methods of the instance (build_modules, then build_imports).
     """
 
-    def __init__(self, packages, options=DEFAULT_OPTIONS):
+    def __init__(self, packages, path_resolver=resolve_path):
         """Instantiate a DependencyMatrix object.
         :param packages: string / list / OrderedDict containing packages to scan
         :param options: a dict containing a boolean for each option
@@ -49,20 +66,32 @@ class DependencyMatrix:
         elif isinstance(packages, collections.OrderedDict):
             self.packages = packages.values()
             self.groups = packages.keys()
-        self.options = options
+        else:
+            self.packages = packages
+            self.groups = ['']
+        self.path_resolver = resolve_path
         self.modules = []
         self.imports = []
         self.max_depth = 0
+        self.matrices = []
         self._inside = {}
+        self._modules_are_built = False
+        self._imports_are_built = False
+        self._matrices_are_built = False
 
-    def init_modules(self):
-        """Build the extended module list by walking over the initial modules.
-        Do not add external modules (only sub-modules of initial ones).
+    def build(self):
+        return self.build_modules().build_imports().build_matrices()
+
+    def build_modules(self):
+        """Build the module list with all python files in the given packages.
+        Also compute the maximum depth.
         """
+        if self._modules_are_built:
+            return self
         group = 0
         for package_group in self.packages:
             for package in package_group:
-                module_path = self.resolve_path(package)
+                module_path = self.path_resolver(package)
                 if not module_path:
                     continue
                 module_path = os.path.dirname(module_path)
@@ -70,13 +99,17 @@ class DependencyMatrix:
                     self._walk(package, module_path, group))
             group += 1
         self.max_depth = max([len(m['name'].split('.')) for m in self.modules])
+        self._modules_are_built = True
+        return self
 
-    def init_imports(self):
-        if self.max_depth < 1:
-            return
+    def build_imports(self):
+        """Build the big dictionary of imports.
+        """
+        if not self._modules_are_built or self._imports_are_built:
+            return self
         source_index = 0
         for module in self.modules:
-            imports_dicts = self._parse_imports(module)
+            imports_dicts = self.parse_imports(module)
             for key in imports_dicts.keys():
                 target_index = self.module_index(key)
                 self.imports.append({
@@ -84,44 +117,64 @@ class DependencyMatrix:
                     'source_index': source_index,
                     'target_index': target_index,
                     'target_name': self.modules[target_index]['name'],
-                    'imports': imports_dicts[key],
+                    'imports': [imports_dicts[key]],
                     'cardinal': len(imports_dicts[key]['import'])
                 })
             source_index += 1
+        self._imports_are_built = True
+        return self
+
+    def build_matrices(self):
+        """Build the matrices of each depth. Starts with the last one
+        (maximum depth), and ascend through the levels
+        until depth 1 is reached.
+        """
+        if not self._imports_are_built or self._matrices_are_built:
+            return self
+        md = self.max_depth
+        self.matrices = [None for x in range(0, md)]
+        self.matrices[md-1] = {'modules': self.modules,
+                               'imports': self.imports}
+        md -= 1
+        while md > 0:
+            self.matrices[md-1] = self._build_up_matrix(md)
+            md -= 1
+        self._matrices_are_built = True
+        return self
 
     def module_index(self, module):
         """Return the index of the given module in the built list of modules.
         :param module: a string representing the module name (pack.mod.submod)
         """
-        # we don't need to store results, since we have unique keys
-        # see _parse_imports -> sum_from
+        # We don't need to store results, since we have unique keys
+        # See parse_imports -> sum_from
 
-        # FIXME: what is the more performant? 3 loops with 1 comparison
+        # FIXME: what is the most efficient? 3 loops with 1 comparison
         # or 1 loop with 3 comparisons? In the second case: are we sure
-        # we get an EXACT result?
+        # we get an EXACT result (order of comparisons)?
 
-        # case 1: module is already a target
+        # Case 1: module is already a target
         idx = 0
         for m in self.modules:
             if module == m['name']:
                 return idx
             idx += 1
-        # case 2: module is an __init__ target
+        # Case 2: module is an __init__ target
         idx = 0
         for m in self.modules:
             if m['name'] == module+'.__init__':
                 return idx
             idx += 1
-        # case 3: module is the sub-module of a target
+        # Case 3: module is the sub-module of a target
         idx = 0
         for m in self.modules:
             if module.startswith(m['name']+'.'):
                 return idx
             idx += 1
-        # should never reach this (see _parse_imports -> if is_inside(mod))
+        # We should never reach this (see parse_imports -> if contains(mod))
         return None
 
-    def is_inside(self, module):
+    def contains(self, module):
         """Check if the specified module is part of the package list given
         to this object. Return True if yes, False if not.
         :param module: a string representing the module name (pack.mod.submod)
@@ -138,10 +191,11 @@ class DependencyMatrix:
             self._inside[module] = False
             return False
 
-    def _parse_imports(self, module):
+    def parse_imports(self, module, force=False):
         """Return a dictionary of dictionaries with importing module (by)
         and imported modules (from and import). Keys are the importing modules.
         :param module: dict containing module's path and name
+        :param force: boolean, force append even if packages do not contain module
         :return: dict of dict
         """
         sum_from = collections.OrderedDict()
@@ -160,7 +214,7 @@ class DependencyMatrix:
                         mod = os.path.splitext(mod)[0]
                         level -= 1
                     mod += '.' + node.module
-                if self.is_inside(mod):
+                if self.contains(mod) or force:
                     if sum_from.get(mod, None):
                         sum_from[mod]['import'] += [n.name for n in node.names]
                     else:
@@ -170,23 +224,59 @@ class DependencyMatrix:
                             'import': [n.name for n in node.names]}
         return sum_from
 
-    # @staticmethod
-    # def _get_depth_dict(imports, max_depth):
-    #     """Update a dictionary for a specific depth based on another dictionary.
-    #     :param imports: *required* (dict); base dictionary
-    #     :param max_depth: *required* (int); regroup all sub-modules deeper than max_depth
-    #     :return: (dict); the new updated dictionary
-    #     """
-    #     new_dict = collections.OrderedDict()
-    #     for key in imports.keys():
-    #         value = imports[key]
-    #         new_key = '.'.join(key.split('.')[:max_depth])
-    #         if new_dict.get(new_key, None):
-    #             new_dict[new_key].extend(value)
-    #         else:
-    #             new_dict[new_key] = value
-    #     return new_dict
+    def _build_up_matrix(self, down_level):
+        """Build matrix data based on the matrix below it.
+        :param down_level: int, depth of the matrix below
+        """
+        # First we build the new module list
+        up_modules, up_imports = [], []
+        seen_module, seen_import = {}, {}
+        modules_indexes = {}
+        index_old, index_new = 0, -1
+        for m in self.matrices[down_level]['modules']:
+            up_module = m['name'].split('.')[:down_level]
+            # FIXME: We could maybe get rid of path...
+            if seen_module.get(up_module, None) is not None:
+                # seen_module[up_module]['path'] += ', ' + m['path']
+                pass
+            else:
+                seen_module[up_module] = {
+                    'name': up_module,
+                    # 'path': m['path'],
+                    'group_name': m['group_name'],
+                    'group_index': m['group_index']
+                }
+                up_modules.append(seen_module[up_module])
+                index_new += 1
+            modules_indexes[index_old] = {'index': index_new,
+                                          'name': up_module}
+            index_old += 1
 
+        # Then we build the new imports list
+        for i in self.matrices[down_level]['imports']:
+            new_source_index = modules_indexes[i['source_index']]['index']
+            new_source_name = modules_indexes[i['source_index']]['name']
+            new_target_index = modules_indexes[i['target_index']]['index']
+            new_target_name = modules_indexes[i['target_index']]['name']
+            seen_id = (new_source_index, new_target_index)
+            if seen_import.get(seen_id, None) is not None:
+                seen_import[seen_id]['cardinal'] += i['cardinal']
+                seen_import[seen_id]['imports'] += i['imports']
+            else:
+                seen_import[seen_id] = {
+                    'cardinal': i['cardinal'],
+                    'imports': i['imports'],
+                    'source_name': new_source_name,
+                    'source_index': new_source_index,
+                    'target_name': new_target_name,
+                    'target_index': new_target_index,
+                }
+                up_imports.append(seen_import[seen_id])
+
+        # We return the new dict of modules / imports
+        return {'modules': up_modules, 'imports': up_imports}
+
+    # TODO: Add exclude option
     def _walk(self, name, path, group, prefix=''):
         """Walk recursively into subdirectories of a directory and return a
         list of all Python files found (*.py).
@@ -212,19 +302,74 @@ class DependencyMatrix:
                 })
         return result
 
-    @staticmethod
-    def resolve_path(mod):
-        """Built-in method for getting a module's path within Python path.
-        :param mod: *required* (string); the partial basename of the module
-        :return: (string); the path to this module or None if not found
+    def to_json(self):
+        """Return self as a JSON string (without path_resolver callable).
         """
-        for path in sys.path:
-            mod_path = os.path.join(path, mod.replace('.', '/'))
-            if os.path.isdir(mod_path):
-                mod_path += '/__init__.py'
-                if os.path.exists(mod_path):
-                    return mod_path
-                return None
-            elif os.path.exists(mod_path + '.py'):
-                return mod_path + '.py'
-        return None
+        return json.dumps({
+            'packages': self.packages,
+            'groups': self.groups,
+            # 'path_resolver': self.path_resolver,
+            'modules': self.modules,
+            'imports': self.imports,
+            'max_depth': self.max_depth,
+            'matrices': self.matrices,
+            '_inside': self._inside,
+            '_modules_are_built': self._modules_are_built,
+            '_imports_are_built': self._imports_are_built,
+            '_matrices_are_built': self._matrices_are_built,
+        })
+
+    @staticmethod
+    def _option_filter(matrix, options):
+        """Return a light version of a matrix based on given options.
+        :param matrix: a matrix from self.matrices
+        :param options: dict of booleans. keys are group_name, group_index,
+        source_name, source_index, target_name, target_index, imports, cardinal
+        """
+        if not options['group_name']:
+            for item in matrix['modules']:
+                del item['group_name']
+        if not options['group_index']:
+            for item in matrix['modules']:
+                del item['group_index']
+        if not options['source_name']:
+            for item in matrix['imports']:
+                del item['source_name']
+        if not options['source_index']:
+            for item in matrix['imports']:
+                del item['source_index']
+        if not options['target_name']:
+            for item in matrix['imports']:
+                del item['target_name']
+        if not options['target_index']:
+            for item in matrix['imports']:
+                del item['target_index']
+        if not options['imports']:
+            for item in matrix['imports']:
+                del item['imports']
+        if not options['cardinal']:
+            for item in matrix['imports']:
+                del item['cardinal']
+        return matrix
+
+    def get_matrix(self, matrix):
+        """Return a copy of the specified matrix.
+        Cast given index into [0 .. max_depth] range.
+        :param matrix: index/depth. Zero return max_depth matrix.
+        """
+        if matrix == 0 or matrix > self.max_depth:
+            m = self.max_depth-1
+        elif matrix < 0:
+            m = 0
+        else:
+            m = matrix-1
+        return dict(self.matrices[m])
+
+    def matrix_to_json(self, matrix, options=DEFAULT_OPTIONS):
+        """Return a matrix from self.matrices as a JSON string.
+        :param matrix: index/depth of matrix (begin to 1, end to max_depth,
+        and 0 is equivalent to max_depth)
+        """
+        return json.dumps(
+            DependencyMatrix._option_filter(
+                self.get_matrix(matrix), options))
