@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#
+
 # Copyright (c) 2015 Timothée Mazzucotelli
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
@@ -54,6 +54,7 @@ class DependencyMatrix:
 
     def __init__(self, packages, path_resolver=resolve_path):
         """Instantiate a DependencyMatrix object.
+
         :param packages: string / list / OrderedDict containing packages to scan
         :param path_resolver: a callable that can find the absolute path given
         a module name
@@ -81,6 +82,8 @@ class DependencyMatrix:
         self._matrices_are_built = False
 
     def build(self):
+        """Shortcut for building modules, imports and matrices.
+        """
         return self.build_modules().build_imports().build_matrices()
 
     def build_modules(self):
@@ -145,6 +148,7 @@ class DependencyMatrix:
 
     def module_index(self, module):
         """Return the index of the given module in the built list of modules.
+
         :param module: a string representing the module name (pack.mod.submod)
         """
         # We don't need to store results, since we have unique keys
@@ -178,6 +182,7 @@ class DependencyMatrix:
     def contains(self, module):
         """Check if the specified module is part of the package list given
         to this object. Return True if yes, False if not.
+
         :param module: a string representing the module name (pack.mod.submod)
         """
         pre_computed = self._inside.get(module, None)
@@ -195,8 +200,9 @@ class DependencyMatrix:
     def parse_imports(self, module, force=False):
         """Return a dictionary of dictionaries with importing module (by)
         and imported modules (from and import). Keys are the importing modules.
+
         :param module: dict containing module's path and name
-        :param force: boolean, force append even if packages do not contain module
+        :param force: bool, force append even if packages do not contain module
         :return: dict of dict
         """
         sum_from = collections.OrderedDict()
@@ -227,6 +233,7 @@ class DependencyMatrix:
 
     def _build_up_matrix(self, down_level):
         """Build matrix data based on the matrix below it.
+
         :param down_level: int, depth of the matrix below
         """
         # First we build the new module list
@@ -281,6 +288,7 @@ class DependencyMatrix:
     def _walk(self, name, path, group, prefix=''):
         """Walk recursively into subdirectories of a directory and return a
         list of all Python files found (*.py).
+
         :param path: *required* (string); directory to scan
         :param prefix: *optional* (string); file paths prepended string
         :return: (list); the list of Python files
@@ -323,6 +331,7 @@ class DependencyMatrix:
     @staticmethod
     def _option_filter(matrix, options):
         """Return a light version of a matrix based on given options.
+
         :param matrix: a matrix from self.matrices
         :param options: dict of booleans. keys are group_name, group_index,
         source_name, source_index, target_name, target_index, imports, cardinal
@@ -356,6 +365,7 @@ class DependencyMatrix:
     def get_matrix(self, matrix):
         """Return a copy of the specified matrix.
         Cast given index into [0 .. max_depth] range.
+
         :param matrix: index/depth. Zero return max_depth matrix.
         """
         if matrix == 0 or matrix > self.max_depth:
@@ -368,8 +378,10 @@ class DependencyMatrix:
 
     def matrix_to_json(self, matrix, options=DEFAULT_OPTIONS):
         """Return a matrix from self.matrices as a JSON string.
+
         :param matrix: index/depth of matrix (begin to 1, end to max_depth,
         and 0 is equivalent to max_depth)
+        :param options: dict of filter options
         """
         return json.dumps(
             DependencyMatrix._option_filter(
