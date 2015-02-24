@@ -11,6 +11,7 @@ import sys
 import ast
 import json
 import csv
+import StringIO
 import collections
 
 def resolve_path(module):
@@ -369,12 +370,13 @@ class DependencyMatrix:
 
         :param matrix: index/depth. Zero return max_depth matrix.
         """
-        if matrix == 0 or matrix > self.max_depth:
+        i = int(matrix)
+        if i == 0 or i > self.max_depth:
             m = self.max_depth-1
-        elif matrix < 0:
+        elif i < 0:
             m = 0
         else:
-            m = matrix-1
+            m = i-1
         return dict(self.matrices[m])
 
     def matrix_to_json(self, matrix, options=DEFAULT_OPTIONS):
@@ -399,7 +401,7 @@ class DependencyMatrix:
         returning the text.
         """
         # where to write csv
-        if file_object and isinstance(file_object, file):
+        if file_object:
             si = None
             cw = csv.writer(file_object)
         else:
@@ -415,7 +417,7 @@ class DependencyMatrix:
             csv_cells[(i['source_index'], i['target_index'])] = i['cardinal']
 
         # write the first line (columns)
-        cw.writerow([''].extend([m['name'] for m in data['modules']]))
+        cw.writerow([''] + [m['name'] for m in data['modules']])
 
         # compute and write the lines
         l = len(data['modules'])
