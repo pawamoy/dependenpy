@@ -1,8 +1,9 @@
 dependenpy
 =======
 
-This Python module can build the dependency matrices of a project's packages, based on `import` and `from ... import ...` commands in their modules.
-For now, its purpose is purely informational.
+This Python module can build the dependency matrices of a project's packages, based on `from ... import ...` commands in their modules. For now, its purpose is purely informational.
+
+The module is composed of only one class: DependencyMatrix, that is initialized with a list of packages foundable is sys.path. This list of packages can be a string (one package), a list (several) or an ordered dictionary, used to define groups of packages with a legend. We use an ordered dictionary because it is important to keep the same order as the one given by the user. On the other hand it is not always handy to pass an OrderedDict instance, so in the future we could maybe pass a list of dict.
 
 Usage
 -----
@@ -17,25 +18,25 @@ myapps = (
     ‘moduleN’
 )
 
+# Create an empty instance
 dm = DependencyMatrix(myapps)
+
+# Init its data with build methods
+dm.build()
+
+# You can also use separately dm.build_modules(),
+# dm.build_imports() and dm.build_matrices().
+# You can even chain them: dm.build_modules().build_imports().build_matrices().
+# The order is important, since matrices need imports, and imports need modules.
+# The build() method is just a shortcut of the above chained command.
 
 # Print max depth of submodules and the big dictionary of imports
 print dm.max_depth
 print dm.imports
 
-# Actually build the matrices, one for each depth
-dm.compute_matrix()
+# Equivalent to json_m_max = dm.matrix_to_json(dm.max_depth)
+json_m_max = dm.matrix_to_json(0)
 
-m1 = dm.get_matrix(1)
-
-# Equivalent to m_max = dm.get_matrix(dm.max_depth)
-m_max = dm.get_matrix(0)
-
-# Print size of the square matrix
-print len(m_max)
-
-# Output matrix as JSON
-print m_max.to_json()
 ```
 
 Here is an example of colorized CSV output:
@@ -45,7 +46,7 @@ Here is an example of colorized CSV output:
 
 
 This module was originally design to work in a Django project.
-The Django package django-dpdpy has been built with it to display the matrices with D3JS.
+The Django package django-dpdpy has been built on it to display the matrices with D3JS (it will soon be registered on GitHub, then PyPi).  
 
 
 License
