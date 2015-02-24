@@ -313,6 +313,7 @@ class DependencyMatrix:
 
     def to_json(self):
         """Return self as a JSON string (without path_resolver callable).
+        It is just a way to serialize it.
         """
         return json.dumps({
             'packages': self.packages,
@@ -386,3 +387,52 @@ class DependencyMatrix:
         return json.dumps(
             DependencyMatrix._option_filter(
                 self.get_matrix(matrix), options))
+
+    def matrix_to_csv(self, matrix, file_object=None):
+        """Return a matrix from self.matrices as a CSV array. No options here
+        because we output only the list of modules and the cardinals.
+
+        :param matrix: index/depth of matrix (begin to 1, end to max_depth,
+        and 0 is equivalent to max_depth)
+        :param file_object: if given, csv will write in this file object
+        and return it modified instead of writing in a string buffer and
+        returning the text.
+        """
+        # where to write csv
+        if file_object and isinstance(file_object, file):
+            si = None
+            cw = csv.writer(file_object)
+        else:
+            si = StringIO.StringIO()
+            cw = csv.writer(si)
+
+        # matrix data
+        data = self.get_matrix(matrix)
+
+        # search for each cell, will be 0 if not found
+        csv_cells = {}
+        for i in data['imports']:
+            csv_cells[(i['source_index'], i['target_index'])] = i['cardinal']
+
+        # write the first line (columns)
+        cw.writerow([''].extend([m['name'] for m in data['modules']]))
+
+        # compute and write the lines
+        l = len(data['modules'])
+        for i in range(0, l):
+            # name of module
+            line = [data['modules'][i]['name']]
+            for j in range(0, l):
+                cell = csv_cells.get((i, j), None)
+                if cell is not None:
+                    line.append(cell)
+                else:
+                    line.append(0)
+            # write the line
+            cw.writerow(line)
+
+        # return the result
+        if si:
+            return si.getvalue().strip('\r\n')
+        elif file_object:
+            return file_object
