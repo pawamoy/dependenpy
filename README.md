@@ -37,6 +37,7 @@ print dm.imports
 # Equivalent to json_m_max = dm.matrix_to_json(dm.max_depth)
 json_m_max = dm.matrix_to_json(0)
 
+csv_string_m2 = dm.matrix_to_csv(2)
 ```
 
 Here is an example of colorized CSV output:
