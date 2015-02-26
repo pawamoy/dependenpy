@@ -117,14 +117,16 @@ class DependencyMatrix:
             imports_dicts = self.parse_imports(module)
             for key in imports_dicts.keys():
                 target_index = self.module_index(key)
-                self.imports.append({
-                    'source_name': module['name'],
-                    'source_index': source_index,
-                    'target_index': target_index,
-                    'target_name': self.modules[target_index]['name'],
-                    'imports': [imports_dicts[key]],
-                    'cardinal': len(imports_dicts[key]['import'])
-                })
+                # it happens sometimes (tricky/wrong imports in code)
+                if target_index is not None:
+                    self.imports.append({
+                        'source_name': module['name'],
+                        'source_index': source_index,
+                        'target_index': target_index,
+                        'target_name': self.modules[target_index]['name'],
+                        'imports': [imports_dicts[key]],
+                        'cardinal': len(imports_dicts[key]['import'])
+                    })
             source_index += 1
         self._imports_are_built = True
         return self
