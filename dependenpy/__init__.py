@@ -1,4 +1,5 @@
-#
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2015 Timothée Mazzucotelli
 #
 # This Source Code Form is subject to the terms of the Mozilla Public

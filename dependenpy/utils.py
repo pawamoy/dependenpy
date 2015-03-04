@@ -27,6 +27,7 @@ import collections
 
 def resolve_path(module):
     """Built-in method for getting a module's path within Python path.
+
     :param module: str, the name of the module
     :return: str, absolute path to this module, None if not found
     """
@@ -41,7 +42,7 @@ def resolve_path(module):
             return module_path + '.py'
     return None
 
-
+#: Filter default options for JSON output
 DEFAULT_OPTIONS = {
     'group_name': True,
     'group_index': True,
@@ -58,20 +59,6 @@ DEFAULT_OPTIONS = {
 # TODO: Change OrderedDict by a list
 class DependencyMatrix:
     """Dependency Matrix data builder.
-
-    Attributes:
-        packages (list of list of str): the packages used to build the data,
-            optionally organized by groups
-        groups (list of str): the names of the groups
-        path_resolver (callable): the method that find the path of a module
-        modules (list of dict): the list of all packages' modules, containing
-            name, path, group_index and group_name
-        imports (list of dict): the list of all modules' imports, containing
-            cardinal, source_index, source_name, target_index, target_name,
-            and imports dicts themselves (by, from, import)
-        max_depth (int): the maximum module depth
-        matrices (list of dict): one matrix for each depth, containing the
-            list of modules and the list of imports
     """
 
     def __init__(self, packages, path_resolver=resolve_path):
@@ -81,6 +68,10 @@ class DependencyMatrix:
         :param path_resolver: callable, finds the absolute path of a module
         :raise AttributeError: when `packages` has wrong type
         """
+        #: list of list of str: the packages used to build the data,
+        #: optionally organized by groups
+        self.packages = None
+        self.groups = None #: list of str: the names of the groups
         if isinstance(packages, str):
             self.packages = [[packages]]
             self.groups = ['']
@@ -92,10 +83,19 @@ class DependencyMatrix:
             self.groups = packages.keys()
         else:
             raise AttributeError
+        #: callable: the method that find the path of a module
         self.path_resolver = path_resolver
+        #: list of dict: the list of all packages' modules, containing
+        #: name, path, group_index and group_name
         self.modules = []
+        #: list of dict: the list of all modules' imports, containing
+        #: cardinal, source_index, source_name, target_index, target_name,
+        #: and imports dicts themselves (by, from, import)
         self.imports = []
+        #: int: the maximum module depth
         self.max_depth = 0
+        #: list of dict: one matrix for each depth, containing the
+        #: list of modules and the list of imports
         self.matrices = []
         self._inside = {}
         self._modules_are_built = False
@@ -437,8 +437,8 @@ class DependencyMatrix:
         :param matrix: int, index/depth of matrix (from 1 to max_depth,
             0 is equivalent to max_depth)
         :param file_object: File, if given, csv will write in this file object
-        and return it modified instead of writing in a string buffer and
-        return the text.
+            and return it modified instead of writing in a string buffer and
+            return the text.
         :return: File, if file_object is given, else str
         """
         # where to write csv
