@@ -6,6 +6,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+"""dependenpy utils module.
+
+This is the main and only module of dependenpy package.
+This module contains:
+
+    a class, DependencyMatrix: the class building your dependency matrix.
+    a function, resolve_path: transforms a module name into an absolute path.
+    a dictionary, DEFAULT_OPTIONS: contains the filter options for JSON output.
+
+"""
+
 import os
 import sys
 import ast
@@ -16,13 +27,13 @@ import collections
 
 def resolve_path(module):
     """Built-in method for getting a module's path within Python path.
-    :param mod: *required* (string); the partial basename of the module
-    :return: (string); the path to this module or None if not found
+    :param module: str, the name of the module
+    :return: str, absolute path to this module, None if not found
     """
     for path in sys.path:
-        module_path = os.path.join(path, module.replace('.', '/'))
+        module_path = os.path.join(path, module.replace('.', os.sep))
         if os.path.isdir(module_path):
-            module_path += '/__init__.py'
+            module_path = '%s%s__init__.py' % (module_path, os.sep)
             if os.path.exists(module_path):
                 return module_path
             return None
@@ -44,21 +55,31 @@ DEFAULT_OPTIONS = {
 
 
 # TODO: Add exclude option
+# TODO: Change OrderedDict by a list
 class DependencyMatrix:
-    """A new instance of DependencyMatrix contains the list of packages you
-    specified, optionally the associated groups, the options you passed, and
-    attributes for the maximum depth of the modules, the list of these
-    modules, and their imports (or dependencies). These last three attributes
-    are initialized to 0 or an empty list. To compute them, use the build
-    methods of the instance (build_modules, then build_imports).
+    """Dependency Matrix data builder.
+
+    Attributes:
+        packages (list of list of str): the packages used to build the data,
+            optionally organized by groups
+        groups (list of str): the names of the groups
+        path_resolver (callable): the method that find the path of a module
+        modules (list of dict): the list of all packages' modules, containing
+            name, path, group_index and group_name
+        imports (list of dict): the list of all modules' imports, containing
+            cardinal, source_index, source_name, target_index, target_name,
+            and imports dicts themselves (by, from, import)
+        max_depth (int): the maximum module depth
+        matrices (list of dict): one matrix for each depth, containing the
+            list of modules and the list of imports
     """
 
     def __init__(self, packages, path_resolver=resolve_path):
         """Instantiate a DependencyMatrix object.
 
-        :param packages: string / list / OrderedDict containing packages to scan
-        :param path_resolver: a callable that can find the absolute path given
-        a module name
+        :param packages: str/list/OrderedDict: packages to scan
+        :param path_resolver: callable, finds the absolute path of a module
+        :raise AttributeError: when `packages` has wrong type
         """
         if isinstance(packages, str):
             self.packages = [[packages]]
@@ -70,8 +91,7 @@ class DependencyMatrix:
             self.packages = packages.values()
             self.groups = packages.keys()
         else:
-            self.packages = packages
-            self.groups = ['']
+            raise AttributeError
         self.path_resolver = path_resolver
         self.modules = []
         self.imports = []
@@ -84,12 +104,16 @@ class DependencyMatrix:
 
     def build(self):
         """Shortcut for building modules, imports and matrices.
+
+        :return: self, with built data
         """
         return self.build_modules().build_imports().build_matrices()
 
     def build_modules(self):
         """Build the module list with all python files in the given packages.
         Also compute the maximum depth.
+
+        :return: self, with built modules
         """
         if self._modules_are_built:
             return self
@@ -108,7 +132,9 @@ class DependencyMatrix:
         return self
 
     def build_imports(self):
-        """Build the big dictionary of imports.
+        """Build the big list of imports.
+
+        :return: self, with built imports
         """
         if not self._modules_are_built or self._imports_are_built:
             return self
@@ -132,9 +158,11 @@ class DependencyMatrix:
         return self
 
     def build_matrices(self):
-        """Build the matrices of each depth. Starts with the last one
+        """Build the matrices for each depth. Starts with the last one
         (maximum depth), and ascend through the levels
         until depth 1 is reached.
+
+        :return: self, with built matrices
         """
         if not self._imports_are_built or self._matrices_are_built:
             return self
@@ -152,7 +180,8 @@ class DependencyMatrix:
     def module_index(self, module):
         """Return the index of the given module in the built list of modules.
 
-        :param module: a string representing the module name (pack.mod.submod)
+        :param module: str, represents the module name (pack.mod.submod)
+        :return: int, the index of the module, None if not found
         """
         # We don't need to store results, since we have unique keys
         # See parse_imports -> sum_from
@@ -183,10 +212,10 @@ class DependencyMatrix:
         return None
 
     def contains(self, module):
-        """Check if the specified module is part of the package list given
-        to this object. Return True if yes, False if not.
+        """Check if the specified module is part of the packages list.
 
-        :param module: a string representing the module name (pack.mod.submod)
+        :param module: str, represents the module name (pack.mod.submod)
+        :return: bool, True if yes, False if not
         """
         pre_computed = self._inside.get(module, None)
         if pre_computed is not None:
@@ -204,9 +233,9 @@ class DependencyMatrix:
         """Return a dictionary of dictionaries with importing module (by)
         and imported modules (from and import). Keys are the importing modules.
 
-        :param module: dict containing module's path and name
-        :param force: bool, force append even if packages do not contain module
-        :return: dict of dict
+        :param module: dict, contains module's path and name
+        :param force: bool, force append even if module is not part of packages
+        :return: dict of dict, imports
         """
         sum_from = collections.OrderedDict()
         code = open(module['path']).read()
@@ -235,9 +264,10 @@ class DependencyMatrix:
         return sum_from
 
     def _build_up_matrix(self, down_level):
-        """Build matrix data based on the matrix below it.
+        """Build matrix data based on the matrix below it (with depth+1).
 
-        :param down_level: int, depth of the matrix below
+        :param down_level: int, depth of the below matrix
+        :return: dict, matrix data
         """
         # First we build the new module list
         up_modules, up_imports = [], []
@@ -289,12 +319,14 @@ class DependencyMatrix:
 
     # TODO: Add exclude option
     def _walk(self, name, path, group, prefix=''):
-        """Walk recursively into subdirectories of a directory and return a
-        list of all Python files found (*.py).
+        """Walk recursively into subdirectories of a package directory
+        and return a list of all Python files found (*.py).
 
-        :param path: *required* (string); directory to scan
-        :param prefix: *optional* (string); file paths prepended string
-        :return: (list); the list of Python files
+        :param name: str, name of the package
+        :param path: str, path of the package
+        :param group: int, group index of the package
+        :param prefix: str, used by recursion, file paths prepended string
+        :return: list of dict, contains name, path, group_index and group_name
         """
         result = []
         for item in os.listdir(path):
@@ -302,12 +334,12 @@ class DependencyMatrix:
             if os.path.isdir(sub_item):
                 result.extend(self._walk(
                     name, sub_item, group,
-                    '%s%s/' % (prefix, os.path.basename(sub_item))))
+                    '%s%s%s' % (prefix, os.path.basename(sub_item), os.sep)))
             elif item.endswith('.py'):
                 result.append({
                     'name': '%s.%s' % (
                         name, os.path.splitext(
-                            prefix+item)[0].replace('/', '.')),
+                            prefix+item)[0].replace(os.sep, '.')),
                     'path': sub_item,
                     'group_index': group,
                     'group_name': self.groups[group]
@@ -316,7 +348,9 @@ class DependencyMatrix:
 
     def to_json(self):
         """Return self as a JSON string (without path_resolver callable).
-        It is just a way to serialize it.
+        This method is just a way to serialize the object itself.
+
+        :return: str, a JSON dump of self
         """
         return json.dumps({
             'packages': self.packages,
@@ -334,11 +368,13 @@ class DependencyMatrix:
 
     @staticmethod
     def _option_filter(matrix, options):
-        """Return a light version of a matrix based on given options.
+        """Return a light version of matrix data based on given options.
 
-        :param matrix: a matrix from self.matrices
-        :param options: dict of booleans. keys are group_name, group_index,
-        source_name, source_index, target_name, target_index, imports, cardinal
+        :param matrix: dict, a matrix from self.matrices
+        :param options: dict of bool, keys are group_name, group_index,
+            source_name, source_index, target_name, target_index,
+            imports and cardinal
+        :return: dict, the filtered matrix data
         """
         if not options['group_name']:
             for item in matrix['modules']:
@@ -367,10 +403,11 @@ class DependencyMatrix:
         return matrix
 
     def get_matrix(self, matrix):
-        """Return a copy of the specified matrix.
-        Cast given index into [0 .. max_depth] range.
+        """Return a copy of the specified matrix data.
+        The given index is casted into [0 .. max_depth] range.
 
-        :param matrix: index/depth. Zero return max_depth matrix.
+        :param matrix: int, index/depth. Zero means max_depth.
+        :return: dict, copy of the matrix data
         """
         i = int(matrix)
         if i == 0 or i > self.max_depth:
@@ -384,23 +421,25 @@ class DependencyMatrix:
     def matrix_to_json(self, matrix, options=DEFAULT_OPTIONS):
         """Return a matrix from self.matrices as a JSON string.
 
-        :param matrix: index/depth of matrix (begin to 1, end to max_depth,
-        and 0 is equivalent to max_depth)
-        :param options: dict of filter options
+        :param matrix: int, index/depth of matrix (from 1 to max_depth,
+            0 is equivalent to max_depth)
+        :param options: dict, filter options
+        :return: str, a JSON dump of the matrix data
         """
         return json.dumps(
             DependencyMatrix._option_filter(
                 self.get_matrix(matrix), options))
 
     def matrix_to_csv(self, matrix, file_object=None):
-        """Return a matrix from self.matrices as a CSV array. No options here
-        because we output only the list of modules and the cardinals.
+        """Return a matrix from self.matrices as a CSV array. No filter options
+        here because we output only the list of modules and the cardinals.
 
-        :param matrix: index/depth of matrix (begin to 1, end to max_depth,
-        and 0 is equivalent to max_depth)
-        :param file_object: if given, csv will write in this file object
+        :param matrix: int, index/depth of matrix (from 1 to max_depth,
+            0 is equivalent to max_depth)
+        :param file_object: File, if given, csv will write in this file object
         and return it modified instead of writing in a string buffer and
-        returning the text.
+        return the text.
+        :return: File, if file_object is given, else str
         """
         # where to write csv
         if file_object:
