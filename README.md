@@ -1,6 +1,10 @@
 dependenpy
 =======
 
+[![Build Status](https://travis-ci.org/Pawamoy/dependenpy.svg?branch=1.0.4)](https://travis-ci.org/Pawamoy/dependenpy)
+[![Documentation Status](https://readthedocs.org/projects/dependenpy/badge/?version=latest)](https://readthedocs.org/projects/dependenpy/?badge=latest)
+[![Coverage Status](https://coveralls.io/repos/Pawamoy/dependenpy/badge.svg)](https://coveralls.io/r/Pawamoy/dependenpy)
+
 This Python module can build the dependency matrices of a project's packages, based on `from ... import ...` commands in their modules. For now, its purpose is purely informational.
 
 The module is composed of only one class: DependencyMatrix, which is initialized with a list of packages foundable is sys.path. This list of packages can be a string (one package), a list (several) or an ordered dictionary, used to define groups of packages with a legend. We use an ordered dictionary because it is important to keep the same order as the one given by the user. On the other hand it is not always handy to pass an OrderedDict instance, so in the future we could maybe pass a list of dict.
