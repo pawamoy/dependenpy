@@ -364,6 +364,8 @@ class DependencyMatrix(object):
                     'group_index': group,
                     'group_name': self.groups[group]
                 })
+        # Ensure resulting list of files is always in the same order
+        result.sort()
         return result
 
     def to_json(self):
