@@ -1,0 +1,11 @@
+language: python
+python:
+    - "2.7"
+install:
+    - pip install pep8
+before_script:
+    - pep8 --ignore=E226 dependenpy/utils.py
+    - pyflakes dependenpy/utils.py
+    - pylint -f colorized dependenpy/utils.py || true
+script:
+    - python dependenpy/tests.py

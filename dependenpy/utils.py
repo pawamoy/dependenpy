@@ -25,6 +25,20 @@ import csv
 import StringIO
 import collections
 
+
+#: Filter default options for JSON output
+DEFAULT_OPTIONS = {
+    'group_name': True,
+    'group_index': True,
+    'source_name': True,
+    'source_index': True,
+    'target_name': True,
+    'target_index': True,
+    'imports': True,
+    'cardinal': True,
+}
+
+
 def resolve_path(module):
     """Built-in method for getting a module's path within Python path.
 
@@ -42,22 +56,10 @@ def resolve_path(module):
             return module_path + '.py'
     return None
 
-#: Filter default options for JSON output
-DEFAULT_OPTIONS = {
-    'group_name': True,
-    'group_index': True,
-    'source_name': True,
-    'source_index': True,
-    'target_name': True,
-    'target_index': True,
-    'imports': True,
-    'cardinal': True,
-}
-
 
 # TODO: Add exclude option
-# TODO: Change OrderedDict by a list
-class DependencyMatrix:
+# TODO: Replace OrderedDict by a list (easier to use)
+class DependencyMatrix(object):
     """Dependency Matrix data builder.
     """
 
@@ -71,12 +73,15 @@ class DependencyMatrix:
         #: list of list of str: the packages used to build the data,
         #: optionally organized by groups
         self.packages = None
-        self.groups = None #: list of str: the names of the groups
+        self.groups = None  #: list of str: the names of the groups
         if isinstance(packages, str):
             self.packages = [[packages]]
             self.groups = ['']
         elif isinstance(packages, list):
-            self.packages = [packages]
+            if all([isinstance(p, list) for p in packages]):
+                self.packages = packages
+            else:
+                self.packages = [packages]
             self.groups = ['']
         elif isinstance(packages, collections.OrderedDict):
             self.packages = packages.values()
@@ -101,6 +106,18 @@ class DependencyMatrix:
         self._modules_are_built = False
         self._imports_are_built = False
         self._matrices_are_built = False
+
+    def __eq__(self, other):
+        return all([self.packages == other.packages,
+                    self.groups == other.groups,
+                    self.max_depth == other.max_depth,
+                    self.modules == other.modules,
+                    self.imports == other.imports,
+                    self.matrices == other.matrices,
+                    self._inside == other._inside,
+                    self._modules_are_built == other._modules_are_built,
+                    self._imports_are_built == other._imports_are_built,
+                    self._matrices_are_built == other._matrices_are_built])
 
     def build(self):
         """Shortcut for building modules, imports and matrices.
@@ -178,7 +195,7 @@ class DependencyMatrix:
         return self
 
     def module_index(self, module):
-        """Return the index of the given module in the built list of modules.
+        """Return index of given (sub)module in the built list of modules.
 
         :param module: str, represents the module name (pack.mod.submod)
         :return: int, the index of the module, None if not found
@@ -241,18 +258,21 @@ class DependencyMatrix:
         code = open(module['path']).read()
         for node in ast.parse(code).body:
             if isinstance(node, ast.ImportFrom):
-                if not node.module:
-                    continue
                 mod = node.module
-                # We rebuild the module name if it is a relative import
                 level = node.level
+                # We ignore local imports (from . import)
+                # But not up imports (from .. import)
+                if not mod and level < 2:
+                    continue
+                # We rebuild the module name if it is a relative import
+                # FIXME: what if it goes up higher than len(module.split('.'))?
                 if level > 0:
                     mod = os.path.splitext(module['name'])[0]
                     level -= 1
                     while level != 0:
                         mod = os.path.splitext(mod)[0]
                         level -= 1
-                    mod += '.' + node.module
+                    mod += '.' + node.module if node.module else ''
                 if self.contains(mod) or force:
                     if sum_from.get(mod, None):
                         sum_from[mod]['import'] += [n.name for n in node.names]

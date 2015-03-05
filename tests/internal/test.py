@@ -1,20 +1,23 @@
-# builtin import, ignored
+# IGNORED: builtin import
 import builtin
 
-# package import, should be transformed to submodule2.__init__
+# OK: package import, should be transformed to internal.__init__
 from internal import submodule2
 
-# idem
+# OK: package import, should be transformed to internal.submodule1.__init__
 from internal.submodule1 import submoduleA
 
-# test module exists, should be OK
+# OK: idem, submoduleA exists
 from internal.submodule1.submoduleA import test
 
-# relative import, should be transformed to internal.test
+# IGNORED: local import, ignored (not interesting)
 from . import test
 
-# internal but does not exists, ignored
+# OK: internal, does not exists, but is added
+# because we only check 'from' parts
 from internal.submodule2 import doesnotexists
 
-# exists but external, ignored
-from external import exists
+# IGNORED: exists but external
+from external.exists import something
+
+# total: 4
