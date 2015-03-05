@@ -326,7 +326,7 @@ class DependencyMatrix(object):
             else:
                 seen_import[seen_id] = {
                     'cardinal': i['cardinal'],
-                    'imports': i['imports'],
+                    'imports': list(i['imports']),
                     'source_name': new_source_name,
                     'source_index': new_source_index,
                     'target_name': new_target_name,
