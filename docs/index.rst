@@ -8,7 +8,7 @@ Welcome to Dependenpy's documentation!
 
 *dependenpy* is a Python package that helps you build a dependency matrix
 of your project. You just give the list of packages that have to be scanned
-and *dependenpy* automatically parse all the code to build dependencies
+and *dependenpy* automatically parses all the code to build dependencies
 between modules, based on `from ... import ...` instructions.
 You can then output and use content as JSON or CSV.
 

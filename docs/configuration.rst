@@ -79,14 +79,14 @@ the following filter options.
 
 .. autodata:: dependenpy.utils.DEFAULT_OPTIONS
 
-    * `group_name` is the name of module's group
+    * `group_name` is the name of the module's group
     * `group_index` is the position of the module's group in the list of groups
     * `source_name` is the name of the **importing** module
     * `source_index` is the position of the **importing** module in the list of modules
     * `target_name` is the name of the **imported** module
     * `target_index` is the position of the **imported** module in the list of modules
-    * `imports` is the list of imports (dict containing 'by', 'from' and 'import') done by the module
-    * `cardinal` is the number of imports done by the module
+    * `imports` is the list of imports (dict containing 'by', 'from' and 'import') done by the source
+    * `cardinal` is the number of imports done by the source
 
 If you create a DependencyMatrix object in an huge project, the lists of
 imports (`imports` option) for each dependency might also be enormous.
