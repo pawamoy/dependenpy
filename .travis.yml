@@ -14,9 +14,13 @@ install:
     - pip install pep8
     - pip install pyflakes
     - pip install pylint
+    - pip install coveralls
 before_script:
     - pep8 --ignore=E226 dependenpy/utils.py
     - pyflakes dependenpy/utils.py
     - pylint -f colorized dependenpy/utils.py || true
 script:
     - python dependenpy/tests.py
+    - coverage run --source=dependenpy setup.py test
+after_success:
+    coveralls
