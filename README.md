@@ -3,7 +3,7 @@ dependenpy
 
 [![Build Status](https://travis-ci.org/Pawamoy/dependenpy.svg?branch=master)](https://travis-ci.org/Pawamoy/dependenpy)
 [![Documentation Status](https://readthedocs.org/projects/dependenpy/badge/?version=latest)](https://readthedocs.org/projects/dependenpy/?badge=latest)
-[![Coverage Status](https://coveralls.io/repos/Pawamoy/dependenpy/badge.svg)](https://coveralls.io/r/Pawamoy/dependenpy)
+[![Coverage Status](https://coveralls.io/repos/Pawamoy/dependenpy/badge.svg?branch=master)](https://coveralls.io/r/Pawamoy/dependenpy?branch=master)
 
 This Python module can build the dependency matrices of a project's packages, based on `from ... import ...` commands in their modules. For now, its purpose is purely informational.
 
