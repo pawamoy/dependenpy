@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<todo version="0.1.20">
+    <note priority="medium" time="1425662483">
+        DependenpyMatrix should create matrices as list of lists of ints (for compatibility with other programs such as archan)"
+    </note>
+    <note priority="medium" time="1425662542">
+        It must be possible to output groups as a list the same size of packages with corresponding groups
+    </note>
+</todo>

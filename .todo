@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <todo version="0.1.20">
-    <note priority="medium" time="1425479821">
+    <note priority="medium" time="1425479821" done="1425662397">
         Add unit tests and continuous integration with Travis (+ badges in README)
     </note>
 </todo>
