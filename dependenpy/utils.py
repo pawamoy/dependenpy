@@ -326,7 +326,7 @@ class DependencyMatrix(object):
             else:
                 seen_import[seen_id] = {
                     'cardinal': i['cardinal'],
-                    'imports': i['imports'],
+                    'imports': list(i['imports']),
                     'source_name': new_source_name,
                     'source_index': new_source_index,
                     'target_name': new_target_name,
@@ -364,6 +364,8 @@ class DependencyMatrix(object):
                     'group_index': group,
                     'group_name': self.groups[group]
                 })
+        # Ensure resulting list of files is always in the same order
+        result.sort()
         return result
 
     def to_json(self):

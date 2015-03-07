@@ -1,7 +1,7 @@
 dependenpy
 =======
 
-[![Build Status](https://travis-ci.org/Pawamoy/dependenpy.svg?branch=1.0.4)](https://travis-ci.org/Pawamoy/dependenpy)
+[![Build Status](https://travis-ci.org/Pawamoy/dependenpy.svg?branch=master)](https://travis-ci.org/Pawamoy/dependenpy)
 [![Documentation Status](https://readthedocs.org/projects/dependenpy/badge/?version=latest)](https://readthedocs.org/projects/dependenpy/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/Pawamoy/dependenpy/badge.svg)](https://coveralls.io/r/Pawamoy/dependenpy)
 
