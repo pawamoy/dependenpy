@@ -22,8 +22,11 @@ import sys
 import ast
 import json
 import csv
-import StringIO
 import collections
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
 #: Filter default options for JSON output
@@ -468,7 +471,7 @@ class DependencyMatrix(object):
             si = None
             cw = csv.writer(file_object)
         else:
-            si = StringIO.StringIO()
+            si = StringIO()
             cw = csv.writer(si)
 
         # matrix data

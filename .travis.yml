@@ -20,7 +20,7 @@ before_script:
     - pyflakes dependenpy/utils.py
     - pylint -f colorized dependenpy/utils.py || true
 script:
-    - python dependenpy/tests.py
-    - coverage run --source=dependenpy setup.py test
+    - coverage run dependenpy/tests.py
+    - coverage report -m
 after_success:
     coveralls
