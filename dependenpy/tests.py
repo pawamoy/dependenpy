@@ -68,6 +68,14 @@ class StaticDataTestCase(AbstractTestCase):
                 'Imports have been modified by build_matrices()')
 
 
+class NoPathTestCase(unittest.TestCase):
+    def setUp(self):
+        self.dm = DependencyMatrix('unfoundable')
+
+    def test_modules(self):
+        self.assertEqual(self.dm.build_modules().modules, [])
+
+
 class ModuleTestCase(AbstractTestCase):
     def setUp(self):
         super(ModuleTestCase, self).setUp()
@@ -122,6 +130,7 @@ class ModuleTestCase(AbstractTestCase):
         local_path = os.path.abspath(os.path.join(
             os.path.dirname(os.path.dirname(__file__)), 'tests'))
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
+            self.assertTrue(dm.build_modules()._modules_are_built)
             self.assertTrue(dm._modules_are_built)
             self.assertFalse(dm._imports_are_built)
             self.assertFalse(dm._matrices_are_built)

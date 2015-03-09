@@ -147,7 +147,8 @@ class DependencyMatrix(object):
                 self.modules.extend(
                     self._walk(package, module_path, group))
             group += 1
-        self.max_depth = max([len(m['name'].split('.')) for m in self.modules])
+        if self.modules:
+            self.max_depth = max([len(m['name'].split('.')) for m in self.modules])
         self._modules_are_built = True
         return self
 
