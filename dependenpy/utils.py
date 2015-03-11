@@ -24,9 +24,9 @@ import json
 import csv
 import collections
 try:
-    from StringIO import StringIO
-except ImportError:
     from io import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 
 #: Filter default options for JSON output
