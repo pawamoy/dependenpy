@@ -1,8 +1,8 @@
-'''
+"""
 Created on 17 fevr. 2015
 
 @author: Pierre.Parrend
-'''
+"""
 
 
 class Error(Exception):
@@ -20,6 +20,7 @@ class DSMError(Error):
 
     def __init__(self, msg):
         self.msg = msg
+
 
 class ArchanError(Error):
     """Exception raised for errors in the input.
