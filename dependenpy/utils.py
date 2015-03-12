@@ -60,6 +60,18 @@ def resolve_path(module):
     return None
 
 
+class Matrix(object):
+    """Matrix class.
+    """
+
+    def __init__(self):
+        #: dict of dict: for each module identified by a key (currently
+        #: its name), stores the value of its name, group, imports cardinal,
+        #: exports cardinal, similarity with the other modules, and the
+        #: corresponding order index
+        self.modules = {}
+
+
 # TODO: Add exclude option
 # TODO: Replace OrderedDict by a list (easier to use)
 class DependencyMatrix(object):
