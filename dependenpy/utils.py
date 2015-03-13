@@ -23,6 +23,7 @@ import ast
 import json
 import csv
 import collections
+
 try:
     from StringIO import StringIO
 except ImportError:
@@ -64,12 +65,198 @@ class Matrix(object):
     """Matrix class.
     """
 
-    def __init__(self):
+    def __init__(self, depth, modules, imports):
+        #: int: the current depth of this matrix
+        self.depth = depth
+        self.size = len(modules)
+
         #: dict of dict: for each module identified by a key (currently
         #: its name), stores the value of its name, group, imports cardinal,
         #: exports cardinal, similarity with the other modules, and the
-        #: corresponding order index
+        #: corresponding order indexes
         self.modules = {}
+        m_index = 0
+        for module in modules:
+            self.modules[module['name']] = {
+                'group': module['group'],
+                'cardinal': {'imports': 0, 'exports': 0},
+                'similarity': {},
+                'order': {'group': m_index}}
+            m_index += 1
+
+        for i in imports:
+            cardinal = i['cardinal']
+            self.modules[i['source_name']]['cardinal']['imports'] += cardinal
+            self.modules[i['target_name']]['cardinal']['exports'] += cardinal
+
+        #: list of dict: every dependencies between the modules, containing
+        #: the source and target names, the source and target position
+        #: (according to current order), the list of imports, and the
+        #: number of imports and exports (cardinals)
+        self.dependencies = imports
+
+        #: list of str: the ordered list of modules' groups
+        self.groups = [m['group']['name'] for m in modules]
+        #: list of str: the ordered list of modules' names
+        self.keys = [m['name'] for m in modules]
+
+        #: list of list of int: the concrete matrix with numeric values
+        self.matrix = None
+        self._update_matrix()
+
+        self.orders = {
+            'name': (False, self._compute_name_order),
+            'group': (True, self._compute_group_order),
+            'import': (False, self._compute_import_order),
+            'export': (False, self._compute_export_order),
+            'similarity': (False, self._compute_similarity_order)}
+
+    def build_up_matrix(self):
+        """Build matrix data based on the matrix below it (with depth+1).
+
+        :param down_level: int, depth of the below matrix
+        :return: dict, matrix data
+        """
+        # First we build the new module list
+        up_modules, up_dependencies = [], []
+        seen_module, seen_import = {}, {}
+        modules_indexes = {}
+        index_old, index_new = 0, -1
+        for k in self.keys:
+            up_module = '.'.join(k.split('.')[:self.depth])
+            if seen_module.get(up_module, None) is None:
+                seen_module[up_module] = {'name': up_module,
+                                          'group': self.modules[k]['group']}
+                up_modules.append(seen_module[up_module])
+                index_new += 1
+            modules_indexes[index_old] = {'index': index_new,
+                                          'name': up_module}
+            index_old += 1
+
+        # Then we build the new dependencies list
+        for d in self.dependencies:
+            new_source_index = modules_indexes[d['source_index']]['index']
+            new_source_name = modules_indexes[d['source_index']]['name']
+            new_target_index = modules_indexes[d['target_index']]['index']
+            new_target_name = modules_indexes[d['target_index']]['name']
+            seen_id = (new_source_index, new_target_index)
+            if seen_import.get(seen_id, None) is not None:
+                seen_import[seen_id]['cardinal'] += d['cardinal']
+                seen_import[seen_id]['imports'] += d['imports']
+            else:
+                seen_import[seen_id] = {
+                    'cardinal': d['cardinal'],
+                    'imports': list(d['imports']),
+                    'source_name': new_source_name,
+                    'source_index': new_source_index,
+                    'target_name': new_target_name,
+                    'target_index': new_target_index,
+                }
+                up_dependencies.append(seen_import[seen_id])
+
+        # We return the new Matrix
+        return Matrix(self.depth-1, up_modules, up_dependencies)
+
+    def sort(self, order):
+        try:
+            self.compute_order(order)
+        except KeyError:
+            print('Order %s does not match any of these: %s' % (
+                order, self.orders.keys()))
+            return
+
+        for d in self.dependencies:
+            d['source_index'] = self.modules[d['source_name']]['order'][order]
+            d['target_index'] = self.modules[d['target_name']]['order'][order]
+
+        self._update_matrix()
+        # TODO: update keys and groups
+
+    def compute_orders(self):
+        for order in self.orders.keys():
+            self.compute_order(order)
+
+    def compute_order(self, order):
+        """Compute the index order according to a criteria.
+        The available criteria are listed in self.orders keys.
+
+        :param order: str, order criteria to use
+        :raise: KeyError when order key is not in self.orders dict
+        """
+        if self.orders[order][0]:
+            return
+        self.orders[order][1]()
+
+    def _compute_name_order(self):
+        # TODO: code this method
+        self.orders['name'] = True
+
+    def _compute_import_order(self):
+        # TODO: code this method
+        self.orders['import'] = True
+
+    def _compute_export_order(self):
+        # TODO: code this method
+        self.orders['export'] = True
+
+    def _compute_similarity_order(self):
+        # TODO: code this method
+        self.orders['similarity'] = True
+
+    def _compute_group_order(self):
+        # TODO: code this method
+        self.orders['group'] = True
+
+    def _update_matrix(self):
+        self.matrix = [[0 for x in range(self.size)]
+                       for x in range(self.size)]
+        for d in self.dependencies:
+            self.matrix[d['source_index']][d['target_index']] += d['cardinal']
+
+    def to_json(self):
+        """Return a matrix from self.matrices as a JSON string.
+
+        :param matrix: int, index/depth of matrix (from 1 to max_depth,
+            0 is equivalent to max_depth)
+        :return: str, a JSON dump of the matrix
+        """
+        return json.dumps({'depth': self.depth,
+                           'size': self.size,
+                           'modules': self.modules,
+                           'dependencies': self.dependencies,
+                           'keys': self.keys,
+                           'groups': self.groups,
+                           'matrix': self.matrix,
+                           'orders': self.orders.keys()})
+
+    def to_csv(self, file_object=None):
+        """Return the matrix as a CSV array.
+
+        :param file_object: File, if given, csv will write in this file object
+            and return it modified instead of writing in a string buffer and
+            return the text.
+        :return: File, if file_object is given, else str
+        """
+        # where to write csv
+        if file_object:
+            si = None
+            cw = csv.writer(file_object)
+        else:
+            si = StringIO()
+            cw = csv.writer(si)
+
+        # write the first line (columns)
+        cw.writerow([''] + self.keys)
+
+        # write the lines
+        for i in range(0, self.size):
+            cw.writerow([self.keys[i]] + self.matrix[i])
+
+        # return the result
+        if si:
+            return si.getvalue().strip('\r\n')
+        elif file_object:
+            return file_object
 
 
 # TODO: Add exclude option
@@ -106,7 +293,7 @@ class DependencyMatrix(object):
         #: callable: the method that find the path of a module
         self.path_resolver = path_resolver
         #: list of dict: the list of all packages' modules, containing
-        #: name, path, group_index and group_name
+        #: name, path, group index and group name
         self.modules = []
         #: list of dict: the list of all modules' imports, containing
         #: cardinal, source_index, source_name, target_index, target_name,
@@ -182,12 +369,12 @@ class DependencyMatrix(object):
                     self.imports.append({
                         'source_name': module['name'],
                         'source_index': source_index,
-                        'target_index': target_index,
                         'target_name': self.modules[target_index]['name'],
+                        'target_index': target_index,
                         'imports': [imports_dicts[key]],
                         'cardinal': len(imports_dicts[key]['import'])
                     })
-            source_index += 1
+                    source_index += 1
         self._imports_are_built = True
         return self
 
@@ -202,11 +389,10 @@ class DependencyMatrix(object):
             return self
         md = self.max_depth
         self.matrices = [None for x in range(0, md)]
-        self.matrices[md-1] = {'modules': self.modules,
-                               'imports': self.imports}
+        self.matrices[md-1] = Matrix(md, self.modules, self.imports)
         md -= 1
         while md > 0:
-            self.matrices[md-1] = self._build_up_matrix(md)
+            self.matrices[md-1] = self.matrices[md].build_up_matrix()
             md -= 1
         self._matrices_are_built = True
         return self
@@ -233,13 +419,13 @@ class DependencyMatrix(object):
         # Case 2: module is an __init__ target
         idx = 0
         for m in self.modules:
-            if m['name'] == module+'.__init__':
+            if m['name'] == module + '.__init__':
                 return idx
             idx += 1
         # Case 3: module is the sub-module of a target
         idx = 0
         for m in self.modules:
-            if module.startswith(m['name']+'.'):
+            if module.startswith(m['name'] + '.'):
                 return idx
             idx += 1
         # We should never reach this (see parse_imports -> if contains(mod))
@@ -257,7 +443,7 @@ class DependencyMatrix(object):
         else:
             for package_group in self.packages:
                 for package in package_group:
-                    if module == package or module.startswith(package+'.'):
+                    if module == package or module.startswith(package + '.'):
                         self._inside[module] = True
                         return True
             self._inside[module] = False
@@ -300,60 +486,6 @@ class DependencyMatrix(object):
                             'import': [n.name for n in node.names]}
         return sum_from
 
-    def _build_up_matrix(self, down_level):
-        """Build matrix data based on the matrix below it (with depth+1).
-
-        :param down_level: int, depth of the below matrix
-        :return: dict, matrix data
-        """
-        # First we build the new module list
-        up_modules, up_imports = [], []
-        seen_module, seen_import = {}, {}
-        modules_indexes = {}
-        index_old, index_new = 0, -1
-        for m in self.matrices[down_level]['modules']:
-            up_module = '.'.join(m['name'].split('.')[:down_level])
-            # FIXME: We could maybe get rid of path...
-            if seen_module.get(up_module, None) is not None:
-                # seen_module[up_module]['path'] += ', ' + m['path']
-                pass
-            else:
-                seen_module[up_module] = {
-                    'name': up_module,
-                    # 'path': m['path'],
-                    'group_name': m['group_name'],
-                    'group_index': m['group_index']
-                }
-                up_modules.append(seen_module[up_module])
-                index_new += 1
-            modules_indexes[index_old] = {'index': index_new,
-                                          'name': up_module}
-            index_old += 1
-
-        # Then we build the new imports list
-        for i in self.matrices[down_level]['imports']:
-            new_source_index = modules_indexes[i['source_index']]['index']
-            new_source_name = modules_indexes[i['source_index']]['name']
-            new_target_index = modules_indexes[i['target_index']]['index']
-            new_target_name = modules_indexes[i['target_index']]['name']
-            seen_id = (new_source_index, new_target_index)
-            if seen_import.get(seen_id, None) is not None:
-                seen_import[seen_id]['cardinal'] += i['cardinal']
-                seen_import[seen_id]['imports'] += i['imports']
-            else:
-                seen_import[seen_id] = {
-                    'cardinal': i['cardinal'],
-                    'imports': list(i['imports']),
-                    'source_name': new_source_name,
-                    'source_index': new_source_index,
-                    'target_name': new_target_name,
-                    'target_index': new_target_index,
-                }
-                up_imports.append(seen_import[seen_id])
-
-        # We return the new dict of modules / imports
-        return {'modules': up_modules, 'imports': up_imports}
-
     # TODO: Add exclude option
     def _walk(self, name, path, group, prefix=''):
         """Walk recursively into subdirectories of a package directory
@@ -363,7 +495,7 @@ class DependencyMatrix(object):
         :param path: str, path of the package
         :param group: int, group index of the package
         :param prefix: str, used by recursion, file paths prepended string
-        :return: list of dict, contains name, path, group_index and group_name
+        :return: list of dict, contains name, path, group index and group name
         """
         result = []
         for item in os.listdir(path):
@@ -376,10 +508,9 @@ class DependencyMatrix(object):
                 result.append({
                     'name': '%s.%s' % (
                         name, os.path.splitext(
-                            prefix+item)[0].replace(os.sep, '.')),
+                            prefix + item)[0].replace(os.sep, '.')),
                     'path': sub_item,
-                    'group_index': group,
-                    'group_name': self.groups[group]
+                    'group': {'index': group, 'name': self.groups[group]}
                 })
         # Ensure resulting list of files is always in the same order
         result.sort()
@@ -417,10 +548,10 @@ class DependencyMatrix(object):
         """
         if not options['group_name']:
             for item in matrix['modules']:
-                del item['group_name']
+                del item['group']['name']
         if not options['group_index']:
             for item in matrix['modules']:
-                del item['group_index']
+                del item['group']['index']
         if not options['source_name']:
             for item in matrix['imports']:
                 del item['source_name']
@@ -442,79 +573,17 @@ class DependencyMatrix(object):
         return matrix
 
     def get_matrix(self, matrix):
-        """Return a copy of the specified matrix data.
+        """Return the specified matrix.
         The given index is casted into [0 .. max_depth] range.
 
         :param matrix: int, index/depth. Zero means max_depth.
-        :return: dict, copy of the matrix data
+        :return: Matrix instance
         """
         i = int(matrix)
         if i == 0 or i > self.max_depth:
-            m = self.max_depth-1
+            m = self.max_depth - 1
         elif i < 0:
             m = 0
         else:
-            m = i-1
-        return dict(self.matrices[m])
-
-    def matrix_to_json(self, matrix, options=DEFAULT_OPTIONS):
-        """Return a matrix from self.matrices as a JSON string.
-
-        :param matrix: int, index/depth of matrix (from 1 to max_depth,
-            0 is equivalent to max_depth)
-        :param options: dict, filter options
-        :return: str, a JSON dump of the matrix data
-        """
-        return json.dumps(
-            DependencyMatrix._option_filter(
-                self.get_matrix(matrix), options))
-
-    def matrix_to_csv(self, matrix, file_object=None):
-        """Return a matrix from self.matrices as a CSV array. No filter options
-        here because we output only the list of modules and the cardinals.
-
-        :param matrix: int, index/depth of matrix (from 1 to max_depth,
-            0 is equivalent to max_depth)
-        :param file_object: File, if given, csv will write in this file object
-            and return it modified instead of writing in a string buffer and
-            return the text.
-        :return: File, if file_object is given, else str
-        """
-        # where to write csv
-        if file_object:
-            si = None
-            cw = csv.writer(file_object)
-        else:
-            si = StringIO()
-            cw = csv.writer(si)
-
-        # matrix data
-        data = self.get_matrix(matrix)
-
-        # search for each cell, will be 0 if not found
-        csv_cells = {}
-        for i in data['imports']:
-            csv_cells[(i['source_index'], i['target_index'])] = i['cardinal']
-
-        # write the first line (columns)
-        cw.writerow([''] + [m['name'] for m in data['modules']])
-
-        # compute and write the lines
-        l = len(data['modules'])
-        for i in range(0, l):
-            # name of module
-            line = [data['modules'][i]['name']]
-            for j in range(0, l):
-                cell = csv_cells.get((i, j), None)
-                if cell is not None:
-                    line.append(cell)
-                else:
-                    line.append(0)
-            # write the line
-            cw.writerow(line)
-
-        # return the result
-        if si:
-            return si.getvalue().strip('\r\n')
-        elif file_object:
-            return file_object
+            m = i - 1
+        return self.matrices[m]
