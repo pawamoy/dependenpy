@@ -78,6 +78,7 @@ class Matrix(object):
         m_index = 0
         for module in modules:
             self.modules[module['name']] = {
+                'name': module['name'],
                 'group': module['group'],
                 'cardinal': {'imports': 0, 'exports': 0},
                 'similarity': {},
@@ -187,20 +188,40 @@ class Matrix(object):
             return
         self.orders[order][1]()
 
+    def _write_order(self, order, sorted_keys):
+        for i in range(len(sorted_keys)):
+            self.modules[sorted_keys[i]]['order'][order] = i
+        self.orders[order][0] = True
+
     def _compute_name_order(self):
-        # TODO: code this method
-        self.orders['name'] = True
+        sorted_keys = sorted(self.keys)
+        self._write_order('name', sorted_keys)
 
     def _compute_import_order(self):
-        # TODO: code this method
-        self.orders['import'] = True
+        sorted_keys = [m['name'] for m in sorted(
+            self.modules,
+            cmp=lambda x, y: cmp(
+                x['cardinal']['imports'],
+                y['cardinal']['imports']))]
+        self._write_order('import', sorted_keys)
 
     def _compute_export_order(self):
-        # TODO: code this method
-        self.orders['export'] = True
+        sorted_keys = [m['name'] for m in sorted(
+            self.modules,
+            cmp=lambda x, y: cmp(
+                x['cardinal']['exports'],
+                y['cardinal']['exports']))]
+        self._write_order('export', sorted_keys)
 
     def _compute_similarity_order(self):
-        # TODO: code this method
+        # TODO: compute (i,j) vectors:
+        # double loop on modules, count same imports
+        similarities = {}
+        for m1 in self.modules:
+            for m2 in self.modules:
+                similarities[(m1['name'], m2['name'])] = len(
+                    [i for i m1['imports']]
+                )
         self.orders['similarity'] = True
 
     def _compute_group_order(self):
@@ -208,8 +229,7 @@ class Matrix(object):
         self.orders['group'] = True
 
     def _update_matrix(self):
-        self.matrix = [[0 for x in range(self.size)]
-                       for x in range(self.size)]
+        self.matrix = [[0 for x in range(self.size)] for x in range(self.size)]
         for d in self.dependencies:
             self.matrix[d['source_index']][d['target_index']] += d['cardinal']
 
