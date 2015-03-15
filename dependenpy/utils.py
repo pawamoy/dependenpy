@@ -78,7 +78,7 @@ class Matrix(object):
         m_index = 0
         for module in modules:
             self.modules[module['name']] = {
-                'name': module['name'],
+                # 'name': module['name'],
                 'group': module['group'],
                 'cardinal': {'imports': 0, 'exports': 0},
                 'similarity': {},
@@ -214,14 +214,18 @@ class Matrix(object):
         self._write_order('export', sorted_keys)
 
     def _compute_similarity_order(self):
-        # TODO: compute (i,j) vectors:
-        # double loop on modules, count same imports
         similarities = {}
-        for m1 in self.modules:
-            for m2 in self.modules:
-                similarities[(m1['name'], m2['name'])] = len(
-                    [i for i m1['imports']]
-                )
+        for d1 in self.dependencies:
+            for d2 in self.dependencies:
+                n, i, j = 0, d1['source_name'], d2['source_name']
+                if i != j: 
+                    for di1 in d1['imports']:
+                        for di2 in d2['imports']:
+                            if di1['from'] == di2['from']:
+                                n += len([0 for x in di1['import']
+                                          if x in di2['import']])
+                    similarities[(i, j)] = n
+        # TODO: use a TSP solver to order vectors
         self.orders['similarity'] = True
 
     def _compute_group_order(self):
