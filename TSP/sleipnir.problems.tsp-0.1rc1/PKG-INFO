@@ -1,0 +1,17 @@
+Metadata-Version: 1.0
+Name: sleipnir.problems.tsp
+Version: 0.1rc1
+Summary: A TSP Solver
+Home-page: http://sleipnir.liberalia.net/
+Author: Carlos Martín
+Author-email: cmartin@liberalia.net
+License: GNU General Public License, version 2
+Description: Add Here a a description to this package
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Topic :: Software Development

@@ -1,0 +1,4 @@
+sleipnir.components      >= 0.1rc3
+sleipnir.core            >= 0.1rc2
+sleipnir.heuristics      >= 0.1rc2
+sleipnir.problems.tsp    >= 0.1rc1

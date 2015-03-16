@@ -1,0 +1,17 @@
+LICENSE
+MANIFEST.in
+README
+setup.py
+sleipnir.problems.tsp.egg-info/PKG-INFO
+sleipnir.problems.tsp.egg-info/SOURCES.txt
+sleipnir.problems.tsp.egg-info/dependency_links.txt
+sleipnir.problems.tsp.egg-info/entry_points.txt
+sleipnir.problems.tsp.egg-info/not-zip-safe
+sleipnir.problems.tsp.egg-info/requires.txt
+sleipnir.problems.tsp.egg-info/top_level.txt
+tests/__init__.py
+tests/test_solver.py
+tsp/__init__.py
+tsp/constants.py
+tsp/interfaces.py
+tsp/problems.py
