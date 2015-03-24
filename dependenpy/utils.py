@@ -43,6 +43,10 @@ DEFAULT_OPTIONS = {
 }
 
 
+def cmp(a, b):
+    return (a > b) - (a < b)
+
+
 def resolve_path(module):
     """Built-in method for getting a module's path within Python path.
 
@@ -112,11 +116,24 @@ class Matrix(object):
             'export': (False, self._compute_export_order),
             'similarity': (False, self._compute_similarity_order)}
 
+    def __str__(self):
+        return '%s' % self.matrix
+
+    def __eq__(self, other):
+        return all([
+            self.depth == other['depth'],
+            self.size == other['size'],
+            self.modules == other['modules'],
+            self.dependencies == other['dependencies'],
+            self.groups == other['groups'],
+            self.keys == other['keys'],
+            self.matrix == other['matrix'],
+        ])
+
     def build_up_matrix(self):
         """Build matrix data based on the matrix below it (with depth+1).
 
-        :param down_level: int, depth of the below matrix
-        :return: dict, matrix data
+        :return: :class:`Matrix` instance
         """
         # First we build the new module list
         up_modules, up_dependencies = [], []
