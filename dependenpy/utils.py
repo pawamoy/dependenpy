@@ -218,7 +218,7 @@ class Matrix(object):
         for d1 in self.dependencies:
             for d2 in self.dependencies:
                 n, i, j = 0, d1['source_name'], d2['source_name']
-                if i != j: 
+                if i != j:
                     for di1 in d1['imports']:
                         for di2 in d2['imports']:
                             if di1['from'] == di2['from']:
