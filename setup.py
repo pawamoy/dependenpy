@@ -16,7 +16,7 @@ setup(
     author='Timothée Mazzucotelli',
     author_email='timothee.mazzucotelli@gmail.com',
     url='https://github.com/Pawamoy/dependenpy',
-    download_url = 'https://github.com/Pawamoy/dependenpy/tarball/1.0.4',
+    # download_url = 'https://github.com/Pawamoy/dependenpy/tarball/1.0.4',
 
     keywords="dependency matrix dsm",
     description="A Python module that builds a Dependency Matrix for your project.",

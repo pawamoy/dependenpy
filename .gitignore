@@ -5,5 +5,4 @@ docs/_build/
 docs/symlink.sh
 docs/docs.html
 MANIFEST
-MANIFEST.in
 .coverage
