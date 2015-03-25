@@ -16,7 +16,7 @@ install:
 before_script:
 - pep8 --ignore=E226 dependenpy/utils.py
 - pyflakes dependenpy/utils.py
-- pylint -f colorized dependenpy/utils.py || true
+- pylint -f colorized -d C0103 dependenpy/utils.py || true
 script:
 - coverage run dependenpy/tests.py
 - coverage report -m
