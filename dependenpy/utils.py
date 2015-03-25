@@ -11,9 +11,9 @@
 This is the main and only module of dependenpy package.
 This module contains:
 
-    a class, DependencyMatrix: the class building your dependency matrix.
+    a class, DependencyMatrix: the class building your dependency matrix data.
+    a class, Matrix: the class containing the 2-dimensions array of integers
     a function, resolve_path: transforms a module name into an absolute path.
-    a dictionary, DEFAULT_OPTIONS: contains the filter options for JSON output.
 
 """
 
@@ -28,19 +28,6 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-
-
-#: Filter default options for JSON output
-DEFAULT_OPTIONS = {
-    'group_name': True,
-    'group_index': True,
-    'source_name': True,
-    'source_index': True,
-    'target_name': True,
-    'target_index': True,
-    'imports': True,
-    'cardinal': True,
-}
 
 
 def cmp(a, b):
@@ -121,13 +108,13 @@ class Matrix(object):
 
     def __eq__(self, other):
         return all([
-            self.depth == other['depth'],
-            self.size == other['size'],
-            self.modules == other['modules'],
-            self.dependencies == other['dependencies'],
-            self.groups == other['groups'],
-            self.keys == other['keys'],
-            self.matrix == other['matrix'],
+            self.depth == other.depth,
+            self.size == other.size,
+            self.modules == other.modules,
+            self.dependencies == other.dependencies,
+            self.groups == other.groups,
+            self.keys == other.keys,
+            self.matrix == other.matrix,
         ])
 
     def build_up_matrix(self):
@@ -141,7 +128,7 @@ class Matrix(object):
         modules_indexes = {}
         index_old, index_new = 0, -1
         for k in self.keys:
-            up_module = '.'.join(k.split('.')[:self.depth])
+            up_module = '.'.join(k.split('.')[:self.depth-1])
             if seen_module.get(up_module, None) is None:
                 seen_module[up_module] = {'name': up_module,
                                           'group': self.modules[k]['group']}
@@ -570,7 +557,7 @@ class DependencyMatrix(object):
             'modules': self.modules,
             'imports': self.imports,
             'max_depth': self.max_depth,
-            'matrices': self.matrices,
+            'matrices': [m.to_json() for m in self.matrices],
             '_inside': self._inside,
             '_modules_are_built': self._modules_are_built,
             '_imports_are_built': self._imports_are_built,
