@@ -21,6 +21,7 @@ Usage
 -----
 
 .. code:: python
+
     from dependenpy.utils import DependencyMatrix
 
     myapps = (
