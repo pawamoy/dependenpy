@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# GenIDA documentation build configuration file, created by
+# Dependenpy documentation build configuration file, created by
 # sphinx-quickstart on Sat Oct 11 21:23:51 2014.
 #
 # This file is execfile()d with the current directory set to its
