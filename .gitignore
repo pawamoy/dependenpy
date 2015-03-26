@@ -7,3 +7,4 @@ docs/docs.html
 MANIFEST
 .coverage
 dependenpy.egg-info/
+stats/
