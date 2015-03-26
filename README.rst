@@ -68,7 +68,7 @@ Documentation
 
 On `ReadTheDocs`_
 
-.. _ReadTheDocs: http://dependenpy.readthedocs.org/en/latest/)
+.. _ReadTheDocs: http://dependenpy.readthedocs.org/en/latest/
 
 
 License
