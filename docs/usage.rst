@@ -39,7 +39,7 @@ Methods
 You can then access each one of the built matrices with the `get_matrix(depth)`
 method, knowing that depth **0** is equivalent to the **maximum depth**.
 
-.. autoclass:: dependenpy.utils.DependencyMatrix
+.. autoclass:: dependenpy.utils.MatrixBuilder
     :members:
 
 
@@ -56,7 +56,7 @@ To instantiate, build and use/output your dependency matrix, a few steps:
 
 .. code:: python
 
-    from dependenpy.utils import DependencyMatrix
+    from dependenpy.utils import MatrixBuilder
 
 
     # set the list of packages
@@ -69,7 +69,7 @@ To instantiate, build and use/output your dependency matrix, a few steps:
 
 
     # create an object
-    my_dm = DependencyMatrix(my_packages)
+    my_dm = MatrixBuilder(my_packages)
 
 
     # build the content progressively...
@@ -91,11 +91,16 @@ To instantiate, build and use/output your dependency matrix, a few steps:
 
     # then output the content as JSON...
     print dm.to_json()
-    print dm.matrix_to_json(0)
+    print dm.get_matrix(0).to_json()
 
     # ... or as CSV
-    print dm.matrix_to_csv(1)
+    print dm.get_matrix(1).to_csv()
 
     # you can also directly write the CSV data into a file object
     with open("matrix.csv", "w") as my_csv:
         dm.matrix_to_csv(1, my_csv)
+
+
+    # You can skip the assignation of the data builder object
+    # to keep only one autonomous Matrix instance:
+    my_matrix = MatrixBuilder(my_packages).build().get_matrix(2)

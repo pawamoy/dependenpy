@@ -22,7 +22,7 @@ Usage
 
 .. code:: python
 
-    from dependenpy.utils import DependencyMatrix
+    from dependenpy.utils import MatrixBuilder
 
     myapps = (
         ‘module1’,
@@ -32,7 +32,7 @@ Usage
     )
 
     # Create an empty instance
-    dm = DependencyMatrix(myapps)
+    dm = MatrixBuilder(myapps)
 
     # Init its data with build methods
     dm.build()
@@ -47,10 +47,6 @@ Usage
     print dm.max_depth
     print dm.imports
 
-    # Equivalent to json_m_max = dm.matrix_to_json(dm.max_depth)
-    json_m_max = dm.matrix_to_json(0)
-
-    csv_string_m2 = dm.matrix_to_csv(2)
 
 Here is an example of colorized CSV output:
 
@@ -60,8 +56,9 @@ Here is an example of colorized CSV output:
 
 
 This module was originally design to work in a Django project.
-The Django package django-dpdpy has been built on it to display the matrices with D3JS (it will soon be registered on GitHub, then PyPi).  
+The Django package `django-archan`_ has been built on it to display the matrices with D3JS.
 
+.. _django-archan: https://github.com/Pawamoy/archan
 
 Documentation
 -------------

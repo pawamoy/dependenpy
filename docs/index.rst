@@ -14,11 +14,10 @@ You can then output and use content as JSON or CSV.
 
 .. note::
 
-   *dependenpy* does not really build an actual matrix, it creates the data
-   that are **needed to build** the matrix. However, there is a method
-   that directly output contents as CSV, which is a kind of matrix representation.
    *dependenpy* **can not do** matrix computations. If this is what you need,
-   consider using libraries that are optimized for this.
+   consider using libraries that are optimized for this. However, *dependenpy*
+   has built-ins methods that allow you to sort the matrix according to different
+   criteria.
 
 
 Why would you do that ?

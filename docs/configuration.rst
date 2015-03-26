@@ -13,13 +13,13 @@ In your project, you can have different types of packages:
 * ...
 
 It would be great to organize your packages by groups.
-To do so, instead of passing a `list` to the `DependencyMatrix` constructor,
+To do so, instead of passing a `list` to the `MatrixBuilder` constructor,
 you can pass an `OrderedDict`, imported from `collections`. Example:
 
 .. code:: python
 
     from collections import OrderedDict
-    from dependenpy.utils import DependencyMatrix
+    from dependenpy.utils import MatrixBuilder
 
     my_packages = OrderedDict()
 
@@ -28,7 +28,7 @@ you can pass an `OrderedDict`, imported from `collections`. Example:
     my_packages['Core features'] = ['members', 'surveys', 'news']
     my_packages['Security layer'] = ['broker']
 
-    my_dm = DependencyMatrix(my_packages)
+    my_dm = MatrixBuilder(my_packages)
 
 
 Finding modules' paths
@@ -51,7 +51,7 @@ of a module than looping over sys.path: using `sys.modules.get(module_name)`.
 
 .. code:: python
 
-    from dependenpy.utils import DependencyMatrix
+    from dependenpy.utils import MatrixBuilder
 
     my_packages = ...
 
@@ -61,7 +61,7 @@ of a module than looping over sys.path: using `sys.modules.get(module_name)`.
             return 'py'.join(module_path.__file__.rsplit('pyc'))
         return None
 
-    my_dm = DependencyMatrix(my_packages, get_django_module_path)
+    my_dm = MatrixBuilder(my_packages, get_django_module_path)
 
 .. warning::
 
@@ -70,42 +70,3 @@ of a module than looping over sys.path: using `sys.modules.get(module_name)`.
     default path resolver (it is currently not possible to specify several
     path resolver methods).
 
-
-Filtering JSON output
----------------------
-
-By default, the `matrix_to_json` method outputs all available data, using
-the following filter options.
-
-.. autodata:: dependenpy.utils.DEFAULT_OPTIONS
-
-    * `group_name` is the name of the module's group
-    * `group_index` is the position of the module's group in the list of groups
-    * `source_name` is the name of the **importing** module
-    * `source_index` is the position of the **importing** module in the list of modules
-    * `target_name` is the name of the **imported** module
-    * `target_index` is the position of the **imported** module in the list of modules
-    * `imports` is the list of imports (dict containing 'by', 'from' and 'import') done by the source
-    * `cardinal` is the number of imports done by the source
-
-If you create a DependencyMatrix object in an huge project, the lists of
-imports (`imports` option) for each dependency might also be enormous.
-It would be a waste of time and space to output or store it
-if you don't need it. The other options involve just one value for each dependency.
-
-Use options like this:
-
-.. code:: python
-
-    my_options = {
-        'group_name': False,
-        'group_index': True,
-        'source_name': False,
-        'source_index': True,
-        'target_name': False,
-        'target_index': True,
-        'imports': False,
-        'cardinal': True,
-    }
-
-    my_dm.matrix_to_json(2, my_options)
