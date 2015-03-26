@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import os
-from distutils.core import setup
+from setuptools import setup
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='dependenpy',
-    version='1.0.4',
+    version='1.1.0',
     packages=['dependenpy'],
     license='MPL 2.0',
 
@@ -21,7 +21,8 @@ setup(
     keywords="dependency matrix dsm",
     description="A Python module that builds a Dependency Matrix for your project.",
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        # "Development Status :: 5 - Production/Stable",
+        'Development Status :: 4 - Beta',
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Topic :: Utilities",
