@@ -402,7 +402,7 @@ class DependencyMatrix(object):
                         'imports': [imports_dicts[key]],
                         'cardinal': len(imports_dicts[key]['import'])
                     })
-                    source_index += 1
+            source_index += 1
         self._imports_are_built = True
         return self
 

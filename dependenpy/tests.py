@@ -163,7 +163,7 @@ class ImportsTestCase(AbstractTestCase):
                                           'classF',
                                           'classG',
                                           'classH']}],
-                  'source_index': 0,
+                  'source_index': 3,
                   'source_name': 'internal.submodule1.submoduleA.test',
                   'target_index': 8,
                   'target_name': 'internal.test'},
@@ -171,7 +171,7 @@ class ImportsTestCase(AbstractTestCase):
                   'imports': [{'by': 'internal.submodule1.test',
                                'from': 'internal.submodule1.submoduleA',
                                'import': ['test', 'othertest']}],
-                  'source_index': 1,
+                  'source_index': 4,
                   'source_name': 'internal.submodule1.test',
                   'target_index': 2,
                   'target_name': 'internal.submodule1.submoduleA.__init__'},
@@ -179,7 +179,7 @@ class ImportsTestCase(AbstractTestCase):
                   'imports': [{'by': 'internal.submodule1.test',
                                'from': 'internal.submodule1.submoduleA.test',
                                'import': ['Test1']}],
-                  'source_index': 2,
+                  'source_index': 4,
                   'source_name': 'internal.submodule1.test',
                   'target_index': 3,
                   'target_name': 'internal.submodule1.submoduleA.test'},
@@ -187,7 +187,7 @@ class ImportsTestCase(AbstractTestCase):
                   'imports': [{'by': 'internal.submodule1.test',
                                'from': 'internal',
                                'import': ['test']}],
-                  'source_index': 3,
+                  'source_index': 4,
                   'source_name': 'internal.submodule1.test',
                   'target_index': 0,
                   'target_name': 'internal.__init__'},
@@ -195,7 +195,7 @@ class ImportsTestCase(AbstractTestCase):
                   'imports': [{'by': 'internal.submodule2.test',
                                'from': 'internal.submodule2.test2',
                                'import': ['someclass']}],
-                  'source_index': 4,
+                  'source_index': 6,
                   'source_name': 'internal.submodule2.test',
                   'target_index': 7,
                   'target_name': 'internal.submodule2.test2'},
@@ -203,7 +203,7 @@ class ImportsTestCase(AbstractTestCase):
                   'imports': [{'by': 'internal.test',
                                'from': 'internal',
                                'import': ['submodule2']}],
-                  'source_index': 5,
+                  'source_index': 8,
                   'source_name': 'internal.test',
                   'target_index': 0,
                   'target_name': 'internal.__init__'},
@@ -211,7 +211,7 @@ class ImportsTestCase(AbstractTestCase):
                   'imports': [{'by': 'internal.test',
                                'from': 'internal.submodule1',
                                'import': ['submoduleA']}],
-                  'source_index': 6,
+                  'source_index': 8,
                   'source_name': 'internal.test',
                   'target_index': 1,
                   'target_name': 'internal.submodule1.__init__'},
@@ -219,7 +219,7 @@ class ImportsTestCase(AbstractTestCase):
                   'imports': [{'by': 'internal.test',
                                'from': 'internal.submodule1.submoduleA',
                                'import': ['test']}],
-                  'source_index': 7,
+                  'source_index': 8,
                   'source_name': 'internal.test',
                   'target_index': 2,
                   'target_name': 'internal.submodule1.submoduleA.__init__'},
@@ -309,26 +309,22 @@ class MatricesTestCase(AbstractTestCase):
         self.assertEqual(dm.get_matrix(2).depth, 2)
         self.assertEqual(dm.get_matrix(2).size, 4)
         self.assertEqual(dm.get_matrix(2).modules, {
-            'internal.__init__': {
-                'cardinal': {'exports': 2, 'imports': 9},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 0},
-                'similarity': {}},
-            'internal.submodule1': {
-                'cardinal': {'exports': 5, 'imports': 5},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 1},
-                'similarity': {}},
-            'internal.submodule2': {
-                'cardinal': {'exports': 2, 'imports': 3},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 2},
-                'similarity': {}},
-            'internal.test': {
-                'cardinal': {'exports': 9, 'imports': 1},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 3},
-                'similarity': {}}})
+            'internal.__init__': {'cardinal': {'exports': 2, 'imports': 0},
+                                  'group': {'index': 0, 'name': group},
+                                  'order': {'group': 0},
+                                  'similarity': {}},
+            'internal.submodule1': {'cardinal': {'exports': 5, 'imports': 13},
+                                    'group': {'index': 0, 'name': group},
+                                    'order': {'group': 1},
+                                    'similarity': {}},
+            'internal.submodule2': {'cardinal': {'exports': 2, 'imports': 1},
+                                    'group': {'index': 0, 'name': group},
+                                    'order': {'group': 2},
+                                    'similarity': {}},
+            'internal.test': {'cardinal': {'exports': 9, 'imports': 4},
+                              'group': {'index': 0, 'name': group},
+                              'order': {'group': 3},
+                              'similarity': {}}})
         self.assertEqual(dm.get_matrix(2).dependencies, [
             {'cardinal': 9,
              'imports': [{'by': 'internal.submodule1.submoduleA.test',
@@ -342,8 +338,8 @@ class MatricesTestCase(AbstractTestCase):
                                      'classF',
                                      'classG',
                                      'classH']}],
-             'source_index': 0,
-             'source_name': 'internal.__init__',
+             'source_index': 1,
+             'source_name': 'internal.submodule1',
              'target_index': 3,
              'target_name': 'internal.test'},
             {'cardinal': 3,
@@ -369,16 +365,16 @@ class MatricesTestCase(AbstractTestCase):
              'imports': [{'by': 'internal.submodule2.test',
                           'from': 'internal.submodule2.test2',
                           'import': ['someclass']}],
-             'source_index': 1,
-             'source_name': 'internal.submodule1',
+             'source_index': 2,
+             'source_name': 'internal.submodule2',
              'target_index': 2,
              'target_name': 'internal.submodule2'},
             {'cardinal': 1,
              'imports': [{'by': 'internal.test',
                           'from': 'internal',
                           'import': ['submodule2']}],
-             'source_index': 2,
-             'source_name': 'internal.submodule2',
+             'source_index': 3,
+             'source_name': 'internal.test',
              'target_index': 0,
              'target_name': 'internal.__init__'},
             {'cardinal': 2,
@@ -388,8 +384,8 @@ class MatricesTestCase(AbstractTestCase):
                          {'by': 'internal.test',
                           'from': 'internal.submodule1.submoduleA',
                           'import': ['test']}],
-             'source_index': 2,
-             'source_name': 'internal.submodule2',
+             'source_index': 3,
+             'source_name': 'internal.test',
              'target_index': 1,
              'target_name': 'internal.submodule1'},
             {'cardinal': 1,
@@ -407,32 +403,32 @@ class MatricesTestCase(AbstractTestCase):
                                                  'internal.test'])
         self.assertEqual(
             dm.get_matrix(2).matrix,
-            [[0, 0, 0, 9], [1, 3, 1, 0], [1, 2, 0, 0], [0, 0, 1, 0]])
+            [[0, 0, 0, 0], [1, 3, 0, 9], [0, 0, 1, 0], [1, 2, 1, 0]])
         self.assertEqual(dm.get_matrix(3).depth, 3)
         self.assertEqual(dm.get_matrix(3).size, 8)
         self.assertEqual(dm.get_matrix(3).modules, {
             'internal.__init__': {
-                'cardinal': {'exports': 2, 'imports': 9},
+                'cardinal': {'exports': 2, 'imports': 0},
                 'group': {'index': 0, 'name': group},
                 'order': {'group': 0},
                 'similarity': {}},
             'internal.submodule1.__init__': {
-                'cardinal': {'exports': 1, 'imports': 2},
+                'cardinal': {'exports': 1, 'imports': 0},
                 'group': {'index': 0, 'name': group},
                 'order': {'group': 1},
                 'similarity': {}},
             'internal.submodule1.submoduleA': {
-                'cardinal': {'exports': 4, 'imports': 2},
+                'cardinal': {'exports': 4, 'imports': 9},
                 'group': {'index': 0, 'name': group},
                 'order': {'group': 2},
                 'similarity': {}},
             'internal.submodule1.test': {
-                'cardinal': {'exports': 0, 'imports': 1},
+                'cardinal': {'exports': 0, 'imports': 4},
                 'group': {'index': 0, 'name': group},
                 'order': {'group': 3},
                 'similarity': {}},
             'internal.submodule2.__init__': {
-                'cardinal': {'exports': 1, 'imports': 1},
+                'cardinal': {'exports': 1, 'imports': 0},
                 'group': {'index': 0, 'name': group},
                 'order': {'group': 4},
                 'similarity': {}},
@@ -442,86 +438,80 @@ class MatricesTestCase(AbstractTestCase):
                 'order': {'group': 5},
                 'similarity': {}},
             'internal.submodule2.test2': {
-                'cardinal': {'exports': 1, 'imports': 1},
+                'cardinal': {'exports': 1, 'imports': 0},
                 'group': {'index': 0, 'name': group},
                 'order': {'group': 6},
                 'similarity': {}},
-            'internal.test': {'cardinal': {'exports': 9, 'imports': 1},
+            'internal.test': {'cardinal': {'exports': 9, 'imports': 4},
                               'group': {'index': 0, 'name': group},
                               'order': {'group': 7},
                               'similarity': {}}})
         self.assertEqual(dm.get_matrix(3).dependencies, [
             {'cardinal': 9,
-             'imports': [
-                 {'by': 'internal.submodule1.submoduleA.test',
-                  'from': 'internal.test',
-                  'import': ['someclass',
-                             'classA',
-                             'classB',
-                             'classC',
-                             'classD',
-                             'classE',
-                             'classF',
-                             'classG',
-                             'classH']}],
-             'source_index': 0,
-             'source_name': 'internal.__init__',
-             'target_index': 7,
-             'target_name': 'internal.test'},
-            {'cardinal': 2,
-             'imports': [{'by': 'internal.submodule1.test',
-                          'from': 'internal.submodule1.submoduleA',
-                          'import': ['test', 'othertest']}],
-             'source_index': 1,
-             'source_name': 'internal.submodule1.__init__',
-             'target_index': 2,
-             'target_name': 'internal.submodule1.submoduleA'},
-            {'cardinal': 1,
-             'imports': [{'by': 'internal.submodule1.test',
-                          'from': 'internal.submodule1.submoduleA.test',
-                          'import': ['Test1']}],
+             'imports': [{'by': 'internal.submodule1.submoduleA.test',
+                          'from': 'internal.test',
+                          'import': ['someclass',
+                                     'classA',
+                                     'classB',
+                                     'classC',
+                                     'classD',
+                                     'classE',
+                                     'classF',
+                                     'classG',
+                                     'classH']}],
              'source_index': 2,
              'source_name': 'internal.submodule1.submoduleA',
+             'target_index': 7,
+             'target_name': 'internal.test'},
+            {'cardinal': 3,
+             'imports': [{'by': 'internal.submodule1.test',
+                          'from': 'internal.submodule1.submoduleA',
+                          'import': ['test', 'othertest']},
+                         {'by': 'internal.submodule1.test',
+                          'from': 'internal.submodule1.submoduleA.test',
+                          'import': ['Test1']}],
+             'source_index': 3,
+             'source_name': 'internal.submodule1.test',
              'target_index': 2,
              'target_name': 'internal.submodule1.submoduleA'},
             {'cardinal': 1,
              'imports': [{'by': 'internal.submodule1.test',
                           'from': 'internal',
                           'import': ['test']}],
-             'source_index': 2,
-             'source_name': 'internal.submodule1.submoduleA',
+             'source_index': 3,
+             'source_name': 'internal.submodule1.test',
              'target_index': 0,
              'target_name': 'internal.__init__'},
             {'cardinal': 1,
              'imports': [{'by': 'internal.submodule2.test',
                           'from': 'internal.submodule2.test2',
                           'import': ['someclass']}],
-             'source_index': 3,
-             'source_name': 'internal.submodule1.test',
+             'source_index': 5,
+             'source_name': 'internal.submodule2.test',
              'target_index': 6,
              'target_name': 'internal.submodule2.test2'},
             {'cardinal': 1,
              'imports': [{'by': 'internal.test',
                           'from': 'internal',
                           'import': ['submodule2']}],
-             'source_index': 4,
-             'source_name': 'internal.submodule2.__init__',
+             'source_index': 7,
+             'source_name': 'internal.test',
              'target_index': 0,
              'target_name': 'internal.__init__'},
             {'cardinal': 1,
              'imports': [{'by': 'internal.test',
                           'from': 'internal.submodule1',
                           'import': ['submoduleA']}],
-             'source_index': 5,
-             'source_name': 'internal.submodule2.test',
+             'source_index': 7,
+             'source_name': 'internal.test',
              'target_index': 1,
              'target_name': 'internal.submodule1.__init__'},
             {'cardinal': 1,
              'imports': [{'by': 'internal.test',
                           'from': 'internal.submodule1.submoduleA',
                           'import': ['test']}],
-             'source_index': 6,
-             'source_name': 'internal.submodule2.test2',
+             'source_index': 7,
+             'source_name': 'internal.test',
              'target_index': 2,
              'target_name': 'internal.submodule1.submoduleA'},
             {'cardinal': 1,
@@ -545,14 +535,14 @@ class MatricesTestCase(AbstractTestCase):
                           'internal.submodule2.test2',
                           'internal.test'])
         self.assertEqual(dm.get_matrix(3).matrix,
-                         [[0, 0, 0, 0, 0, 0, 0, 9],
-                          [0, 0, 2, 0, 0, 0, 0, 0],
-                          [1, 0, 1, 0, 0, 0, 0, 0],
+                         [[0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 9],
+                          [1, 0, 3, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0, 0, 1, 0],
-                          [1, 0, 0, 0, 0, 0, 0, 0],
-                          [0, 1, 0, 0, 0, 0, 0, 0],
-                          [0, 0, 1, 0, 0, 0, 0, 0],
-                          [0, 0, 0, 0, 1, 0, 0, 0]])
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [1, 1, 1, 0, 1, 0, 0, 0]])
         self.assertEqual(dm.get_matrix(4).depth, 4)
         self.assertEqual(dm.get_matrix(4).size, 9)
         self.assertEqual(dm.get_matrix(4).modules, {
@@ -615,7 +605,7 @@ class MatricesTestCase(AbstractTestCase):
                                      'classF',
                                      'classG',
                                      'classH']}],
-             'source_index': 0,
+             'source_index': 3,
              'source_name': 'internal.submodule1.submoduleA.test',
              'target_index': 8,
              'target_name': 'internal.test'},
@@ -623,7 +613,7 @@ class MatricesTestCase(AbstractTestCase):
              'imports': [{'by': 'internal.submodule1.test',
                           'from': 'internal.submodule1.submoduleA',
                           'import': ['test', 'othertest']}],
-             'source_index': 1,
+             'source_index': 4,
              'source_name': 'internal.submodule1.test',
              'target_index': 2,
              'target_name': 'internal.submodule1.submoduleA.__init__'},
@@ -631,7 +621,7 @@ class MatricesTestCase(AbstractTestCase):
              'imports': [{'by': 'internal.submodule1.test',
                           'from': 'internal.submodule1.submoduleA.test',
                           'import': ['Test1']}],
-             'source_index': 2,
+             'source_index': 4,
              'source_name': 'internal.submodule1.test',
              'target_index': 3,
              'target_name': 'internal.submodule1.submoduleA.test'},
@@ -639,7 +629,7 @@ class MatricesTestCase(AbstractTestCase):
              'imports': [{'by': 'internal.submodule1.test',
                           'from': 'internal',
                           'import': ['test']}],
-             'source_index': 3,
+             'source_index': 4,
              'source_name': 'internal.submodule1.test',
              'target_index': 0,
              'target_name': 'internal.__init__'},
@@ -647,7 +637,7 @@ class MatricesTestCase(AbstractTestCase):
              'imports': [{'by': 'internal.submodule2.test',
                           'from': 'internal.submodule2.test2',
                           'import': ['someclass']}],
-             'source_index': 4,
+             'source_index': 6,
              'source_name': 'internal.submodule2.test',
              'target_index': 7,
              'target_name': 'internal.submodule2.test2'},
@@ -655,7 +645,7 @@ class MatricesTestCase(AbstractTestCase):
              'imports': [{'by': 'internal.test',
                           'from': 'internal',
                           'import': ['submodule2']}],
-             'source_index': 5,
+             'source_index': 8,
              'source_name': 'internal.test',
              'target_index': 0,
              'target_name': 'internal.__init__'},
@@ -663,7 +653,7 @@ class MatricesTestCase(AbstractTestCase):
              'imports': [{'by': 'internal.test',
                           'from': 'internal.submodule1',
                           'import': ['submoduleA']}],
-             'source_index': 6,
+             'source_index': 8,
              'source_name': 'internal.test',
              'target_index': 1,
              'target_name': 'internal.submodule1.__init__'},
@@ -671,7 +661,7 @@ class MatricesTestCase(AbstractTestCase):
              'imports': [{'by': 'internal.test',
                           'from': 'internal.submodule1.submoduleA',
                           'import': ['test']}],
-             'source_index': 7,
+             'source_index': 8,
              'source_name': 'internal.test',
              'target_index': 2,
              'target_name': 'internal.submodule1.submoduleA.__init__'},
@@ -697,19 +687,19 @@ class MatricesTestCase(AbstractTestCase):
                           'internal.submodule2.test2',
                           'internal.test'])
         self.assertEqual(dm.get_matrix(4).matrix,
-                         [[0, 0, 0, 0, 0, 0, 0, 0, 9],
-                          [0, 0, 2, 0, 0, 0, 0, 0, 0],
-                          [0, 0, 0, 1, 0, 0, 0, 0, 0],
-                          [1, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 9],
+                          [1, 0, 2, 1, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0, 0, 0, 1, 0],
-                          [1, 0, 0, 0, 0, 0, 0, 0, 0],
-                          [0, 1, 0, 0, 0, 0, 0, 0, 0],
-                          [0, 0, 1, 0, 0, 0, 0, 0, 0],
-                          [0, 0, 0, 0, 0, 1, 0, 0, 0]])
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [1, 1, 1, 0, 0, 1, 0, 0, 0]])
 
     def test_matrices(self):
         # local_path = os.path.abspath(os.path.join(
-        #     os.path.dirname(os.path.dirname(__file__)), 'tests'))
+        # os.path.dirname(os.path.dirname(__file__)), 'tests'))
         for dm in [self.str_dm, self.list_dm]:
             self.assertEqualMatrices(dm, '')
         self.assertEqualMatrices(self.od_dm, 'Only group')
@@ -779,10 +769,10 @@ class OutputTestCase(AbstractTestCase):
                 dm.get_matrix(2).to_csv(),
                 ',internal.__init__,internal.submodule1,'
                 'internal.submodule2,internal.test\r\n'
-                'internal.__init__,0,0,0,9\r\n'
-                'internal.submodule1,1,3,1,0\r\n'
-                'internal.submodule2,1,2,0,0\r\n'
-                'internal.test,0,0,1,0',
+                'internal.__init__,0,0,0,0\r\n'
+                'internal.submodule1,1,3,0,9\r\n'
+                'internal.submodule2,0,0,1,0\r\n'
+                'internal.test,1,2,1,0',
                 'CSV MATRIX 2')
             self.assertEqual(
                 dm.get_matrix(3).to_csv(),
@@ -790,14 +780,14 @@ class OutputTestCase(AbstractTestCase):
                 'internal.submodule1.submoduleA,internal.submodule1.test,'
                 'internal.submodule2.__init__,internal.submodule2.test,'
                 'internal.submodule2.test2,internal.test\r\n'
-                'internal.__init__,0,0,0,0,0,0,0,9\r\n'
-                'internal.submodule1.__init__,0,0,2,0,0,0,0,0\r\n'
-                'internal.submodule1.submoduleA,1,0,1,0,0,0,0,0\r\n'
-                'internal.submodule1.test,0,0,0,0,0,0,1,0\r\n'
-                'internal.submodule2.__init__,1,0,0,0,0,0,0,0\r\n'
-                'internal.submodule2.test,0,1,0,0,0,0,0,0\r\n'
-                'internal.submodule2.test2,0,0,1,0,0,0,0,0\r\n'
-                'internal.test,0,0,0,0,1,0,0,0',
+                'internal.__init__,0,0,0,0,0,0,0,0\r\n'
+                'internal.submodule1.__init__,0,0,0,0,0,0,0,0\r\n'
+                'internal.submodule1.submoduleA,0,0,0,0,0,0,0,9\r\n'
+                'internal.submodule1.test,1,0,3,0,0,0,0,0\r\n'
+                'internal.submodule2.__init__,0,0,0,0,0,0,0,0\r\n'
+                'internal.submodule2.test,0,0,0,0,0,0,1,0\r\n'
+                'internal.submodule2.test2,0,0,0,0,0,0,0,0\r\n'
+                'internal.test,1,1,1,0,1,0,0,0',
                 'CSV MATRIX 3')
             self.assertEqual(
                 dm.get_matrix(4).to_csv(),
@@ -806,15 +796,15 @@ class OutputTestCase(AbstractTestCase):
                 'internal.submodule1.submoduleA.test,internal.submodule1.test,'
                 'internal.submodule2.__init__,internal.submodule2.test,'
                 'internal.submodule2.test2,internal.test\r\n'
-                'internal.__init__,0,0,0,0,0,0,0,0,9\r\n'
-                'internal.submodule1.__init__,0,0,2,0,0,0,0,0,0\r\n'
-                'internal.submodule1.submoduleA.__init__,0,0,0,1,0,0,0,0,0\r\n'
-                'internal.submodule1.submoduleA.test,1,0,0,0,0,0,0,0,0\r\n'
-                'internal.submodule1.test,0,0,0,0,0,0,0,1,0\r\n'
-                'internal.submodule2.__init__,1,0,0,0,0,0,0,0,0\r\n'
-                'internal.submodule2.test,0,1,0,0,0,0,0,0,0\r\n'
-                'internal.submodule2.test2,0,0,1,0,0,0,0,0,0\r\n'
-                'internal.test,0,0,0,0,0,1,0,0,0',
+                'internal.__init__,0,0,0,0,0,0,0,0,0\r\n'
+                'internal.submodule1.__init__,0,0,0,0,0,0,0,0,0\r\n'
+                'internal.submodule1.submoduleA.__init__,0,0,0,0,0,0,0,0,0\r\n'
+                'internal.submodule1.submoduleA.test,0,0,0,0,0,0,0,0,9\r\n'
+                'internal.submodule1.test,1,0,2,1,0,0,0,0,0\r\n'
+                'internal.submodule2.__init__,0,0,0,0,0,0,0,0,0\r\n'
+                'internal.submodule2.test,0,0,0,0,0,0,0,1,0\r\n'
+                'internal.submodule2.test2,0,0,0,0,0,0,0,0,0\r\n'
+                'internal.test,1,1,1,0,0,1,0,0,0',
                 'CSV MATRIX 4')
 
 
