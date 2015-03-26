@@ -11,7 +11,7 @@
 This is the main and only module of dependenpy package.
 This module contains:
 
-    a class, DependencyMatrix: the class building your dependency matrix data.
+    a class, MatrixBuilder: the class building your dependency matrix data.
     a class, Matrix: the class containing the 2-dimensions array of integers
     a function, resolve_path: transforms a module name into an absolute path.
 
@@ -28,10 +28,6 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-
-
-def cmp(a, b):
-    return (a > b) - (a < b)
 
 
 def resolve_path(module):
@@ -285,12 +281,12 @@ class Matrix(object):
 
 # TODO: Add exclude option
 # TODO: Replace OrderedDict by a list (easier to use)
-class DependencyMatrix(object):
-    """Dependency Matrix data builder.
+class MatrixBuilder(object):
+    """Dependency matrix data builder.
     """
 
     def __init__(self, packages, path_resolver=resolve_path):
-        """Instantiate a DependencyMatrix object.
+        """Instantiate a MatrixBuilder object.
 
         :param packages: str/list/OrderedDict: packages to scan
         :param path_resolver: callable, finds the absolute path of a module

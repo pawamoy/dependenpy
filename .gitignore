@@ -1,10 +1,10 @@
 *.pyc
+*.egg-info/
 dist/
 .idea/
 docs/_build/
+stats/
 docs/symlink.sh
 docs/docs.html
 MANIFEST
 .coverage
-dependenpy.egg-info/
-stats/

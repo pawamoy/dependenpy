@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 import unittest
 import json
 from collections import OrderedDict
-from dependenpy.utils import DependencyMatrix
+from dependenpy.utils import MatrixBuilder
 
 
 class AbstractTestCase(unittest.TestCase):
@@ -24,9 +24,9 @@ class AbstractTestCase(unittest.TestCase):
         od_p = OrderedDict()
         od_p['Only group'] = ['internal']
 
-        self.str_dm = DependencyMatrix(str_p)
-        self.list_dm = DependencyMatrix(list_p)
-        self.od_dm = DependencyMatrix(od_p)
+        self.str_dm = MatrixBuilder(str_p)
+        self.list_dm = MatrixBuilder(list_p)
+        self.od_dm = MatrixBuilder(od_p)
 
     def tearDown(self):
         del self.str_dm
@@ -36,7 +36,7 @@ class AbstractTestCase(unittest.TestCase):
 
 class EmptyTestCase(AbstractTestCase):
     def test_wrong_type(self):
-        tmp = DependencyMatrix('')
+        tmp = MatrixBuilder('')
         self.assertRaises(AttributeError, tmp.__init__, 1)
 
     def test_packages(self):
@@ -78,7 +78,7 @@ class StaticDataTestCase(AbstractTestCase):
 
 class NoPathTestCase(unittest.TestCase):
     def setUp(self):
-        self.dm = DependencyMatrix('unfoundable')
+        self.dm = MatrixBuilder('unfoundable')
 
     def test_modules(self):
         self.assertEqual(self.dm.build_modules().modules, [])
@@ -723,7 +723,7 @@ class OutputTestCase(AbstractTestCase):
     #     for dm in [self.str_dm, self.list_dm, self.od_dm]:
     #         data = json.loads(dm.to_json())
     #
-    #         obj = DependencyMatrix(data['packages'])
+    #         obj = MatrixBuilder(data['packages'])
     #         obj.groups = data['groups']
     #         obj.modules = data['modules']
     #         obj.imports = data['imports']
@@ -735,7 +735,7 @@ class OutputTestCase(AbstractTestCase):
     #         obj._matrices_are_built = data['_matrices_are_built']
     #         self.assertEqual(dm, obj, 'JSON dump/load/assign')
     #
-    #         obj2 = DependencyMatrix(data['packages'])
+    #         obj2 = MatrixBuilder(data['packages'])
     #         obj2.groups = data['groups']
     #         obj2.build()
     #         self.assertEqual(dm, obj2, 'JSON dump/load/build')
