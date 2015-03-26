@@ -22,7 +22,7 @@ import sys
 import ast
 import json
 import csv
-import collections
+from collections import OrderedDict
 
 try:
     from StringIO import StringIO
@@ -305,7 +305,7 @@ class MatrixBuilder(object):
             else:
                 self.packages = [packages]
             self.groups = ['']
-        elif isinstance(packages, collections.OrderedDict):
+        elif isinstance(packages, OrderedDict):
             self.packages = packages.values()
             self.groups = packages.keys()
         else:
@@ -477,7 +477,7 @@ class MatrixBuilder(object):
         :param force: bool, force append even if module is not part of packages
         :return: dict of dict, imports
         """
-        sum_from = collections.OrderedDict()
+        sum_from = OrderedDict()
         code = open(module['path']).read()
         for node in ast.parse(code).body:
             if isinstance(node, ast.ImportFrom):
@@ -533,8 +533,7 @@ class MatrixBuilder(object):
                     'group': {'index': group, 'name': self.groups[group]}
                 })
         # Ensure resulting list of files is always in the same order
-        result.sort()
-        return result
+        return sorted(result, key=lambda k: k['name'])
 
     def to_json(self):
         """Return self as a JSON string (without path_resolver callable).
