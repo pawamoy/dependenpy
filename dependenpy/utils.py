@@ -97,11 +97,11 @@ class Matrix(object):
         self._update_matrix()
 
         self.orders = {
-            'name': (False, self._compute_name_order),
-            'group': (True, self._compute_group_order),
-            'import': (False, self._compute_import_order),
-            'export': (False, self._compute_export_order),
-            'similarity': (False, self._compute_similarity_order)}
+            'name': [False, self._compute_name_order],
+            'group': [True, self._compute_group_order],
+            'import': [False, self._compute_import_order],
+            'export': [False, self._compute_export_order],
+            'similarity': [False, self._compute_similarity_order]}
 
     def __str__(self):
         return '%s' % self.matrix
@@ -202,23 +202,18 @@ class Matrix(object):
         self._write_order('name', sorted_keys)
 
     def _compute_import_order(self):
-        sorted_keys = [m['name'] for m in sorted(
+        sorted_keys = sorted(
             self.modules,
-            cmp=lambda x, y: cmp(
-                x['cardinal']['imports'],
-                y['cardinal']['imports']))]
+            key=lambda x: self.modules[x]['cardinal']['imports'])
         self._write_order('import', sorted_keys)
 
     def _compute_export_order(self):
-        sorted_keys = [m['name'] for m in sorted(
+        sorted_keys = sorted(
             self.modules,
-            cmp=lambda x, y: cmp(
-                x['cardinal']['exports'],
-                y['cardinal']['exports']))]
+            key=lambda x: self.modules[x]['cardinal']['exports'])
         self._write_order('export', sorted_keys)
 
     def _compute_similarity_order(self):
-        similarities = {}
         for d1 in self.dependencies:
             for d2 in self.dependencies:
                 n, i, j = 0, d1['source_name'], d2['source_name']
@@ -228,13 +223,14 @@ class Matrix(object):
                             if di1['from'] == di2['from']:
                                 n += len([0 for x in di1['import']
                                           if x in di2['import']])
-                    similarities[(i, j)] = n
+                    self.modules[i]['similarity'][j] = n
         # TODO: use a TSP solver to order vectors
-        self.orders['similarity'] = True
+        # self._write_order('similarity', sorted_keys)
 
     def _compute_group_order(self):
+        pass
         # TODO: code this method
-        self.orders['group'] = True
+        # self._write_order('group', sorted_keys)
 
     def _update_matrix(self):
         self.matrix = [[0 for x in range(self.size)] for x in range(self.size)]
@@ -564,42 +560,6 @@ class DependencyMatrix(object):
             '_matrices_are_built': self._matrices_are_built,
         })
 
-    @staticmethod
-    def _option_filter(matrix, options):
-        """Return a light version of matrix data based on given options.
-
-        :param matrix: dict, a matrix from self.matrices
-        :param options: dict of bool, keys are group_name, group_index,
-            source_name, source_index, target_name, target_index,
-            imports and cardinal
-        :return: dict, the filtered matrix data
-        """
-        if not options['group_name']:
-            for item in matrix['modules']:
-                del item['group']['name']
-        if not options['group_index']:
-            for item in matrix['modules']:
-                del item['group']['index']
-        if not options['source_name']:
-            for item in matrix['imports']:
-                del item['source_name']
-        if not options['source_index']:
-            for item in matrix['imports']:
-                del item['source_index']
-        if not options['target_name']:
-            for item in matrix['imports']:
-                del item['target_name']
-        if not options['target_index']:
-            for item in matrix['imports']:
-                del item['target_index']
-        if not options['imports']:
-            for item in matrix['imports']:
-                del item['imports']
-        if not options['cardinal']:
-            for item in matrix['imports']:
-                del item['cardinal']
-        return matrix
-
     def get_matrix(self, matrix):
         """Return the specified matrix.
         The given index is casted into [0 .. max_depth] range.
@@ -607,6 +567,9 @@ class DependencyMatrix(object):
         :param matrix: int, index/depth. Zero means max_depth.
         :return: Matrix instance
         """
+        if not self._matrices_are_built:
+            print('Matrices are not built. Use build() method first.')
+            return None
         i = int(matrix)
         if i == 0 or i > self.max_depth:
             m = self.max_depth - 1
