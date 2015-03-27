@@ -157,8 +157,11 @@ class Matrix(object):
 
         # We return the new Matrix
         return Matrix(self.depth-1, up_modules, up_dependencies)
+        # TODO: optimization: we could compute orders for max_depth matrix
+        # and reuse them in some way for above matrices
 
     def sort(self, order):
+        # TODO: allow sorting in reverse order
         try:
             self.compute_order(order)
         except KeyError:
@@ -210,6 +213,9 @@ class Matrix(object):
         self._write_order('export', sorted_keys)
 
     def _compute_similarity_order(self):
+        # FIXME: even the first step is too long
+        # compute only one half of the matrix, not the whole... use indexes
+        # -> fill modules[i]['similarity'][j] AND modules[j]['similarity'][i]
         for d1 in self.dependencies:
             for d2 in self.dependencies:
                 n, i, j = 0, d1['source_name'], d2['source_name']
@@ -280,7 +286,6 @@ class Matrix(object):
 
 
 # TODO: Add exclude option
-# TODO: Replace OrderedDict by a list (easier to use)
 class MatrixBuilder(object):
     """Dependency matrix data builder.
     """
@@ -305,6 +310,7 @@ class MatrixBuilder(object):
             else:
                 self.packages = [packages]
             self.groups = ['']
+        # TODO: Replace OrderedDict by a list (easier to use)
         elif isinstance(packages, OrderedDict):
             self.packages = packages.values()
             self.groups = packages.keys()
