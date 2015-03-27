@@ -61,11 +61,11 @@ class Matrix(object):
         #: its name), stores the value of its name, group, imports cardinal,
         #: exports cardinal, similarity with the other modules, and the
         #: corresponding order indexes
-        self.modules = {}
+        self.modules = OrderedDict()
         m_index = 0
         for module in modules:
             self.modules[module['name']] = {
-                # 'name': module['name'],
+                'name': module['name'],
                 'group': module['group'],
                 'cardinal': {'imports': 0, 'exports': 0},
                 'similarity': {},
