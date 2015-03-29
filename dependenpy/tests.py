@@ -257,11 +257,10 @@ class MatricesTestCase(AbstractTestCase):
     def assertEqualMatrices(self, dm, group):
         self.assertEqual(dm.get_matrix(1).depth, 1)
         self.assertEqual(dm.get_matrix(1).size, 1)
-        self.assertEqual(dm.get_matrix(1).modules, {
-            'internal': {'cardinal': {'exports': 18, 'imports': 18},
-                         'group': {'index': 0, 'name': group},
-                         'order': {'group': 0},
-                         'similarity': {}}})
+        self.assertEqual(dm.get_matrix(1).modules, OrderedDict([('internal', {
+            'cardinal': {'imports': 18, 'exports': 18}, 'order': {'group': 0},
+            'group': {'index': 0, 'name': group}, 'name': 'internal',
+            'similarity': {}})]))
         self.assertEqual(dm.get_matrix(1).dependencies, [
             {'cardinal': 18,
              'imports': [
@@ -308,23 +307,28 @@ class MatricesTestCase(AbstractTestCase):
         self.assertEqual(dm.get_matrix(1).matrix, [[18]])
         self.assertEqual(dm.get_matrix(2).depth, 2)
         self.assertEqual(dm.get_matrix(2).size, 4)
-        self.assertEqual(dm.get_matrix(2).modules, {
-            'internal.__init__': {'cardinal': {'exports': 2, 'imports': 0},
-                                  'group': {'index': 0, 'name': group},
-                                  'order': {'group': 0},
-                                  'similarity': {}},
-            'internal.submodule1': {'cardinal': {'exports': 5, 'imports': 13},
-                                    'group': {'index': 0, 'name': group},
-                                    'order': {'group': 1},
-                                    'similarity': {}},
-            'internal.submodule2': {'cardinal': {'exports': 2, 'imports': 1},
-                                    'group': {'index': 0, 'name': group},
-                                    'order': {'group': 2},
-                                    'similarity': {}},
-            'internal.test': {'cardinal': {'exports': 9, 'imports': 4},
-                              'group': {'index': 0, 'name': group},
-                              'order': {'group': 3},
-                              'similarity': {}}})
+        self.assertEqual(
+            dm.get_matrix(2).modules,
+            OrderedDict(
+                [('internal.__init__',
+                  {'cardinal': {'imports': 0, 'exports': 2},
+                   'order': {'group': 0}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.__init__', 'similarity': {}}),
+                 ('internal.submodule1',
+                  {'cardinal': {'imports': 13, 'exports': 5},
+                   'order': {'group': 1}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule1', 'similarity': {}}),
+                 ('internal.submodule2',
+                  {'cardinal': {'imports': 1, 'exports': 2},
+                   'order': {'group': 2},
+                   'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule2', 'similarity': {}}),
+                 ('internal.test',
+                  {'cardinal': {'imports': 4, 'exports': 9},
+                   'order': {'group': 3},
+                   'group': {'index': 0, 'name': group},
+                   'name': 'internal.test',
+                   'similarity': {}})]))
         self.assertEqual(dm.get_matrix(2).dependencies, [
             {'cardinal': 9,
              'imports': [{'by': 'internal.submodule1.submoduleA.test',
@@ -406,46 +410,51 @@ class MatricesTestCase(AbstractTestCase):
             [[0, 0, 0, 0], [1, 3, 0, 9], [0, 0, 1, 0], [1, 2, 1, 0]])
         self.assertEqual(dm.get_matrix(3).depth, 3)
         self.assertEqual(dm.get_matrix(3).size, 8)
-        self.assertEqual(dm.get_matrix(3).modules, {
-            'internal.__init__': {
-                'cardinal': {'exports': 2, 'imports': 0},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 0},
-                'similarity': {}},
-            'internal.submodule1.__init__': {
-                'cardinal': {'exports': 1, 'imports': 0},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 1},
-                'similarity': {}},
-            'internal.submodule1.submoduleA': {
-                'cardinal': {'exports': 4, 'imports': 9},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 2},
-                'similarity': {}},
-            'internal.submodule1.test': {
-                'cardinal': {'exports': 0, 'imports': 4},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 3},
-                'similarity': {}},
-            'internal.submodule2.__init__': {
-                'cardinal': {'exports': 1, 'imports': 0},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 4},
-                'similarity': {}},
-            'internal.submodule2.test': {
-                'cardinal': {'exports': 0, 'imports': 1},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 5},
-                'similarity': {}},
-            'internal.submodule2.test2': {
-                'cardinal': {'exports': 1, 'imports': 0},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 6},
-                'similarity': {}},
-            'internal.test': {'cardinal': {'exports': 9, 'imports': 4},
-                              'group': {'index': 0, 'name': group},
-                              'order': {'group': 7},
-                              'similarity': {}}})
+        self.assertEqual(
+            dm.get_matrix(3).modules,
+            OrderedDict(
+                [('internal.__init__',
+                  {'cardinal': {'imports': 0, 'exports': 2},
+                   'order': {'group': 0}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.__init__', 'similarity': {}}),
+                 ('internal.submodule1.__init__',
+                  {'cardinal': {'imports': 0, 'exports': 1},
+                   'order': {'group': 1},
+                   'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule1.__init__',
+                   'similarity': {}}),
+                 ('internal.submodule1.submoduleA',
+                  {'cardinal': {'imports': 9, 'exports': 4},
+                   'order': {'group': 2},
+                   'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule1.submoduleA',
+                   'similarity': {}}),
+                 ('internal.submodule1.test',
+                  {'cardinal': {'imports': 4, 'exports': 0},
+                   'order': {'group': 3}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule1.test', 'similarity': {}}),
+                 ('internal.submodule2.__init__',
+                  {'cardinal': {'imports': 0, 'exports': 1},
+                   'order': {'group': 4},
+                   'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule2.__init__',
+                   'similarity': {}}),
+                 ('internal.submodule2.test',
+                  {'cardinal': {'imports': 1, 'exports': 0},
+                   'order': {'group': 5},
+                   'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule2.test', 'similarity': {}}),
+                 ('internal.submodule2.test2',
+                  {'cardinal': {'imports': 0, 'exports': 1},
+                   'order': {'group': 6},
+                   'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule2.test2', 'similarity': {}}),
+                 ('internal.test',
+                  {'cardinal': {'imports': 4, 'exports': 9},
+                   'order': {'group': 7},
+                   'group': {'index': 0, 'name': group},
+                   'name': 'internal.test',
+                   'similarity': {}})]))
         self.assertEqual(dm.get_matrix(3).dependencies, [
             {'cardinal': 9,
              'imports': [{'by': 'internal.submodule1.submoduleA.test',
@@ -545,53 +554,47 @@ class MatricesTestCase(AbstractTestCase):
                           [1, 1, 1, 0, 1, 0, 0, 0]])
         self.assertEqual(dm.get_matrix(4).depth, 4)
         self.assertEqual(dm.get_matrix(4).size, 9)
-        self.assertEqual(dm.get_matrix(4).modules, {
-            'internal.__init__': {
-                'cardinal': {'exports': 2, 'imports': 0},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 0},
-                'similarity': {}},
-            'internal.submodule1.__init__': {
-                'cardinal': {'exports': 1, 'imports': 0},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 1},
-                'similarity': {}},
-            'internal.submodule1.submoduleA.__init__': {
-                'cardinal': {'exports': 3,
-                             'imports': 0},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 2},
-                'similarity': {}},
-            'internal.submodule1.submoduleA.test': {
-                'cardinal': {'exports': 1,
-                             'imports': 9},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 3},
-                'similarity': {}},
-            'internal.submodule1.test': {
-                'cardinal': {'exports': 0, 'imports': 4},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 4},
-                'similarity': {}},
-            'internal.submodule2.__init__': {
-                'cardinal': {'exports': 1, 'imports': 0},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 5},
-                'similarity': {}},
-            'internal.submodule2.test': {
-                'cardinal': {'exports': 0, 'imports': 1},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 6},
-                'similarity': {}},
-            'internal.submodule2.test2': {
-                'cardinal': {'exports': 1, 'imports': 0},
-                'group': {'index': 0, 'name': group},
-                'order': {'group': 7},
-                'similarity': {}},
-            'internal.test': {'cardinal': {'exports': 9, 'imports': 4},
-                              'group': {'index': 0, 'name': group},
-                              'order': {'group': 8},
-                              'similarity': {}}})
+        self.assertEqual(
+            dm.get_matrix(4).modules,
+            OrderedDict(
+                [('internal.__init__',
+                  {'cardinal': {'imports': 0, 'exports': 2},
+                   'order': {'group': 0}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.__init__', 'similarity': {}}),
+                 ('internal.submodule1.__init__',
+                  {'cardinal': {'imports': 0, 'exports': 1},
+                   'order': {'group': 1}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule1.__init__', 'similarity': {}}),
+                 ('internal.submodule1.submoduleA.__init__',
+                  {'cardinal': {'imports': 0, 'exports': 3},
+                   'order': {'group': 2}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule1.submoduleA.__init__',
+                   'similarity': {}}),
+                 ('internal.submodule1.submoduleA.test',
+                  {'cardinal': {'imports': 9, 'exports': 1},
+                   'order': {'group': 3}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule1.submoduleA.test',
+                   'similarity': {}}),
+                 ('internal.submodule1.test',
+                  {'cardinal': {'imports': 4, 'exports': 0},
+                   'order': {'group': 4}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule1.test', 'similarity': {}}),
+                 ('internal.submodule2.__init__',
+                  {'cardinal': {'imports': 0, 'exports': 1},
+                   'order': {'group': 5}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule2.__init__', 'similarity': {}}),
+                 ('internal.submodule2.test',
+                  {'cardinal': {'imports': 1, 'exports': 0},
+                   'order': {'group': 6}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule2.test', 'similarity': {}}),
+                 ('internal.submodule2.test2',
+                  {'cardinal': {'imports': 0, 'exports': 1},
+                   'order': {'group': 7}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.submodule2.test2', 'similarity': {}}),
+                 ('internal.test',
+                  {'cardinal': {'imports': 4, 'exports': 9},
+                   'order': {'group': 8}, 'group': {'index': 0, 'name': group},
+                   'name': 'internal.test', 'similarity': {}})]))
         self.assertEqual(dm.get_matrix(4).dependencies, [
             {'cardinal': 9,
              'imports': [{'by': 'internal.submodule1.submoduleA.test',
@@ -720,14 +723,14 @@ class OutputTestCase(AbstractTestCase):
             dm.build()
 
     # def test_load_json_dump(self):
-    #     for dm in [self.str_dm, self.list_dm, self.od_dm]:
-    #         data = json.loads(dm.to_json())
+    # for dm in [self.str_dm, self.list_dm, self.od_dm]:
+    # data = json.loads(dm.to_json())
     #
-    #         obj = MatrixBuilder(data['packages'])
-    #         obj.groups = data['groups']
-    #         obj.modules = data['modules']
-    #         obj.imports = data['imports']
-    #         obj.matrices = data['matrices']
+    # obj = MatrixBuilder(data['packages'])
+    # obj.groups = data['groups']
+    # obj.modules = data['modules']
+    # obj.imports = data['imports']
+    # obj.matrices = data['matrices']
     #         obj.max_depth = data['max_depth']
     #         obj._inside = data['_inside']
     #         obj._modules_are_built = data['_modules_are_built']
