@@ -23,6 +23,7 @@ import ast
 import json
 import csv
 from collections import OrderedDict
+from dependenpy.greedy import solve_tsp
 
 try:
     from StringIO import StringIO
@@ -72,10 +73,9 @@ class Matrix(object):
 
         #: dict of dict: for each module identified by a key (currently
         #: its name), stores the value of its name, group, imports cardinal,
-        #: exports cardinal, similarity with the other modules, and the
-        #: corresponding order indexes. Orders are dict with 2 values:
-        #: False for ascendant order, True for descendant order (think of
-        #: reverse=False/True)
+        #: exports cardinal, and the corresponding order indexes.
+        #: Orders are dict with 2 values: False for ascendant order,
+        #: True for descendant order (think of reverse=False/True)
         self.modules = OrderedDict()
         m_index = 0
         for module in modules:
@@ -83,7 +83,6 @@ class Matrix(object):
                 'name': module['name'],
                 'group': module['group'],
                 'cardinal': {'imports': 0, 'exports': 0},
-                'similarity': {},
                 'order': {}}
             for order in self.orders.keys():
                 self.modules[module['name']]['order'][order] = {}
@@ -230,21 +229,39 @@ class Matrix(object):
         self._write_order('export', sorted_keys)
 
     def _compute_similarity_order(self):
+        # we initialize name-index correspondences
+        co = {}
+        for i in range(self.size):
+            co[i] = self.keys[i]
+            co[self.keys[i]] = i
+
+        # we prepare the square symmetric distance matrix
+        matrix = [[0 for x in range(self.size)] for x in range(self.size)]
+
+        # we compute the similarities and fill the matrix
         l = len(self.dependencies)
         for id1 in range(l-1):
             for id2 in range(id1+1, l):
                 d1 = self.dependencies[id1]
                 d2 = self.dependencies[id2]
-                n, i, j = 0, d1['source_name'], d2['source_name']
-                for di1 in d1['imports']:
-                    for di2 in d2['imports']:
-                        if di1['from'] == di2['from']:
-                            n += len([0 for x in di1['import']
-                                      if x in di2['import']])
-                self.modules[i]['similarity'][j] = n
-                self.modules[j]['similarity'][i] = n
-        # TODO: use a TSP solver to order vectors
-        # self._write_order('similarity', sorted_keys)
+                sn1, sn2 = d1['source_name'], d2['source_name']
+                if sn1 != sn2:
+                    n, i, j = 0, co[sn1], co[sn2]
+                    for di1 in d1['imports']:
+                        for di2 in d2['imports']:
+                            if di1['from'] == di2['from']:
+                                n += len([0 for x in di1['import']
+                                          if x in di2['import']])
+
+                    if n > 0:
+                        s = matrix[i][j] + n
+                        matrix[i][j] = s
+                        matrix[j][i] = s
+
+        # we compute the order with a TSP solver, set the sorted keys and save
+        order = solve_tsp(matrix)
+        sorted_keys = [co[k] for k in order]
+        self._write_order('similarity', sorted_keys)
 
     def _compute_group_order(self):
         pass
