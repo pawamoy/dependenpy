@@ -68,6 +68,7 @@ class Matrix(object):
             'import': [False, self._compute_import_order],
             'export': [False, self._compute_export_order],
             'similarity': [False, self._compute_similarity_order]}
+        # TODO: add import+export order
 
         #: dict of dict: for each module identified by a key (currently
         #: its name), stores the value of its name, group, imports cardinal,
@@ -88,6 +89,8 @@ class Matrix(object):
                 self.modules[module['name']]['order'][order] = {}
             # we can fill group order at initialization
             self.modules[module['name']]['order']['group'][False] = m_index
+            # FIXME: temporary until group order computing method is coded
+            self.modules[module['name']]['order']['group'][True] = m_index
             m_index += 1
 
         for i in imports:
