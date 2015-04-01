@@ -230,19 +230,19 @@ class Matrix(object):
         self._write_order('export', sorted_keys)
 
     def _compute_similarity_order(self):
-        # FIXME: even the first step is too long
-        # compute only one half of the matrix, not the whole... use indexes
-        # -> fill modules[i]['similarity'][j] AND modules[j]['similarity'][i]
-        for d1 in self.dependencies:
-            for d2 in self.dependencies:
+        l = len(self.dependencies)
+        for id1 in range(l-1):
+            for id2 in range(id1+1, l):
+                d1 = self.dependencies[id1]
+                d2 = self.dependencies[id2]
                 n, i, j = 0, d1['source_name'], d2['source_name']
-                if i != j:
-                    for di1 in d1['imports']:
-                        for di2 in d2['imports']:
-                            if di1['from'] == di2['from']:
-                                n += len([0 for x in di1['import']
-                                          if x in di2['import']])
-                    self.modules[i]['similarity'][j] = n
+                for di1 in d1['imports']:
+                    for di2 in d2['imports']:
+                        if di1['from'] == di2['from']:
+                            n += len([0 for x in di1['import']
+                                      if x in di2['import']])
+                self.modules[i]['similarity'][j] = n
+                self.modules[j]['similarity'][i] = n
         # TODO: use a TSP solver to order vectors
         # self._write_order('similarity', sorted_keys)
 
