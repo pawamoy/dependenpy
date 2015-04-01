@@ -55,12 +55,26 @@ class Matrix(object):
     def __init__(self, depth, modules, imports):
         #: int: the current depth of this matrix
         self.depth = depth
+        #: int: the size of this square matrix (nb rows/columns)
         self.size = len(modules)
+
+        #: dict of tuple: the available sorting orders.
+        #: First value of tuple is bool: order is computed or not.
+        #: Second value of tuple is callable: the class method that compute
+        #: the order
+        self.orders = {
+            'name': [False, self._compute_name_order],
+            'group': [True, self._compute_group_order],
+            'import': [False, self._compute_import_order],
+            'export': [False, self._compute_export_order],
+            'similarity': [False, self._compute_similarity_order]}
 
         #: dict of dict: for each module identified by a key (currently
         #: its name), stores the value of its name, group, imports cardinal,
         #: exports cardinal, similarity with the other modules, and the
-        #: corresponding order indexes
+        #: corresponding order indexes. Orders are dict with 2 values:
+        #: False for ascendant order, True for descendant order (think of
+        #: reverse=False/True)
         self.modules = OrderedDict()
         m_index = 0
         for module in modules:
@@ -69,7 +83,11 @@ class Matrix(object):
                 'group': module['group'],
                 'cardinal': {'imports': 0, 'exports': 0},
                 'similarity': {},
-                'order': {'group': m_index}}
+                'order': {}}
+            for order in self.orders.keys():
+                self.modules[module['name']]['order'][order] = {}
+            # we can fill group order at initialization
+            self.modules[module['name']]['order']['group'][False] = m_index
             m_index += 1
 
         for i in imports:
@@ -91,13 +109,6 @@ class Matrix(object):
         #: list of list of int: the concrete matrix with numeric values
         self.matrix = None
         self._update_matrix()
-
-        self.orders = {
-            'name': [False, self._compute_name_order],
-            'group': [True, self._compute_group_order],
-            'import': [False, self._compute_import_order],
-            'export': [False, self._compute_export_order],
-            'similarity': [False, self._compute_similarity_order]}
 
     def __str__(self):
         return '%s' % self.matrix
@@ -160,8 +171,7 @@ class Matrix(object):
         # TODO: optimization: we could compute orders for max_depth matrix
         # and reuse them in some way for above matrices
 
-    def sort(self, order):
-        # TODO: allow sorting in reverse order
+    def sort(self, order, reverse=False):
         try:
             self.compute_order(order)
         except KeyError:
@@ -169,9 +179,10 @@ class Matrix(object):
                 order, self.orders.keys()))
             return
 
+        # pylint: disable=line-too-long
         for d in self.dependencies:
-            d['source_index'] = self.modules[d['source_name']]['order'][order]
-            d['target_index'] = self.modules[d['target_name']]['order'][order]
+            d['source_index'] = self.modules[d['source_name']]['order'][order][reverse]  # noqa
+            d['target_index'] = self.modules[d['target_name']]['order'][order][reverse]  # noqa
 
         self._update_matrix()
         # TODO: update keys and groups
@@ -192,8 +203,11 @@ class Matrix(object):
         self.orders[order][1]()
 
     def _write_order(self, order, sorted_keys):
-        for i in range(len(sorted_keys)):
-            self.modules[sorted_keys[i]]['order'][order] = i
+        l = len(sorted_keys)
+        for i in range(l):
+            self.modules[sorted_keys[i]]['order'][order][False] = i
+        for i in range(l):
+            self.modules[sorted_keys[i]]['order'][order][True] = l-1-i
         self.orders[order][0] = True
 
     def _compute_name_order(self):
