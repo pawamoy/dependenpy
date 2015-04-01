@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='dependenpy',
-    version='1.1.0',
+    version='1.1.1',
     packages=['dependenpy'],
     license='MPL 2.0',
 
@@ -19,7 +19,8 @@ setup(
     # download_url = 'https://github.com/Pawamoy/dependenpy/tarball/1.0.4',
 
     keywords="dependency matrix dsm",
-    description="A Python module that builds a Dependency Matrix for your project.",
+    description="A Python module that builds "
+                "a Dependency Matrix for your project.",
     classifiers=[
         # "Development Status :: 5 - Production/Stable",
         'Development Status :: 4 - Beta',
