@@ -175,11 +175,11 @@ class Matrix(object):
 
     def sort(self, order, reverse=False):
         try:
-            self.compute_order(order)
+            sorted_keys = self.compute_order(order)
         except KeyError:
             print('Order %s does not match any of these: %s' % (
                 order, self.orders.keys()))
-            return
+            return False
 
         # pylint: disable=line-too-long
         for d in self.dependencies:
@@ -187,7 +187,11 @@ class Matrix(object):
             d['target_index'] = self.modules[d['target_name']]['order'][order][reverse]  # noqa
 
         self._update_matrix()
-        # TODO: update keys and groups
+
+        self.keys = reversed(sorted_keys) if reverse else sorted_keys
+        self.groups = [self.modules[key]['group']['name'] for key in self.keys]
+
+        return True
 
     def compute_orders(self):
         for order in self.orders.keys():
@@ -201,8 +205,8 @@ class Matrix(object):
         :raise: KeyError when order key is not in self.orders dict
         """
         if self.orders[order][0]:
-            return
-        self.orders[order][1]()
+            return None
+        return self.orders[order][1]()
 
     def _write_order(self, order, sorted_keys):
         l = len(sorted_keys)
@@ -215,18 +219,21 @@ class Matrix(object):
     def _compute_name_order(self):
         sorted_keys = sorted(self.keys)
         self._write_order('name', sorted_keys)
+        return sorted_keys
 
     def _compute_import_order(self):
         sorted_keys = sorted(
             self.modules,
             key=lambda x: self.modules[x]['cardinal']['imports'])
         self._write_order('import', sorted_keys)
+        return sorted_keys
 
     def _compute_export_order(self):
         sorted_keys = sorted(
             self.modules,
             key=lambda x: self.modules[x]['cardinal']['exports'])
         self._write_order('export', sorted_keys)
+        return sorted_keys
 
     def _compute_similarity_order(self):
         # we initialize name-index correspondences
@@ -262,11 +269,12 @@ class Matrix(object):
         order = solve_tsp(matrix)
         sorted_keys = [co[k] for k in order]
         self._write_order('similarity', sorted_keys)
+        return sorted_keys
 
     def _compute_group_order(self):
-        pass
         # TODO: code this method
         # self._write_order('group', sorted_keys)
+        return self.keys
 
     def _update_matrix(self):
         self.matrix = [[0 for x in range(self.size)] for x in range(self.size)]
