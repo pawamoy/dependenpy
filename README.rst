@@ -76,3 +76,9 @@ Copyright (c) 2015 Timothée Mazzucotelli
 This Source Code is subject to the terms of the Mozilla Public
 License, v. 2.0. See the LICENSE.txt file for more details.
 
+Thanks
+------
+
+Thanks to `dmishin`_ for the TSP solver, needed to compute the similarity order.
+
+.. _dmishin: https://github.com/dmishin

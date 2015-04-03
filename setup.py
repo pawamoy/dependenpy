@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='dependenpy',
-    version='1.1.1',
+    version='1.1.2',
     packages=['dependenpy'],
     license='MPL 2.0',
 
