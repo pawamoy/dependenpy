@@ -16,6 +16,12 @@ This module contains:
     a function, resolve_path: transforms a module name into an absolute path.
 
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 
 import os
 import sys
@@ -84,7 +90,7 @@ class Matrix(object):
                 'group': module['group'],
                 'cardinal': {'imports': 0, 'exports': 0},
                 'order': {}}
-            for order in self.orders.keys():
+            for order in list(self.orders.keys()):
                 self.modules[module['name']]['order'][order] = {}
             # we can fill group order at initialization
             self.modules[module['name']]['order']['group'][False] = m_index
@@ -110,7 +116,7 @@ class Matrix(object):
 
         #: dict of list of str: the sorted key for each order
         self._sorted_keys = {}
-        for order in self.orders.keys():
+        for order in list(self.orders.keys()):
             self._sorted_keys[order] = []
 
         #: list of list of int: the concrete matrix with numeric values
@@ -183,7 +189,7 @@ class Matrix(object):
             self.compute_order(order)
         except KeyError:
             print('Order %s does not match any of these: %s' % (
-                order, self.orders.keys()))
+                order, list(self.orders.keys())))
             return False
 
         # pylint: disable=line-too-long
@@ -200,7 +206,7 @@ class Matrix(object):
         return True
 
     def compute_orders(self):
-        for order in self.orders.keys():
+        for order in list(self.orders.keys()):
             self.compute_order(order)
 
     def compute_order(self, order):
@@ -297,7 +303,7 @@ class Matrix(object):
                            'keys': self.keys,
                            'groups': self.groups,
                            'matrix': self.matrix,
-                           'orders': self.orders.keys()})
+                           'orders': list(self.orders.keys())})
 
     def to_csv(self, file_object=None):
         """Return the matrix as a CSV array.
@@ -356,8 +362,8 @@ class MatrixBuilder(object):
             self.groups = ['']
         # TODO: Replace OrderedDict by a list (easier to use)
         elif isinstance(packages, OrderedDict):
-            self.packages = packages.values()
-            self.groups = packages.keys()
+            self.packages = list(packages.values())
+            self.groups = list(packages.keys())
         else:
             raise AttributeError
         #: callable: the method that find the path of a module
@@ -432,7 +438,7 @@ class MatrixBuilder(object):
         source_index = 0
         for module in self.modules:
             imports_dicts = self.parse_imports(module)
-            for key in imports_dicts.keys():
+            for key in list(imports_dicts.keys()):
                 target_index = self.module_index(key)
                 # it happens sometimes (tricky/wrong imports in code)
                 if target_index is not None:

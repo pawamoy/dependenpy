@@ -5,6 +5,8 @@ Finds a suboptimal solution.
 """
 
 from __future__ import print_function, division
+from __future__ import unicode_literals
+from builtins import range
 from itertools import islice
 from array import array as pyarray
 
@@ -26,9 +28,9 @@ def optimize_solution(distances, connections):
 
     d_total = 0.0
     optimizations = 0
-    for a in xrange(n-1):
+    for a in range(n-1):
         b = a + 1
-        for c in xrange(b+2, n-1):
+        for c in range(b+2, n-1):
             d = c + 1
             delta_d = ds(a, b) + ds(c, d) - (ds(a, c) + ds(b, d))
             if delta_d > 0:
@@ -76,8 +78,8 @@ def pairs_by_dist(n, distances):
     # Sort coordinate pairs by distance
     indices = [None] * (n*(n-1)//2)
     idx = 0
-    for i in xrange(n):
-        for j in xrange(i+1, n):
+    for i in range(n):
+        for j in range(i+1, n):
             indices[idx] = (i, j)
             idx += 1
 
@@ -103,11 +105,11 @@ def solve_tsp(distances, optim_steps=3, pairs_by_dist=pairs_by_dist):
     node_valency = pyarray('i', [2]) * n
     
     # for each node, stores 1 or 2 connected nodes
-    connections = [[] for i in xrange(n)]
+    connections = [[] for i in range(n)]
 
     def join_segments(sorted_pairs):
         # segments of nodes. Initially, each segment contains only 1 node
-        segments = [[i] for i in xrange(n)]
+        segments = [[i] for i in range(n)]
   
         def filtered_pairs():
             # Generate sequence of

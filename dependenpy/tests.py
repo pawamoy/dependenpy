@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+from builtins import range
+from builtins import object
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2015 Timothée Mazzucotelli
