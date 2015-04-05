@@ -50,7 +50,6 @@ def resolve_path(module):
             module_path = '%s%s__init__.py' % (module_path, os.sep)
             if os.path.exists(module_path):
                 return module_path
-            return None
         elif os.path.exists(module_path + '.py'):
             return module_path + '.py'
     return None
