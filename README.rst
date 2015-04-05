@@ -17,6 +17,10 @@ dependenpy
     :target: https://pypi.python.org/pypi/dependenpy/
     :alt: Wheel Status
 
+.. image:: https://pypip.in/format/dependenpy/badge.svg
+    :target: https://pypi.python.org/pypi/dependenpy/
+    :alt: Download format
+
 .. image:: https://travis-ci.org/Pawamoy/dependenpy.svg?branch=master
     :target: https://travis-ci.org/Pawamoy/dependenpy
     :alt: Build Status
