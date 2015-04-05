@@ -34,26 +34,14 @@ dependenpy
     :alt: License
 
 This Python module can build the dependency matrices of a project's packages,
-based on `from ... import ...` commands in their modules.
+based on ``from ... import ...`` commands in their modules.
 For now, its purpose is purely informational.
 
 The module is composed of two classes: MatrixBuilder,
-which is initialized with a list of packages foundable is sys.path.
+which is initialized with a list of packages foundable is sys.path, and Matrix,
+which is an autonomous class containing matrix data.
 This list of packages can be a string (one package), a list of string (several)
 or another type of list, used to define groups of packages with a legend.
-
-The "other type" of list looks like this:
-
-.. code:: python
-
-    my_packages = [
-        'Framework', ['django'],
-        'Libraries', ['dependenpy', 'django-archan'],
-        'Core features', ['members', 'surveys', 'news']
-        'Security layer', ['broker']
-    ]
-
-This way you can specify groups of packages.
 
 Usage
 -----
@@ -90,6 +78,20 @@ Usage
 
     # Output matrix of maximum depth in JSON
     dm.get_matrix(0).to_json()
+
+
+The "other type" of list you can give to a MatrixBuilder looks like this:
+
+.. code:: python
+
+    my_packages = [
+        'Framework', ['django'],
+        'Libraries', ['dependenpy', 'django-archan'],
+        'Core features', ['members', 'surveys', 'news']
+        'Security layer', ['broker']
+    ]
+
+This way you can specify groups of packages.
 
 
 Here is an example of colorized CSV output:

@@ -48,7 +48,7 @@ Example
 
 To instantiate, build and use/output your dependency matrix, a few steps:
 
-* import the DependencyMatrix class
+* import the MatrixBuilder class
 * set your list of packages
 * instantiate a matrix with this list
 * run its build methods

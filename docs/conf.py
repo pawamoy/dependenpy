@@ -50,7 +50,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Dependenpy'
-copyright = u"2015, Timothée Mazzucotelli"
+copyright = u'2015, Timothée Mazzucotelli'
+author = u'Timothée Mazzucotelli'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -107,7 +108,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+# html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -221,7 +222,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'Dependenpy.tex', u'Dependenpy Documentation',
+  (master_doc, 'Dependenpy.tex', u'Dependenpy Documentation',
    u"Timothée Mazzucotelli", 'manual'),
 ]
 
@@ -251,8 +252,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'dependenpy', u'Dependenpy Documentation',
-     [u"Timothée Mazzucotelli"], 1)
+    (master_doc, 'dependenpy', u'Dependenpy Documentation',
+     [author], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -265,8 +266,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'dependenpy', u'Dependenpy Documentation',
-   u"Timothée Mazzucotelli", 'Dependenpy', "A Python module that build dependencies in your project's packages.",
+  (master_doc, 'dependenpy', u'Dependenpy Documentation',
+   author, 'Dependenpy', "A Python module that build dependencies in your project's packages.",
    'Miscellaneous'),
 ]
 
@@ -281,5 +282,3 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-
-todo_include_todos = True
