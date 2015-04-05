@@ -351,7 +351,7 @@ class MatrixBuilder(object):
         #: optionally organized by groups
         self.packages = None
         self.groups = None  #: list of str: the names of the groups
-        if isinstance(packages, str):
+        if isinstance(packages, str) or isinstance(packages, unicode):
             self.packages = [[packages]]
             self.groups = ['']
         elif isinstance(packages, list):
