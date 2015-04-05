@@ -47,6 +47,12 @@ Usage
     print dm.max_depth
     print dm.imports
 
+    # Output matrix of depth 1 in CSV
+    dm.get_matrix(1).to_csv()
+
+    # Output matrix of maximum depth in JSON
+    dm.get_matrix(0).to_json()
+
 
 Here is an example of colorized CSV output:
 

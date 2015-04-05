@@ -13,20 +13,18 @@ In your project, you can have different types of packages:
 * ...
 
 It would be great to organize your packages by groups.
-To do so, instead of passing a `list` to the `MatrixBuilder` constructor,
-you can pass an `OrderedDict`, imported from `collections`. Example:
+Well, this is possible by passing a list like this:
 
 .. code:: python
 
-    from collections import OrderedDict
     from dependenpy.utils import MatrixBuilder
 
-    my_packages = OrderedDict()
-
-    my_packages['Framework'] = ['django']
-    my_packages['Libraries'] = ['dependenpy', 'django-dpdpy']
-    my_packages['Core features'] = ['members', 'surveys', 'news']
-    my_packages['Security layer'] = ['broker']
+    my_packages = [
+        'Framework', ['django'],
+        'Libraries', ['dependenpy', 'django-archan'],
+        'Core features', ['members', 'surveys', 'news']
+        'Security layer', ['broker']
+    ]
 
     my_dm = MatrixBuilder(my_packages)
 

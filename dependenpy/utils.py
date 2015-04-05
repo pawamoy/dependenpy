@@ -18,6 +18,9 @@ This module contains:
 """
 from __future__ import print_function
 from __future__ import unicode_literals
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 from future import standard_library
 standard_library.install_aliases()
 from builtins import range
@@ -411,7 +414,7 @@ class MatrixBuilder(object):
             if not isinstance(l[i+1], list):
                 return False, "Item %s is not a list" % str(i+1)
             if not MatrixBuilder._is_list_of_string(l[i+1]):
-                return False, "List %s has non-string items" % str(i/2+1)
+                return False, "List %s has non-string items" % str(old_div(i,2)+1)
         return True, ""
 
     @staticmethod
