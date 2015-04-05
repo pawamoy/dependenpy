@@ -293,10 +293,8 @@ class Matrix(object):
             self.matrix[d['source_index']][d['target_index']] += d['cardinal']
 
     def to_json(self):
-        """Return a matrix from self.matrices as a JSON string.
-
-        :param matrix: int, index/depth of matrix (from 1 to max_depth,
-            0 is equivalent to max_depth)
+        """Return the matrix data as a JSON string.
+u
         :return: str, a JSON dump of the matrix
         """
         return json.dumps({'depth': self.depth,
@@ -414,7 +412,8 @@ class MatrixBuilder(object):
             if not isinstance(l[i+1], list):
                 return False, "Item %s is not a list" % str(i+1)
             if not MatrixBuilder._is_list_of_string(l[i+1]):
-                return False, "List %s has non-string items" % str(old_div(i,2)+1)
+                return False, "List %s has non-string items" % str(
+                    old_div(i, 2) + 1)
         return True, ""
 
     @staticmethod
