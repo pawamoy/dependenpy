@@ -1,5 +1,0 @@
-
-    [sleipnir.plugins]
-      problems.tsp.problem   = tsp.problems:TSP
-      problems.tsp.interface = tsp.interfaces:ITSP
-    

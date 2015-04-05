@@ -1,4 +1,0 @@
-
-    [sleipnir.plugins]
-      tsp.solvers.aco = aco_tsp.solver:Solver
-    
