@@ -6,6 +6,7 @@ install:
 - pip install pyflakes
 - pip install pylint
 - pip install coveralls
+- pip install future
 before_script:
 - ./tests.sh
 script:
