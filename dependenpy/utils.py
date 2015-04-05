@@ -28,6 +28,7 @@ import sys
 import ast
 import json
 import csv
+import six
 from collections import OrderedDict
 from dependenpy.greedy import solve_tsp
 
@@ -351,21 +352,25 @@ class MatrixBuilder(object):
         #: optionally organized by groups
         self.packages = None
         self.groups = None  #: list of str: the names of the groups
-        if isinstance(packages, str) or isinstance(packages, unicode):
+        if MatrixBuilder._is_string(packages):
             self.packages = [[packages]]
             self.groups = ['']
         elif isinstance(packages, list):
-            if all([isinstance(p, list) for p in packages]):
+            if all([MatrixBuilder._is_list_of_string(p) for p in packages]):
                 self.packages = packages
-            else:
+                self.groups = ['']
+            elif MatrixBuilder._is_list_of_string(packages):
                 self.packages = [packages]
-            self.groups = ['']
-        # TODO: Replace OrderedDict by a list (easier to use)
-        elif isinstance(packages, OrderedDict):
-            self.packages = list(packages.values())
-            self.groups = list(packages.keys())
+                self.groups = ['']
+            else:
+                valid, msg = MatrixBuilder._is_valid_list(packages)
+                if not valid:
+                    raise AttributeError(msg)
+                self.packages = [packages[i+1]
+                                 for i in range(0, len(packages), 2)]
+                self.groups = [packages[i] for i in range(0, len(packages), 2)]
         else:
-            raise AttributeError
+            raise AttributeError("Wrong type for given list of packages")
         #: callable: the method that find the path of a module
         self.path_resolver = path_resolver
         #: list of dict: the list of all packages' modules, containing
@@ -396,6 +401,32 @@ class MatrixBuilder(object):
                     self._modules_are_built == other._modules_are_built,
                     self._imports_are_built == other._imports_are_built,
                     self._matrices_are_built == other._matrices_are_built])
+
+    @staticmethod
+    def _is_valid_list(l):
+        if len(l) % 2 != 0:
+            return False, "List length is odd"
+        for i in range(0, len(l), 2):
+            if not MatrixBuilder._is_string(l[i]):
+                return False, "Item %s is not a string" % str(i)
+            if not isinstance(l[i+1], list):
+                return False, "Item %s is not a list" % str(i+1)
+            if not MatrixBuilder._is_list_of_string(l[i+1]):
+                return False, "List %s has non-string items" % str(i/2+1)
+        return True, ""
+
+    @staticmethod
+    def _is_list_of_string(l):
+        if isinstance(l, list):
+            return all([MatrixBuilder._is_string(s) for s in l])
+        else:
+            return False
+
+    @staticmethod
+    def _is_string(s):
+        return (isinstance(s, six.string_types) or
+                isinstance(s, six.text_type) or
+                isinstance(s, bytes))
 
     def build(self):
         """Shortcut for building modules, imports and matrices.

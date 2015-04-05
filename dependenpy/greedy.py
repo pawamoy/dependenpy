@@ -6,6 +6,7 @@ Finds a suboptimal solution.
 
 from __future__ import print_function, division
 from __future__ import unicode_literals
+from future.utils import bytes_to_native_str
 from builtins import range
 from itertools import islice
 from array import array as pyarray
@@ -102,7 +103,7 @@ def solve_tsp(distances, optim_steps=3, pairs_by_dist=pairs_by_dist):
 
     # State of the TSP solver algorithm.
     # Initially, each node has 2 sticky ends
-    node_valency = pyarray('i', [2]) * n
+    node_valency = pyarray(bytes_to_native_str(b'i'), [2]) * n
     
     # for each node, stores 1 or 2 connected nodes
     connections = [[] for i in range(n)]
