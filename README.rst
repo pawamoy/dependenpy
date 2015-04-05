@@ -25,6 +25,10 @@ dependenpy
     :target: https://coveralls.io/r/Pawamoy/dependenpy?branch=master
     :alt: Coverage Status
 
+.. image:: https://landscape.io/github/Pawamoy/dependenpy/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/Pawamoy/dependenpy/master
+   :alt: Code Health
+
 .. image:: https://pypip.in/py_versions/dependenpy/badge.svg
     :target: https://pypi.python.org/pypi/dependenpy/
     :alt: Supported Python versions
