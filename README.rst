@@ -9,14 +9,6 @@ dependenpy
     :target: https://pypi.python.org/pypi/dependenpy/
     :alt: Development Status
 
-.. image:: https://pypip.in/egg/dependenpy/badge.svg
-    :target: https://pypi.python.org/pypi/dependenpy/
-    :alt: Egg Status
-
-.. image:: https://pypip.in/wheel/dependenpy/badge.svg
-    :target: https://pypi.python.org/pypi/dependenpy/
-    :alt: Wheel Status
-
 .. image:: https://pypip.in/format/dependenpy/badge.svg
     :target: https://pypi.python.org/pypi/dependenpy/
     :alt: Download format
