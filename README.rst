@@ -1,6 +1,22 @@
 dependenpy
 ==========
 
+.. image:: https://pypip.in/version/dependenpy/badge.svg
+    :target: https://pypi.python.org/pypi/dependenpy/
+    :alt: Latest Version
+
+.. image:: https://pypip.in/status/dependenpy/badge.svg
+    :target: https://pypi.python.org/pypi/dependenpy/
+    :alt: Development Status
+
+.. image:: https://pypip.in/egg/dependenpy/badge.svg
+    :target: https://pypi.python.org/pypi/dependenpy/
+    :alt: Egg Status
+
+.. image:: https://pypip.in/wheel/dependenpy/badge.svg
+    :target: https://pypi.python.org/pypi/dependenpy/
+    :alt: Wheel Status
+
 .. image:: https://travis-ci.org/Pawamoy/dependenpy.svg?branch=master
     :target: https://travis-ci.org/Pawamoy/dependenpy
     :alt: Build Status
@@ -12,6 +28,14 @@ dependenpy
 .. image:: https://coveralls.io/repos/Pawamoy/dependenpy/badge.svg?branch=master
     :target: https://coveralls.io/r/Pawamoy/dependenpy?branch=master
     :alt: Coverage Status
+
+.. image:: https://pypip.in/py_versions/dependenpy/badge.svg
+    :target: https://pypi.python.org/pypi/dependenpy/
+    :alt: Supported Python versions
+
+.. image:: https://pypip.in/license/dependenpy/badge.svg
+    :target: https://pypi.python.org/pypi/dependenpy/
+    :alt: License
 
 This Python module can build the dependency matrices of a project's packages, based on `from ... import ...` commands in their modules. For now, its purpose is purely informational.
 
