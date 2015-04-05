@@ -41,9 +41,27 @@ dependenpy
     :target: https://pypi.python.org/pypi/dependenpy/
     :alt: License
 
-This Python module can build the dependency matrices of a project's packages, based on `from ... import ...` commands in their modules. For now, its purpose is purely informational.
+This Python module can build the dependency matrices of a project's packages,
+based on `from ... import ...` commands in their modules.
+For now, its purpose is purely informational.
 
-The module is composed of only one class: DependencyMatrix, which is initialized with a list of packages foundable is sys.path. This list of packages can be a string (one package), a list (several) or an ordered dictionary, used to define groups of packages with a legend. We use an ordered dictionary because it is important to keep the same order as the one given by the user. On the other hand it is not always handy to pass an OrderedDict instance, so in the future we could maybe pass a list of dict.
+The module is composed of two classes: MatrixBuilder,
+which is initialized with a list of packages foundable is sys.path.
+This list of packages can be a string (one package), a list of string (several)
+or another type of list, used to define groups of packages with a legend.
+
+The "other type" of list looks like this:
+
+.. code:: python
+
+    my_packages = [
+        'Framework', ['django'],
+        'Libraries', ['dependenpy', 'django-archan'],
+        'Core features', ['members', 'surveys', 'news']
+        'Security layer', ['broker']
+    ]
+
+This way you can specify groups of packages.
 
 Usage
 -----
