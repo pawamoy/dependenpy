@@ -18,6 +18,8 @@ setup(
     url='https://github.com/Pawamoy/dependenpy',
     # download_url = 'https://github.com/Pawamoy/dependenpy/tarball/1.0.4',
 
+    install_requires=['future'],
+
     keywords="dependency matrix dsm",
     description="A Python module that builds "
                 "a Dependency Matrix for your project.",
