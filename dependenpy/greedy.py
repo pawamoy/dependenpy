@@ -65,7 +65,7 @@ def restore_path(connections):
     prev_point = None
     cur_point = start
     while True:
-        next_points = [pnt for pnt in connections[cur_point] 
+        next_points = [pnt for pnt in connections[cur_point]
                        if pnt != prev_point]
         if not next_points:
             break
@@ -90,8 +90,8 @@ def pairs_by_dist(n, distances):
 
 def solve_tsp(distances, optim_steps=3, pairs_by_dist=pairs_by_dist):
     """Given a distance matrix, finds a solution for the TSP problem.
-    Returns list of vertex indices. 
-    Guarantees that the first index is lower than the last"""
+    Returns list of vertex indices.
+    Guarantees that the first index is lower than the last."""
     n = len(distances)
     if n == 0:
         return []
@@ -104,14 +104,14 @@ def solve_tsp(distances, optim_steps=3, pairs_by_dist=pairs_by_dist):
     # State of the TSP solver algorithm.
     # Initially, each node has 2 sticky ends
     node_valency = pyarray(bytes_to_native_str(b'i'), [2]) * n
-    
+
     # for each node, stores 1 or 2 connected nodes
     connections = [[] for i in range(n)]
 
     def join_segments(sorted_pairs):
         # segments of nodes. Initially, each segment contains only 1 node
         segments = [[i] for i in range(n)]
-  
+
         def filtered_pairs():
             # Generate sequence of
             for ij in sorted_pairs:

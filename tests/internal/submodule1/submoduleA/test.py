@@ -11,5 +11,5 @@ from ...test import (
     classE, classF)
 from ...test import classG, \
     classH
-    
+
 # total: 1

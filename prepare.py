@@ -1,8 +1,9 @@
-import os, sys
+import os
+import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('tests'))
-from dependenpy.utils import MatrixBuilder as MB
-dm = MB('internal')
+from dependenpy.utils import MatrixBuilder
+dm = MatrixBuilder('internal')
 dm.build()
 m = dm.get_matrix(2)
 m.compute_order('similarity')
