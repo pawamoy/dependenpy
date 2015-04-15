@@ -8,7 +8,7 @@
 
 from __future__ import unicode_literals
 from builtins import range
-from builtins import object
+# from builtins import object
 
 import sys
 import os
@@ -16,7 +16,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
 import unittest
-import json
+# import json
 from collections import OrderedDict
 from dependenpy.utils import MatrixBuilder
 
@@ -115,7 +115,7 @@ class ModuleTestCase(AbstractTestCase):
               'path': local_path + '/internal/submodule1/__init__.py'},
              {'group': {'index': 0, 'name': group},
               'name': 'internal.submodule1.submoduleA.__init__',
-              'path': local_path + '/internal/submodule1/submoduleA/__init__.py'},
+              'path': local_path + '/internal/submodule1/submoduleA/__init__.py'},  # noqa
              {'group': {'index': 0, 'name': group},
               'name': 'internal.submodule1.submoduleA.test',
               'path': local_path + '/internal/submodule1/submoduleA/test.py'},
@@ -187,7 +187,7 @@ class ImportsTestCase(AbstractTestCase):
                   u'target_name': u'internal.submodule1.submoduleA.__init__'},
                  {u'cardinal': 1,
                   u'imports': [{u'by': u'internal.submodule1.test',
-                                u'from': u'internal.submodule1.submoduleA.test',
+                                u'from': u'internal.submodule1.submoduleA.test',  # noqa
                                 u'import': ['Test1']}],
                   u'source_index': 4,
                   u'source_name': u'internal.submodule1.test',
@@ -832,7 +832,7 @@ class OutputTestCase(AbstractTestCase):
     # self.assertEqual(dm, obj2, 'JSON dump/load/build')
 
     # def test_matrix_to_json(self):
-    #     class Dummy(object):
+    # class Dummy(object):
     #         pass
     #
     #     for dm in [self.str_dm, self.list_dm, self.od_dm]:
@@ -884,12 +884,13 @@ class OutputTestCase(AbstractTestCase):
                 dm.get_matrix(4).to_csv(),
                 u',internal.__init__,internal.submodule1.__init__,'
                 u'internal.submodule1.submoduleA.__init__,'
-                u'internal.submodule1.submoduleA.test,internal.submodule1.test,'
+                u'internal.submodule1.submoduleA.test,'
+                u'internal.submodule1.test,'
                 u'internal.submodule2.__init__,internal.submodule2.test,'
                 u'internal.submodule2.test2,internal.test\r\n'
                 u'internal.__init__,0,0,0,0,0,0,0,0,0\r\n'
                 u'internal.submodule1.__init__,0,0,0,0,0,0,0,0,0\r\n'
-                u'internal.submodule1.submoduleA.__init__,0,0,0,0,0,0,0,0,0\r\n'
+                u'internal.submodule1.submoduleA.__init__,0,0,0,0,0,0,0,0,0\r\n'  # noqa
                 u'internal.submodule1.submoduleA.test,0,0,0,0,0,0,0,0,9\r\n'
                 u'internal.submodule1.test,1,0,2,1,0,0,0,0,0\r\n'
                 u'internal.submodule2.__init__,0,0,0,0,0,0,0,0,0\r\n'
