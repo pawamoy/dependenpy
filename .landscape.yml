@@ -1,6 +1,3 @@
-# This will enable almost every single warning
-allow-shorthand: false
-
 ignore-patterns:
   - (^|/)\..+
 
