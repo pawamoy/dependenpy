@@ -25,7 +25,7 @@ setup(
                 "a Dependency Matrix for your project.",
     classifiers=[
         # "Development Status :: 5 - Production/Stable",
-        'Development Status :: 4 - Beta',
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Topic :: Utilities",
