@@ -1,10 +1,17 @@
 ignore-patterns:
   - (^|/)\..+
 
+strictness: veryhigh
+autodetect: true
+doc-warnings: true
+test-warnings: false
+member-warnings: false
+
 pylint:
   disable:
     - fixme
     - bad-continuation
+    - invalid-name
 
   options:
     max-locals: 15
@@ -23,11 +30,16 @@ mccabe:
     max-complexity: 10
 
 pep8:
+  full: true
+  disable:
+    - E226
+    - E402
   options:
     max-line-length: 79
     single-line-if-stmt: n
 
 pyroma:
+  run: true
   disable:
     - PYR19
     - PYR16
