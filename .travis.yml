@@ -5,7 +5,7 @@ python:
 - '3.4'
 install:
 - pip install coveralls
-- pip install future
+- pip install tox
 script:
 - tox
 - coverage report -m
