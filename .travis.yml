@@ -4,15 +4,10 @@ python:
 - '3.3'
 - '3.4'
 install:
-- pip install pep8
-- pip install pyflakes
-- pip install pylint
 - pip install coveralls
 - pip install future
-before_script:
-- ./tests.sh
 script:
-- coverage run --include='dependenpy*' dependenpy/tests.py
+- tox
 - coverage report -m
 after_success: coveralls
 notifications:
