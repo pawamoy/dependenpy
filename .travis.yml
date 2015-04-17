@@ -11,5 +11,6 @@ script:
 - coverage report -m
 after_success: coveralls
 notifications:
+  email: false
   slack:
     secure: hD2sRUSn91cA4qIL1gKQHHCr3wTdzEr4TcFbgQOaIuuEwvwwT0N34gSfntKyQ98D9OKLxFi4sH3ANSM/eH2xka+c5cMb6isdwDborf1s3AB+nI4+zBh1QAjlAOd2qg8YfXbRgRrF6oYN5N3rXFjtHBUQAwf+i/0a6jeLaLAiMaI=
