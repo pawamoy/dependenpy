@@ -16,6 +16,7 @@ This module contains:
     a function, resolve_path: transforms a module name into an absolute path.
 
 """
+
 from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
@@ -47,6 +48,7 @@ def resolve_path(module):
     :param module: str, the name of the module
     :return: str, absolute path to this module, None if not found
     """
+
     for path in sys.path:
         module_path = os.path.join(path, module.replace('.', os.sep))
         if os.path.isdir(module_path):
