@@ -296,7 +296,7 @@ class Matrix(object):
 
     def to_json(self):
         """Return the matrix data as a JSON string.
-u
+
         :return: str, a JSON dump of the matrix
         """
         return json.dumps({'depth': self.depth,
