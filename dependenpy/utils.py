@@ -79,8 +79,8 @@ class Matrix(object):
             'group': [True, self._compute_group_order],
             'import': [False, self._compute_import_order],
             'export': [False, self._compute_export_order],
+            'import+export': [False, self._compute_import_export_order],
             'similarity': [False, self._compute_similarity_order]}
-        # TODO: add import+export order
 
         #: dict of dict: for each module identified by a key (currently
         #: its name), stores the value of its name, group, imports cardinal,
@@ -99,8 +99,7 @@ class Matrix(object):
                 self.modules[module['name']]['order'][order] = {}
             # we can fill group order at initialization
             self.modules[module['name']]['order']['group'][False] = m_index
-            # FIXME: temporary until group order computing method is coded
-            self.modules[module['name']]['order']['group'][True] = m_index
+            self._compute_reverse_group_order()
             m_index += 1
 
         for i in imports:
@@ -239,15 +238,22 @@ class Matrix(object):
 
     def _compute_import_order(self):
         sorted_keys = sorted(
-            self.modules,
+            self.keys,
             key=lambda x: self.modules[x]['cardinal']['imports'])
         self._write_order('import', sorted_keys)
 
     def _compute_export_order(self):
         sorted_keys = sorted(
-            self.modules,
+            self.keys,
             key=lambda x: self.modules[x]['cardinal']['exports'])
         self._write_order('export', sorted_keys)
+
+    def _compute_import_export_order(self):
+        sorted_keys = sorted(
+            self.keys,
+            key=lambda x: self.modules[x]['cardinal']['exports'] +
+                          self.modules[x]['cardinal']['imports'])  # noqa
+        self._write_order('import+export', sorted_keys)
 
     def _compute_similarity_order(self):
         # we initialize name-index correspondences
@@ -285,9 +291,25 @@ class Matrix(object):
         self._write_order('similarity', sorted_keys)
 
     def _compute_group_order(self):
-        # TODO: code this method
-        # self._write_order('group', sorted_keys)
+        # just here for consistency
         pass
+
+    def _compute_reverse_group_order(self):
+        # immediately called in initialization
+        grouped = OrderedDict()
+        for module in self.modules:
+            if grouped.get(module['group']):
+                grouped[module['group']].append(module['name'])
+            else:
+                grouped[module['group']] = []
+
+        reversed_grouped = []
+        for group in reversed(grouped):
+            for key in group:
+                reversed_grouped.append(key)
+
+        for module in self.modules.keys():
+            self.modules[module]['order']['group'][True] = reversed_grouped.index(module)  # noqa
 
     def _update_matrix(self):
         self.matrix = [[0 for x in range(self.size)] for x in range(self.size)]
@@ -338,7 +360,6 @@ class Matrix(object):
             return file_object
 
 
-# TODO: Add exclude option
 class MatrixBuilder(object):
     """Dependency matrix data builder.
     """
@@ -516,10 +537,6 @@ class MatrixBuilder(object):
         # We don't need to store results, since we have unique keys
         # See parse_imports -> sum_from
 
-        # FIXME: what is the most efficient? 3 loops with 1 comparison
-        # or 1 loop with 3 comparisons? In the second case: are we sure
-        # we get an EXACT result (order of comparisons)?
-
         # Case 1: module is already a target
         idx = 0
         for m in self.modules:
@@ -578,8 +595,10 @@ class MatrixBuilder(object):
                 if not mod and level < 2:
                     continue
                 # We rebuild the module name if it is a relative import
-                # FIXME: what if it goes up higher than len(module.split('.'))?
-                if level > 0:
+                if level > len(module.split('.')):
+                    # Level is too high for our module path
+                    pass
+                elif level > 0:
                     mod = os.path.splitext(module['name'])[0]
                     level -= 1
                     while level != 0:
