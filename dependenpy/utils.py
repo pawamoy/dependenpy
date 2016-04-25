@@ -393,7 +393,7 @@ class MatrixBuilder(object):
                                  for i in range(0, len(packages), 2)]
                 self.groups = [packages[i] for i in range(0, len(packages), 2)]
         else:
-            raise AttributeError("Wrong type for given list of packages")
+            raise AttributeError('Wrong type for given list of packages')
         #: callable: the method that find the path of a module
         self.path_resolver = path_resolver
         #: list of dict: the list of all packages' modules, containing
