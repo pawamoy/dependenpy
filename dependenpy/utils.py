@@ -99,8 +99,9 @@ class Matrix(object):
                 self.modules[module['name']]['order'][order] = {}
             # we can fill group order at initialization
             self.modules[module['name']]['order']['group'][False] = m_index
-            self._compute_reverse_group_order()
             m_index += 1
+
+        self._compute_reverse_group_order()
 
         for i in imports:
             cardinal = i['cardinal']
@@ -297,14 +298,13 @@ class Matrix(object):
     def _compute_reverse_group_order(self):
         # immediately called in initialization
         grouped = OrderedDict()
-        for module in self.modules:
-            if grouped.get(module['group']):
-                grouped[module['group']].append(module['name'])
-            else:
-                grouped[module['group']] = []
+        for module in self.modules.values():
+            if grouped.get(module['group']['name'], None) is None:
+                grouped[module['group']['name']] = []
+            grouped[module['group']['name']].append(module['name'])
 
         reversed_grouped = []
-        for group in reversed(grouped):
+        for k, group in reversed(grouped.items()):
             for key in group:
                 reversed_grouped.append(key)
 
@@ -595,7 +595,7 @@ class MatrixBuilder(object):
                 if not mod and level < 2:
                     continue
                 # We rebuild the module name if it is a relative import
-                if level > len(module.split('.')):
+                if level > len(module['name'].split('.')):
                     # Level is too high for our module path
                     pass
                 elif level > 0:
