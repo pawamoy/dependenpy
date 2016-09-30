@@ -29,9 +29,9 @@ def optimize_solution(distances, connections):
 
     d_total = 0.0
     optimizations = 0
-    for a in range(n-1):
+    for a in range(n - 1):
         b = a + 1
-        for c in range(b+2, n-1):
+        for c in range(b + 2, n - 1):
             d = c + 1
             delta_d = ds(a, b) + ds(c, d) - (ds(a, c) + ds(b, d))
             if delta_d > 0:
@@ -77,10 +77,10 @@ def restore_path(connections):
 
 def pairs_by_dist(n, distances):
     # Sort coordinate pairs by distance
-    indices = [None] * (n*(n-1)//2)
+    indices = [None] * (n * (n - 1) // 2)
     idx = 0
     for i in range(n):
-        for j in range(i+1, n):
+        for j in range(i + 1, n):
             indices[idx] = (i, j)
             idx += 1
 
@@ -88,7 +88,7 @@ def pairs_by_dist(n, distances):
     return indices
 
 
-def solve_tsp(distances, optim_steps=3, pairs_by_dist=pairs_by_dist):
+def solve_tsp(distances, optim_steps=3, pairs=pairs_by_dist):
     """Given a distance matrix, finds a solution for the TSP problem.
     Returns list of vertex indices.
     Guarantees that the first index is lower than the last."""
@@ -122,7 +122,7 @@ def solve_tsp(distances, optim_steps=3, pairs_by_dist=pairs_by_dist):
                     continue
                 yield ij
 
-        for i, j in islice(filtered_pairs(), n-1):
+        for i, j in islice(filtered_pairs(), n - 1):
             node_valency[i] -= 1
             node_valency[j] -= 1
             connections[i].append(j)
@@ -137,7 +137,7 @@ def solve_tsp(distances, optim_steps=3, pairs_by_dist=pairs_by_dist):
                 segments[node_idx] = seg_i
             seg_i.extend(seg_j)
 
-    join_segments(pairs_by_dist(n, distances))
+    join_segments(pairs(n, distances))
 
     for passn in range(optim_steps):
         nopt, dtotal = optimize_solution(distances, connections)

@@ -20,12 +20,6 @@ This module contains:
 from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
-from builtins import str
-from past.utils import old_div
-from future import standard_library
-standard_library.install_aliases()
-from builtins import range
-from builtins import object
 
 import os
 import sys
@@ -33,13 +27,16 @@ import ast
 import json
 import csv
 import six
+
 from collections import OrderedDict
-from dependenpy.greedy import solve_tsp
+from past.utils import old_div
 
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
+
+from dependenpy.greedy import solve_tsp
 
 
 def resolve_path(module):
@@ -153,7 +150,7 @@ class Matrix(object):
         modules_indexes = {}
         index_old, index_new = 0, -1
         for k in self.keys:
-            up_module = '.'.join(k.split('.')[:self.depth-1])
+            up_module = '.'.join(k.split('.')[:self.depth - 1])
             if seen_module.get(up_module, None) is None:
                 seen_module[up_module] = {'name': up_module,
                                           'group': self.modules[k]['group']}
@@ -185,7 +182,7 @@ class Matrix(object):
                 up_dependencies.append(seen_import[seen_id])
 
         # We return the new Matrix
-        return Matrix(self.depth-1, up_modules, up_dependencies)
+        return Matrix(self.depth - 1, up_modules, up_dependencies)
         # TODO: optimization: we could compute orders for max_depth matrix
         # and reuse them in some way for above matrices
 
@@ -229,7 +226,7 @@ class Matrix(object):
         for i in range(l):
             self.modules[sorted_keys[i]]['order'][order][False] = i
         for i in range(l):
-            self.modules[sorted_keys[i]]['order'][order][True] = l-1-i
+            self.modules[sorted_keys[i]]['order'][order][True] = l - 1 - i
         self._sorted_keys[order] = sorted_keys
         self.orders[order][0] = True
 
@@ -268,8 +265,8 @@ class Matrix(object):
 
         # we compute the similarities and fill the matrix
         l = len(self.dependencies)
-        for id1 in range(l-1):
-            for id2 in range(id1+1, l):
+        for id1 in range(l - 1):
+            for id2 in range(id1 + 1, l):
                 d1 = self.dependencies[id1]
                 d2 = self.dependencies[id2]
                 sn1, sn2 = d1['source_name'], d2['source_name']
@@ -389,7 +386,7 @@ class MatrixBuilder(object):
                 valid, msg = MatrixBuilder._is_valid_list(packages)
                 if not valid:
                     raise AttributeError(msg)
-                self.packages = [packages[i+1]
+                self.packages = [packages[i + 1]
                                  for i in range(0, len(packages), 2)]
                 self.groups = [packages[i] for i in range(0, len(packages), 2)]
         else:
@@ -432,9 +429,9 @@ class MatrixBuilder(object):
         for i in range(0, len(l), 2):
             if not MatrixBuilder._is_string(l[i]):
                 return False, "Item %s is not a string" % str(i)
-            if not isinstance(l[i+1], list):
-                return False, "Item %s is not a list" % str(i+1)
-            if not MatrixBuilder._is_list_of_string(l[i+1]):
+            if not isinstance(l[i + 1], list):
+                return False, "Item %s is not a list" % str(i + 1)
+            if not MatrixBuilder._is_list_of_string(l[i + 1]):
                 return False, "List %s has non-string items" % str(
                     old_div(i, 2) + 1)
         return True, ""
@@ -520,10 +517,10 @@ class MatrixBuilder(object):
             return self
         md = self.max_depth
         self.matrices = [None for x in range(0, md)]
-        self.matrices[md-1] = Matrix(md, self.modules, self.imports)
+        self.matrices[md - 1] = Matrix(md, self.modules, self.imports)
         md -= 1
         while md > 0:
-            self.matrices[md-1] = self.matrices[md].build_up_matrix()
+            self.matrices[md - 1] = self.matrices[md].build_up_matrix()
             md -= 1
         self._matrices_are_built = True
         return self

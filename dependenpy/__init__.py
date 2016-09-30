@@ -11,4 +11,3 @@ from __future__ import unicode_literals
 __author__ = 'Timothée Mazzucotelli <timothee.mazzucotelli@gmail.com>'
 __version__ = '2.0.1'
 __all__ = ()
-
