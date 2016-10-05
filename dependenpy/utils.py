@@ -306,7 +306,7 @@ class Matrix(object):
             grouped[module['group']['name']].append(module['name'])
 
         reversed_grouped = []
-        for k, group in reversed(grouped.items()):
+        for k, group in reversed(list(grouped.items())):
             for key in group:
                 reversed_grouped.append(key)
 
