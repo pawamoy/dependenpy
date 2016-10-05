@@ -30,6 +30,8 @@ import six
 
 from collections import OrderedDict
 from past.utils import old_div
+from future import standard_library
+from builtins import object, range, str
 
 try:
     from StringIO import StringIO
@@ -37,6 +39,9 @@ except ImportError:
     from io import StringIO
 
 from dependenpy.greedy import solve_tsp
+
+
+standard_library.install_aliases()
 
 
 def resolve_path(module):
