@@ -20,7 +20,7 @@ def read(*names, **kwargs):
 
 setup(
     name='dependenpy',
-    version='2.0.1',
+    version='2.0.2',
     license='MPL 2.0',
     description='A Python module that build dependency matrices between other modules.',
     long_description='%s\n%s' % (
