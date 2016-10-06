@@ -11,14 +11,13 @@ from __future__ import unicode_literals
 import os
 import sys
 import unittest
-from builtins import range
 from collections import OrderedDict
 
 from dependenpy.utils import MatrixBuilder
 
-# sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
-# sys.path.insert(0, os.path.abspath(os.path.join(
-#     os.path.dirname(os.path.dirname(__file__)), 'tests')))
+sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+sys.path.insert(0, os.path.abspath(os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), 'tests')))
 
 
 class AbstractTestCase(unittest.TestCase):

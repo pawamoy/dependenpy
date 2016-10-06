@@ -7,7 +7,6 @@ Finds a suboptimal solution.
 from __future__ import division, print_function, unicode_literals
 
 from array import array as pyarray
-from builtins import range
 from itertools import islice
 
 from future.utils import bytes_to_native_str
