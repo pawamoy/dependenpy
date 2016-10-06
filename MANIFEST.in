@@ -1,11 +1,22 @@
+graft examples
+graft src
+graft ci
+graft tests
+
+include .bumpversion.cfg
+include .coveragerc
+include .cookiecutterrc
+include .editorconfig
+include .isort.cfg
+
 include AUTHORS.rst
+include CHANGELOG.rst
 include CONTRIBUTING.rst
-include HISTORY.rst
 include LICENSE
 include README.rst
 
-recursive-include tests *
-recursive-exclude * __pycache__
-recursive-exclude * *.py[cod]
+include tox.ini .travis.yml appveyor.yml
 
-recursive-include docs *.rst conf.py Makefile make.bat
+include release.sh
+
+global-exclude *.py[cod] __pycache__ *.so *.dylib release.sh

@@ -1,45 +1,44 @@
-dependenpy
+==========
+Dependenpy
 ==========
 
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/Pawamoy/dependenpy
-   :target: https://gitter.im/Pawamoy/dependenpy?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+.. start-badges
 
-.. image:: https://pypip.in/version/dependenpy/badge.svg
-    :target: https://pypi.python.org/pypi/dependenpy/
-    :alt: Latest Version
+|travis|
+|codecov|
+|landscape|
+|version|
+|wheel|
+|gitter|
 
-.. image:: https://pypip.in/status/dependenpy/badge.svg
-    :target: https://pypi.python.org/pypi/dependenpy/
-    :alt: Development Status
+.. |travis| image:: https://travis-ci.org/Pawamoy/dependenpy.svg?branch=master
+    :alt: Travis-CI Build Status
+    :target: https://travis-ci.org/Pawamoy/dependenpy/
 
-.. image:: https://pypip.in/format/dependenpy/badge.svg
-    :target: https://pypi.python.org/pypi/dependenpy/
-    :alt: Download format
-
-.. image:: https://travis-ci.org/Pawamoy/dependenpy.svg?branch=master
-    :target: https://travis-ci.org/Pawamoy/dependenpy
-    :alt: Build Status
-
-.. image:: https://readthedocs.org/projects/dependenpy/badge/?version=latest
-    :target: https://readthedocs.org/projects/dependenpy/?badge=latest
-    :alt: Documentation Status
-
-.. image:: https://coveralls.io/repos/Pawamoy/dependenpy/badge.svg?branch=master
-    :target: https://coveralls.io/r/Pawamoy/dependenpy?branch=master
+.. |codecov| image:: https://codecov.io/github/Pawamoy/dependenpy/coverage.svg?branch=master
     :alt: Coverage Status
+    :target: https://codecov.io/github/Pawamoy/dependenpy/
 
-.. image:: https://landscape.io/github/Pawamoy/dependenpy/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/Pawamoy/dependenpy/master
-   :alt: Code Health
+.. |landscape| image:: https://landscape.io/github/Pawamoy/dependenpy/master/landscape.svg?style=flat
+    :target: https://landscape.io/github/Pawamoy/dependenpy/
+    :alt: Code Quality Status
 
-.. image:: https://pypip.in/py_versions/dependenpy/badge.svg
+.. |version| image:: https://img.shields.io/pypi/v/dependenpy.svg?style=flat
+    :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/dependenpy/
-    :alt: Supported Python versions
 
-.. image:: https://pypip.in/license/dependenpy/badge.svg
+.. |wheel| image:: https://img.shields.io/pypi/wheel/dependenpy.svg?style=flat
+    :alt: PyPI Wheel
     :target: https://pypi.python.org/pypi/dependenpy/
-    :alt: License
+
+.. |gitter| image:: https://badges.gitter.im/Pawamoy/dependenpy.svg
+    :alt: Join the chat at https://gitter.im/Pawamoy/dependenpy
+    :target: https://gitter.im/Pawamoy/dependenpy?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+
+.. end-badges
+
+A Python module that build dependency matrices between other modules.
 
 This Python module can build the dependency matrices of a project's packages,
 based on ``from ... import ...`` commands in their modules.
@@ -51,8 +50,24 @@ which is an autonomous class containing matrix data.
 This list of packages can be a string (one package), a list of string (several)
 or another type of list, used to define groups of packages with a legend.
 
+License
+=======
+
+Software licensed under `MPL 2.0`_ license.
+
+.. _BSD-2 : https://opensource.org/licenses/BSD-2-Clause
+.. _MPL 2.0 : https://www.mozilla.org/en-US/MPL/2.0/
+
+Installation
+============
+
+::
+
+    pip install dependenpy
+
+
 Usage
------
+=====
 
 .. code:: python
 
@@ -110,28 +125,23 @@ Here is an example of colorized CSV output:
 
 
 This module was originally design to work in a Django project.
-The Django package `django-archan`_ has been built on it to display the matrices with D3JS.
+The Django package `django-meerkat`_ uses it to display the matrices with Highcharts.
 
-.. _django-archan: https://github.com/Pawamoy/archan
+.. _django-meerkat: https://github.com/Pawamoy/django-meerkat
+
 
 Documentation
--------------
+=============
 
-On `ReadTheDocs`_
+https://github.com/Pawamoy/dependenpy.wiki
 
-.. _ReadTheDocs: http://dependenpy.readthedocs.org/en/latest/
+Development
+===========
 
-
-License
--------
-
-Copyright (c) 2015 Timothée Mazzucotelli
-
-This Source Code is subject to the terms of the Mozilla Public
-License, v. 2.0. See the LICENSE file for more details.
+To run all the tests: ``tox``
 
 Thanks
-------
+======
 
 Thanks to `dmishin`_ for the TSP solver, needed to compute the similarity order.
 
