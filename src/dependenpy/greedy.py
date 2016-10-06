@@ -4,12 +4,13 @@
 Finds a suboptimal solution.
 """
 
-from __future__ import print_function, division
-from __future__ import unicode_literals
-from future.utils import bytes_to_native_str
+from __future__ import division, print_function, unicode_literals
+
+from array import array as pyarray
 from builtins import range
 from itertools import islice
-from array import array as pyarray
+
+from future.utils import bytes_to_native_str
 
 if "xrange" not in globals():
     # py3

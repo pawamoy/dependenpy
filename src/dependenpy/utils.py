@@ -17,29 +17,28 @@ This module contains:
 
 """
 
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
+from __future__ import division, print_function, unicode_literals
 
+import ast
+import csv
+import json
 import os
 import sys
-import ast
-import json
-import csv
+
+from builtins import object, range, str
+from collections import OrderedDict
+
 import six
 
-from collections import OrderedDict
-from past.utils import old_div
 from future import standard_library
-from builtins import object, range, str
+from past.utils import old_div
+
+from dependenpy.greedy import solve_tsp
 
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-
-from dependenpy.greedy import solve_tsp
-
 
 standard_library.install_aliases()
 

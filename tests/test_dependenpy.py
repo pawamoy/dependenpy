@@ -7,19 +7,18 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from __future__ import unicode_literals
-from builtins import range
-# from builtins import object
 
-import sys
 import os
-
-sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
-sys.path.insert(0, os.path.abspath(os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), 'tests')))
-
+import sys
 import unittest
+from builtins import range
 from collections import OrderedDict
+
 from dependenpy.utils import MatrixBuilder
+
+# sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+# sys.path.insert(0, os.path.abspath(os.path.join(
+#     os.path.dirname(os.path.dirname(__file__)), 'tests')))
 
 
 class AbstractTestCase(unittest.TestCase):
