@@ -587,7 +587,12 @@ class MatrixBuilder(object):
         """
         sum_from = OrderedDict()
         code = open(module['path']).read()
-        for node in ast.parse(code).body:
+        try:
+            body = ast.parse(code).body
+        except SyntaxError:
+            code = open(module['path']).read().encode('utf-8')
+            body = ast.parse(code).body
+        for node in body:
             if isinstance(node, ast.ImportFrom):
                 mod = node.module
                 level = node.level
