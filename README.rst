@@ -133,7 +133,7 @@ The Django package `django-meerkat`_ uses it to display the matrices with Highch
 Documentation
 =============
 
-https://github.com/Pawamoy/dependenpy.wiki
+https://github.com/Pawamoy/dependenpy/wiki
 
 Development
 ===========
