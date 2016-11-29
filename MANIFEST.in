@@ -15,8 +15,11 @@ include CONTRIBUTING.rst
 include LICENSE
 include README.rst
 
-include tox.ini .travis.yml .landscape.yml
+include tox.ini
+include .style.yapf
 
-include release.sh
+include *.yml
 
-global-exclude *.py[cod] __pycache__ *.so *.dylib release.sh
+recursive-include requirements *.txt
+
+global-exclude *.py[cod] __pycache__ *.so *.dylib release.sh update.sh

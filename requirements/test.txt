@@ -1,0 +1,6 @@
+# pyup: ignore file
+pytest
+pytest-travis-fold
+pytest-cov
+future
+six
