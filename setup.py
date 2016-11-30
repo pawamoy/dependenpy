@@ -21,8 +21,7 @@ setup(
     name='dependenpy',
     version='0.1.0',
     license='MPL 2.0',
-    description='A Python module that build dependency matrices '
-                'between other modules.',
+    description='A Python module that build dependency matrices between other modules.',
     long_description='%s\n%s' % (
         re.compile('^.. start-badges.*^.. end-badges', re.M | re.S)
             .sub('', read('README.rst')),
@@ -44,7 +43,6 @@ setup(
         'Operating System :: Unix',
         'Operating System :: POSIX',
         'Operating System :: Microsoft :: Windows',
-        'Framework :: Django',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
