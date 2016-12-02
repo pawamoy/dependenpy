@@ -36,7 +36,7 @@ default_context:
     project_name:                    'Dependenpy'
     project_short_description:       'A Python module that build dependency matrices between other modules.'
     pyup:                            'yes'
-    release_date:                    'today'
+    release_date:                    '2016-10-06'
     repo_name:                       'dependenpy'
     requiresio:                      'no'
     scrutinizer:                     'no'
@@ -45,4 +45,3 @@ default_context:
     travis:                          'yes'
     version:                         '0.1.0'
     website:                         'http://pawamoy.github.io/'
-    year:                            'now'
