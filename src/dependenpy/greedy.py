@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""A simple algorithm for solving the Travelling Salesman Problem.
+"""
+A simple algorithm for solving the Travelling Salesman Problem.
+
 Finds a suboptimal solution.
 """
 
@@ -20,7 +22,7 @@ else:
 
 
 def optimize_solution(distances, connections):
-    """Tries to optimize solution, found by the greedy algorithm"""
+    """Try to optimize solution, found by the greedy algorithm."""
     n = len(connections)
     path = restore_path(connections)
 
@@ -52,12 +54,13 @@ def optimize_solution(distances, connections):
 
 
 def restore_path(connections):
-    """Takes array of connections and returns a path.
+    """
+    Take array of connections and returns a path.
+
     Connections is array of lists with 1 or 2 elements.
     These elements are indices of teh vertices, connected to this vertex
-    Guarantees that first index < last index
+    Guarantees that first index < last index.
     """
-
     # there are 2 nodes with valency 1 - start and end. Get them.
     start, end = [idx for idx, conn in enumerate(connections)
                   if len(conn) == 1]
@@ -76,6 +79,16 @@ def restore_path(connections):
 
 
 def pairs_by_dist(n, distances):
+    """
+    Sort coordinate pairs by distance.
+
+    Args:
+        n (int):
+        distances (list of pairs): the coordinate pairs.
+
+    Returns:
+        list: the sorted coordinate pairs.
+    """
     # Sort coordinate pairs by distance
     indices = [None] * (n * (n - 1) // 2)
     idx = 0
@@ -89,9 +102,12 @@ def pairs_by_dist(n, distances):
 
 
 def solve_tsp(distances, optim_steps=3, pairs=pairs_by_dist):
-    """Given a distance matrix, finds a solution for the TSP problem.
-    Returns list of vertex indices.
-    Guarantees that the first index is lower than the last."""
+    """
+    Given a distance matrix, finds a solution for the TSP problem.
+
+    Return list of vertex indices.
+    Guarantee that the first index is lower than the last.
+    """
     n = len(distances)
     if n == 0:
         return []

@@ -1,6 +1,8 @@
 ignore-patterns:
   - (^|/)\..+
   - build/
+  - tests/internal
+  - tests/external
 
 strictness: veryhigh
 autodetect: true
@@ -8,34 +10,8 @@ doc-warnings: true
 test-warnings: true
 member-warnings: false
 
-pylint:
-  disable:
-    - fixme
-    - bad-continuation
-    - invalid-name
-
-  options:
-    max-locals: 15
-    max-returns: 6
-    max-branches: 12
-    max-statements: 50
-    max-parents: 7
-    max-attributes: 7
-    min-public-methods: 2
-    max-public-methods: 20
-    max-module-lines: 1000
-    max-line-length: 79
-
-mccabe:
-  options:
-    max-complexity: 10
-
 pep8:
   full: true
-  disable:
-    - E226
-    - E402
-
   options:
     max-line-length: 79
     single-line-if-stmt: n
@@ -43,10 +19,9 @@ pep8:
 pyroma:
   run: true
   disable:
-    - PYR19
-    - PYR16
+    - PYR15
 
 pep257:
   disable:
-    - D000
+    - D105
     - D203

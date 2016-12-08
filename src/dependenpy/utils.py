@@ -6,14 +6,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-"""dependenpy utils module.
+"""
+dependenpy utils module.
 
 This is the main and only module of dependenpy package.
 This module contains:
 
-    a class, MatrixBuilder: the class building your dependency matrix data.
-    a class, Matrix: the class containing the 2-dimensions array of integers
-    a function, resolve_path: transforms a module name into an absolute path.
+- a class, MatrixBuilder: the class building your dependency matrix data.
+- a class, Matrix: the class containing the 2-dimensions array of integers
+- a function, resolve_path: transforms a module name into an absolute path.
 
 """
 
@@ -44,12 +45,15 @@ standard_library.install_aliases()
 
 
 def resolve_path(module):
-    """Built-in method for getting a module's path within Python path.
-
-    :param module: str, the name of the module
-    :return: str, absolute path to this module, None if not found
     """
+    Built-in method for getting a module's path within Python path.
 
+    Args:
+        module (str): the name of the module.
+
+    Returns:
+        str: absolute path to this module, None if not found.
+    """
     for path in sys.path:
         module_path = os.path.join(path, module.replace('.', os.sep))
         if os.path.isdir(module_path):
@@ -62,10 +66,17 @@ def resolve_path(module):
 
 
 class Matrix(object):
-    """Matrix class.
-    """
+    """Matrix class."""
 
     def __init__(self, depth, modules, imports):
+        """
+        Init method.
+
+        Args:
+            depth (int): depth of the generated matrix.
+            modules (list): the list of modules.
+            imports (list): the imports data.
+        """
         #: int: the current depth of this matrix
         self.depth = depth
         #: int: the size of this square matrix (nb rows/columns)
@@ -144,9 +155,11 @@ class Matrix(object):
         ])
 
     def build_up_matrix(self):
-        """Build matrix data based on the matrix below it (with depth+1).
+        """
+        Build matrix data based on the matrix below it (with depth+1).
 
-        :return: :class:`Matrix` instance
+        Returns:
+            :class:`Matrix`: instance of Matrix
         """
         # First we build the new module list
         up_modules, up_dependencies = [], []
@@ -191,6 +204,16 @@ class Matrix(object):
         # and reuse them in some way for above matrices
 
     def sort(self, order, reverse=False):
+        """
+        Sort the matrix with the given order.
+
+        Args:
+            order (str): an order available as method in Matrix class.
+            reverse (bool): reverse or not.
+
+        Returns:
+            bool: True unless order is not available.
+        """
         try:
             self.compute_order(order)
         except KeyError:
@@ -212,25 +235,31 @@ class Matrix(object):
         return True
 
     def compute_orders(self):
+        """Compute all available orders."""
         for order in list(self.orders.keys()):
             self.compute_order(order)
 
     def compute_order(self, order):
-        """Compute the index order according to a criteria.
+        """
+        Compute the index order according to a criteria.
+
         The available criteria are listed in self.orders keys.
 
-        :param order: str, order criteria to use
-        :raise: KeyError when order key is not in self.orders dict
+        Args:
+            order (str): the order criteria to use.
+
+        Raises:
+            KeyError: when order key is not in self.orders dict
         """
         if not self.orders[order][0]:
             self.orders[order][1]()
 
     def _write_order(self, order, sorted_keys):
-        l = len(sorted_keys)
-        for i in range(l):
+        length = len(sorted_keys)
+        for i in range(length):
             self.modules[sorted_keys[i]]['order'][order][False] = i
-        for i in range(l):
-            self.modules[sorted_keys[i]]['order'][order][True] = l - 1 - i
+        for i in range(length):
+            self.modules[sorted_keys[i]]['order'][order][True] = length - 1 - i
         self._sorted_keys[order] = sorted_keys
         self.orders[order][0] = True
 
@@ -268,9 +297,9 @@ class Matrix(object):
         matrix = [[0 for x in range(self.size)] for x in range(self.size)]
 
         # we compute the similarities and fill the matrix
-        l = len(self.dependencies)
-        for id1 in range(l - 1):
-            for id2 in range(id1 + 1, l):
+        length = len(self.dependencies)
+        for id1 in range(length - 1):
+            for id2 in range(id1 + 1, length):
                 d1 = self.dependencies[id1]
                 d2 = self.dependencies[id2]
                 sn1, sn2 = d1['source_name'], d2['source_name']
@@ -318,9 +347,11 @@ class Matrix(object):
             self.matrix[d['source_index']][d['target_index']] += d['cardinal']
 
     def to_json(self):
-        """Return the matrix data as a JSON string.
+        """
+        Return the matrix data as a JSON string.
 
-        :return: str, a JSON dump of the matrix
+        Returns:
+            str: a JSON dump of the matrix.
         """
         return json.dumps({'depth': self.depth,
                            'size': self.size,
@@ -332,12 +363,17 @@ class Matrix(object):
                            'orders': list(self.orders.keys())})
 
     def to_csv(self, file_object=None):
-        """Return the matrix as a CSV array.
+        """
+        Return the matrix as a CSV array.
 
-        :param file_object: File, if given, csv will write in this file object
-            and return it modified instead of writing in a string buffer and
-            return the text.
-        :return: File, if file_object is given, else str
+        Args:
+            file_object (File): if given, csv will write in this file object
+                and return it modified instead of writing in a string buffer
+                and return the text.
+
+        Returns:
+            File: if file_object is given
+            str: string otherwise
         """
         # where to write csv
         if file_object:
@@ -362,15 +398,18 @@ class Matrix(object):
 
 
 class MatrixBuilder(object):
-    """Dependency matrix data builder.
-    """
+    """Dependency matrix data builder."""
 
     def __init__(self, packages, path_resolver=resolve_path):
-        """Instantiate a MatrixBuilder object.
+        """
+        Init method.
 
-        :param packages: str/list/OrderedDict: packages to scan
-        :param path_resolver: callable, finds the absolute path of a module
-        :raise AttributeError: when `packages` has wrong type
+        Args:
+            packages (str/list/OrderedDict): packages to scan.
+            path_resolver (callable): finds the absolute path of a module.
+
+        Raises:
+            AttributeError: when `packages` has wrong type.
         """
         #: list of list of str: the packages used to build the data,
         #: optionally organized by groups
@@ -454,17 +493,22 @@ class MatrixBuilder(object):
                 isinstance(s, bytes))
 
     def build(self):
-        """Shortcut for building modules, imports and matrices.
+        """
+        Shortcut for building modules, imports and matrices.
 
-        :return: self, with built data
+        Returns:
+            self: with built data.
         """
         return self.build_modules().build_imports().build_matrices()
 
     def build_modules(self):
-        """Build the module list with all python files in the given packages.
+        """
+        Build the module list with all python files in the given packages.
+
         Also compute the maximum depth.
 
-        :return: self, with built modules
+        Returns:
+            self: with built modules.
         """
         if self._modules_are_built:
             return self
@@ -485,9 +529,11 @@ class MatrixBuilder(object):
         return self
 
     def build_imports(self):
-        """Build the big list of imports.
+        """
+        Build the big list of imports.
 
-        :return: self, with built imports
+        Returns:
+            self: with built imports.
         """
         if not self._modules_are_built or self._imports_are_built:
             return self
@@ -511,11 +557,14 @@ class MatrixBuilder(object):
         return self
 
     def build_matrices(self):
-        """Build the matrices for each depth. Starts with the last one
-        (maximum depth), and ascend through the levels
+        """
+        Build the matrices for each depth.
+
+        Starts with the last one (maximum depth), and ascend through the levels
         until depth 1 is reached.
 
-        :return: self, with built matrices
+        Returns:
+            self: with built matrices.
         """
         if not self._imports_are_built or self._matrices_are_built:
             return self
@@ -530,10 +579,14 @@ class MatrixBuilder(object):
         return self
 
     def module_index(self, module):
-        """Return index of given (sub)module in the built list of modules.
+        """
+        Return index of given (sub)module in the built list of modules.
 
-        :param module: str, represents the module name (pack.mod.submod)
-        :return: int, the index of the module, None if not found
+        Args:
+            module (str): represents the module name (pack.mod.submod).
+
+        Returns:
+            int/None: the index of the module, or None if not found.
         """
         # We don't need to store results, since we have unique keys
         # See parse_imports -> sum_from
@@ -560,7 +613,8 @@ class MatrixBuilder(object):
         return None
 
     def contains(self, module):
-        """Check if the specified module is part of the packages list.
+        """
+        Check if the specified module is part of the packages list.
 
         :param module: str, represents the module name (pack.mod.submod)
         :return: bool, True if yes, False if not
@@ -578,12 +632,18 @@ class MatrixBuilder(object):
             return False
 
     def parse_imports(self, module, force=False):
-        """Return a dictionary of dictionaries with importing module (by)
-        and imported modules (from and import). Keys are the importing modules.
+        """
+        Return a dictionary of dictionaries: imports.
 
-        :param module: dict, contains module's path and name
-        :param force: bool, force append even if module is not part of packages
-        :return: dict of dict, imports
+        ...with importing module (by) and imported modules (from and import).
+        Keys are the importing modules.
+
+        Args:
+            module (dict): contains module's path and name.
+            force (bool): force append even if module is not part of packages
+
+        Returns:
+            dict of dict: imports.
         """
         sum_from = OrderedDict()
         code = open(module['path']).read()
@@ -623,14 +683,19 @@ class MatrixBuilder(object):
 
     # TODO: Add exclude option
     def _walk(self, name, path, group, prefix=''):
-        """Walk recursively into subdirectories of a package directory
-        and return a list of all Python files found (*.py).
+        """
+        Walk recursively into subdirectories of a package directory.
 
-        :param name: str, name of the package
-        :param path: str, path of the package
-        :param group: int, group index of the package
-        :param prefix: str, used by recursion, file paths prepended string
-        :return: list of dict, contains name, path, group index and group name
+        Return a list of all Python files found (*.py).
+
+        Args:
+            name (str): name of the package.
+            path (str): path of the package.
+            group (int): group index of the package.
+            prefix (str): used by recursion, file paths prepended string.
+
+        Returns:
+            list of dict: contains name, path, group index and group name
         """
         result = []
         for item in os.listdir(path):
@@ -651,10 +716,13 @@ class MatrixBuilder(object):
         return sorted(result, key=lambda k: k['name'])
 
     def to_json(self):
-        """Return self as a JSON string (without path_resolver callable).
+        """
+        Return self as a JSON string (without path_resolver callable).
+
         This method is just a way to serialize the object itself.
 
-        :return: str, a JSON dump of self
+        Returns:
+            str: a JSON dump of itself.
         """
         return json.dumps({
             'packages': self.packages,
@@ -671,11 +739,16 @@ class MatrixBuilder(object):
         })
 
     def get_matrix(self, matrix):
-        """Return the specified matrix.
+        """
+        Return the specified matrix.
+
         The given index is casted into [0 .. max_depth] range.
 
-        :param matrix: int, index/depth. Zero means max_depth.
-        :return: Matrix instance
+        Args:
+            matrix (int): index/depth. Zero means max_depth.
+
+        Returns:
+            :class:`Matrix`: a Matrix instance
         """
         if not self._matrices_are_built:
             print('Matrices are not built. Use build() method first.')

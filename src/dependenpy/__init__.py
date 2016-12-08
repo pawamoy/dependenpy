@@ -6,6 +6,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+"""
+Dependenpy package.
+
+With dependenpy you will be able to analyze the internal dependencies in
+your Python code, i.e. which module needs which other module. You will then
+ben able to build a dependency matrix and use it for other purposes.
+"""
+
 from __future__ import unicode_literals
 
 __author__ = 'Timothée Mazzucotelli <timothee.mazzucotelli@gmail.com>'
