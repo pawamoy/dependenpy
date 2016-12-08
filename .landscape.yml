@@ -1,5 +1,6 @@
 ignore-patterns:
   - (^|/)\..+
+  - build/
 
 strictness: veryhigh
 autodetect: true
@@ -48,3 +49,4 @@ pyroma:
 pep257:
   disable:
     - D000
+    - D203
