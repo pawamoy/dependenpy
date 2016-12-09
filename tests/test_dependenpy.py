@@ -948,6 +948,10 @@ class MatricesTestCase(AbstractTestCase):
                 u'internal.test,1,1,1,0,0,1,0,0,0',
                 'CSV MATRIX 4')
 
+
+class OrderTestCase(AbstractTestCase):
+    """Test order of method execution."""
+
     def test_wrong_order(self):
         """Test order of method execution."""
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
