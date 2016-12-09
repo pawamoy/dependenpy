@@ -23,7 +23,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(
 
 
 class AbstractTestCase(unittest.TestCase):
+    """Setup and tear down data."""
+
     def setUp(self):
+        """Setup matrix builders with string, list and ordered dict."""
         str_p = 'internal'
         list_p = ['internal']
         od_p = ['Only group', ['internal']]
@@ -33,17 +36,22 @@ class AbstractTestCase(unittest.TestCase):
         self.od_dm = MatrixBuilder(od_p)
 
     def tearDown(self):
+        """Delete matrix builders."""
         del self.str_dm
         del self.list_dm
         del self.od_dm
 
 
 class EmptyTestCase(AbstractTestCase):
+    """Test empty matrices."""
+
     def test_wrong_type(self):
+        """Assert AttributeError is raised when given a wrong value."""
         tmp = MatrixBuilder('')
         self.assertRaises(AttributeError, tmp.__init__, 1)
 
     def test_wrong_list(self):
+        """Assert AttributeError is raised when given a wrong list."""
         tmp = MatrixBuilder('')
         self.assertRaises(AttributeError, tmp.__init__, ['', '', ['']])
         self.assertRaises(AttributeError, tmp.__init__, ['', '', [''], ['']])
@@ -51,15 +59,18 @@ class EmptyTestCase(AbstractTestCase):
         self.assertRaises(AttributeError, tmp.__init__, [[''], ''])
 
     def test_packages(self):
+        """Assert packages attribute is correctly set."""
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             self.assertEqual(dm.packages, [['internal']])
 
     def test_groups(self):
+        """Assert groups attribute is correctly set."""
         self.assertEqual(self.str_dm.groups, [''])
         self.assertEqual(self.list_dm.groups, [''])
         self.assertEqual(self.od_dm.groups, ['Only group'])
 
     def test_other_attributes(self):
+        """Assert other attributes are correctly set."""
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             self.assertEqual(dm.modules, [])
             self.assertEqual(dm.imports, [])
@@ -72,7 +83,10 @@ class EmptyTestCase(AbstractTestCase):
 
 
 class StaticDataTestCase(AbstractTestCase):
+    """Test data are never modified again once computed."""
+
     def test_static(self):
+        """Assert build_imports/matrices let modules/imports untouched."""
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             dm.build_modules()
             temp_modules = list(dm.modules)
@@ -88,24 +102,33 @@ class StaticDataTestCase(AbstractTestCase):
 
 
 class NoPathTestCase(unittest.TestCase):
+    """Test matrix builder with non-existent package."""
+
     def setUp(self):
-        self.dm = MatrixBuilder('unfoundable')
+        """Setup matrix builder with unfindable package."""
+        self.dm = MatrixBuilder('unfindable')
 
     def test_modules(self):
+        """Assert no module found."""
         self.assertEqual(self.dm.build_modules().modules, [])
 
 
 class ModuleTestCase(AbstractTestCase):
+    """Test building modules methods."""
+
     def setUp(self):
+        """Already build modules."""
         super(ModuleTestCase, self).setUp()
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             dm.build_modules()
 
     def test_max_depth(self):
+        """Assert max depth corresponds."""
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             self.assertEqual(dm.max_depth, 4)
 
     def assertEqualModules(self, modules, group, local_path):
+        """Helper to compare modules."""
         self.assertEqual(
             modules,
             [{'group': {'index': 0, 'name': group},
@@ -137,6 +160,7 @@ class ModuleTestCase(AbstractTestCase):
               'path': local_path + '/internal/test.py'}])
 
     def test_modules(self):
+        """Test modules."""
         local_path = os.path.abspath(os.path.join(
             os.path.dirname(os.path.dirname(__file__)), 'tests'))
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
@@ -150,12 +174,16 @@ class ModuleTestCase(AbstractTestCase):
 
 
 class ImportsTestCase(AbstractTestCase):
+    """Test building imports methods."""
+
     def setUp(self):
+        """Already build imports."""
         super(ImportsTestCase, self).setUp()
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             dm.build_modules().build_imports()
 
     def test_imports(self):
+        """Check imports values."""
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             self.assertTrue(dm._modules_are_built)
             self.assertTrue(dm._imports_are_built)
@@ -252,6 +280,7 @@ class ImportsTestCase(AbstractTestCase):
                   u'target_name': u'internal.submodule2.__init__'}])
 
     def test_inside(self):
+        """Test memorized values."""
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             self.assertEqual(dm._inside, {
                 'internal.test': True,
@@ -266,14 +295,16 @@ class ImportsTestCase(AbstractTestCase):
 
 
 class MatricesTestCase(AbstractTestCase):
-    pass
+    """Test building matrices methods."""
 
     def setUp(self):
+        """Already build everything."""
         super(MatricesTestCase, self).setUp()
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
-            dm.build_modules().build_imports().build_matrices()
+            dm.build()
 
     def assertEqualMatrices(self, dm, group):
+        """Helper to compare matrices."""
         self.assertEqual(dm.get_matrix(1).depth, 1)
         self.assertEqual(dm.get_matrix(1).size, 1)
         self.assertEqual(dm.get_matrix(1).modules, OrderedDict([(u'internal', {
@@ -812,6 +843,7 @@ class MatricesTestCase(AbstractTestCase):
                           [1, 1, 1, 0, 0, 1, 0, 0, 0]])
 
     def test_matrices(self):
+        """Test matrices."""
         # local_path = os.path.abspath(os.path.join(
         # os.path.dirname(os.path.dirname(__file__)), 'tests'))
         for dm in [self.str_dm, self.list_dm]:
@@ -825,13 +857,6 @@ class MatricesTestCase(AbstractTestCase):
 
             for i in range(1, dm.max_depth - 1):
                 self.assertNotEqual(dm.get_matrix(i), dm.get_matrix(i + 1))
-
-
-class OutputTestCase(AbstractTestCase):
-    def setUp(self):
-        super(OutputTestCase, self).setUp()
-        for dm in [self.str_dm, self.list_dm, self.od_dm]:
-            dm.build()
 
     # def test_load_json_dump(self):
     # for dm in [self.str_dm, self.list_dm, self.od_dm]:
@@ -873,6 +898,7 @@ class OutputTestCase(AbstractTestCase):
     #                              other, 'JSON MATRIX dump/load %s' % i)
 
     def test_matrix_to_csv(self):
+        """Test CSV output method."""
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             self.assertEqual(
                 dm.get_matrix(1).to_csv(),
@@ -922,9 +948,8 @@ class OutputTestCase(AbstractTestCase):
                 u'internal.test,1,1,1,0,0,1,0,0,0',
                 'CSV MATRIX 4')
 
-
-class WrongOrderTestCase(AbstractTestCase):
     def test_wrong_order(self):
+        """Test order of method execution."""
         for dm in [self.str_dm, self.list_dm, self.od_dm]:
             dm.build_matrices()
             self.assertFalse(dm._matrices_are_built)
