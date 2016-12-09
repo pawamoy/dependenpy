@@ -122,14 +122,6 @@ The "other type" of list you can give to a MatrixBuilder looks like this:
 
 This way you can specify groups of packages.
 
-
-Here is an example of colorized CSV output:
-
-.. image:: http://imageshack.com/a/img537/3731/myhqOU.png
-    :alt: CSV array
-
-
-
 This module was originally design to work in a Django project.
 The Django package `django-meerkat`_ uses it to display the matrices with Highcharts.
 
