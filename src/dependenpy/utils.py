@@ -88,7 +88,7 @@ class Matrix(object):
         #: the order
         self.orders = {
             'name': [False, self._compute_name_order],
-            'group': [True, self._compute_group_order],
+            'group': [False, self._compute_group_order],
             'import': [False, self._compute_import_order],
             'export': [False, self._compute_export_order],
             'import+export': [False, self._compute_import_export_order],
@@ -100,18 +100,17 @@ class Matrix(object):
         #: Orders are dict with 2 values: False for ascendant order,
         #: True for descendant order (think of reverse=False/True)
         self.modules = OrderedDict()
-        m_index = 0
-        for module in modules:
+        for m_index, module in enumerate(modules):
             self.modules[module['name']] = {
                 'name': module['name'],
                 'group': module['group'],
                 'cardinal': {'imports': 0, 'exports': 0},
                 'order': {}}
             for order in list(self.orders.keys()):
-                self.modules[module['name']]['order'][order] = {}
+                self.modules[module['name']]['order'][order] = {
+                    True: m_index, False: m_index}
             # we can fill group order at initialization
             self.modules[module['name']]['order']['group'][False] = m_index
-            m_index += 1
 
         self._compute_reverse_group_order()
 
@@ -135,6 +134,8 @@ class Matrix(object):
         self._sorted_keys = {}
         for order in list(self.orders.keys()):
             self._sorted_keys[order] = []
+
+        self._write_order('group', self.keys)
 
         #: list of list of int: the concrete matrix with numeric values
         self.matrix = None
@@ -229,7 +230,7 @@ class Matrix(object):
         self._update_matrix()
 
         sorted_keys = self._sorted_keys[order]
-        self.keys = reversed(sorted_keys) if reverse else sorted_keys
+        self.keys = list(reversed(sorted_keys)) if reverse else sorted_keys
         self.groups = [self.modules[key]['group']['name'] for key in self.keys]
 
         return True
