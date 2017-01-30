@@ -226,6 +226,11 @@ class ImportsTestCase(AbstractTestCase):
                   u'source_name': u'internal.submodule1.test',
                   u'target_index': 0,
                   u'target_name': u'internal.__init__'},
+                 {u'cardinal': 1, u'target_index': 5,
+                  u'target_name': u'internal.submodule2.__init__', u'source_index': 4,
+                  u'source_name': u'internal.submodule1.test', u'imports': [
+                     {u'from': u'internal.submodule2', u'import': ['test'],
+                      u'by': u'internal.submodule1.test'}]},
                  {u'cardinal': 1,
                   u'imports': [{u'by': u'internal.submodule2.test',
                                 u'from': u'internal.submodule2.test2',
@@ -305,14 +310,14 @@ class MatricesTestCase(AbstractTestCase):
             self.assertEqual(
                 dm.get_matrix(1).to_csv(),
                 ',internal\r\n'
-                'internal,19',
+                'internal,20',
                 'CSV MATRIX 1')
             self.assertEqual(
                 dm.get_matrix(2).to_csv(),
                 ',internal.__init__,internal.submodule1,'
                 'internal.submodule2,internal.test\r\n'
                 'internal.__init__,0,0,0,0\r\n'
-                'internal.submodule1,1,3,0,9\r\n'
+                'internal.submodule1,1,3,1,9\r\n'
                 'internal.submodule2,0,1,1,0\r\n'
                 'internal.test,1,2,1,0',
                 'CSV MATRIX 2')
@@ -325,7 +330,7 @@ class MatricesTestCase(AbstractTestCase):
                 u'internal.__init__,0,0,0,0,0,0,0,0\r\n'
                 u'internal.submodule1.__init__,0,0,0,0,0,0,0,0\r\n'
                 u'internal.submodule1.submoduleA,0,0,0,0,0,0,0,9\r\n'
-                u'internal.submodule1.test,1,0,3,0,0,0,0,0\r\n'
+                u'internal.submodule1.test,1,0,3,0,1,0,0,0\r\n'
                 u'internal.submodule2.__init__,0,0,0,0,0,0,0,0\r\n'
                 u'internal.submodule2.test,0,0,1,0,0,0,1,0\r\n'
                 u'internal.submodule2.test2,0,0,0,0,0,0,0,0\r\n'
@@ -343,7 +348,7 @@ class MatricesTestCase(AbstractTestCase):
                 u'internal.submodule1.__init__,0,0,0,0,0,0,0,0,0\r\n'
                 u'internal.submodule1.submoduleA.__init__,0,0,0,0,0,0,0,0,0\r\n'  # noqa
                 u'internal.submodule1.submoduleA.test,0,0,0,0,0,0,0,0,9\r\n'
-                u'internal.submodule1.test,1,0,2,1,0,0,0,0,0\r\n'
+                u'internal.submodule1.test,1,0,2,1,0,1,0,0,0\r\n'
                 u'internal.submodule2.__init__,0,0,0,0,0,0,0,0,0\r\n'
                 u'internal.submodule2.test,0,0,1,0,0,0,0,1,0\r\n'
                 u'internal.submodule2.test2,0,0,0,0,0,0,0,0,0\r\n'
