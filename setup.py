@@ -29,7 +29,7 @@ def read(*names, **kwargs):
 setup(
     name='dependenpy',
     version='2.0.2',
-    license='MPL 2.0',
+    license='ISC',
     description='A Python module that build dependency matrices '
                 'between other modules.',
     long_description='%s\n%s' % (
@@ -49,7 +49,7 @@ setup(
         # http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
+        'License :: OSI Approved :: ISC License (ISCL)',
         'Operating System :: Unix',
         'Operating System :: POSIX',
         'Operating System :: Microsoft :: Windows',
