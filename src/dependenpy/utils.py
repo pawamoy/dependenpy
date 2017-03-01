@@ -20,22 +20,22 @@ import json
 import os
 import sys
 
-from builtins import object, range, str
+# from builtins import object, range, str
 from collections import OrderedDict
 
 import six
 
-from future import standard_library
-from past.utils import old_div
+# from future import standard_library
+# from past.utils import old_div
 
-from dependenpy.greedy import solve_tsp
+# from dependenpy.greedy import solve_tsp
 
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
 
-standard_library.install_aliases()
+# standard_library.install_aliases()
 
 
 def resolve_path(module):
@@ -282,39 +282,40 @@ class Matrix(object):
         self._write_order('import+export', sorted_keys)
 
     def _compute_similarity_order(self):
-        # we initialize name-index correspondences
-        co = {}
-        for i in range(self.size):
-            co[i] = self.keys[i]
-            co[self.keys[i]] = i
-
-        # we prepare the square symmetric distance matrix
-        matrix = [[0 for x in range(self.size)] for x in range(self.size)]
-
-        # we compute the similarities and fill the matrix
-        length = len(self.dependencies)
-        for id1 in range(length - 1):
-            for id2 in range(id1 + 1, length):
-                d1 = self.dependencies[id1]
-                d2 = self.dependencies[id2]
-                sn1, sn2 = d1['source_name'], d2['source_name']
-                if sn1 != sn2:
-                    n, i, j = 0, co[sn1], co[sn2]
-                    for di1 in d1['imports']:
-                        for di2 in d2['imports']:
-                            if di1['from'] == di2['from']:
-                                n += len([0 for x in di1['import']
-                                          if x in di2['import']])
-
-                    if n > 0:
-                        s = matrix[i][j] + n
-                        matrix[i][j] = s
-                        matrix[j][i] = s
-
-        # we compute the order with a TSP solver, set the sorted keys and save
-        order = solve_tsp(matrix)
-        sorted_keys = [co[k] for k in order]
-        self._write_order('similarity', sorted_keys)
+        # # we initialize name-index correspondences
+        # co = {}
+        # for i in range(self.size):
+        #     co[i] = self.keys[i]
+        #     co[self.keys[i]] = i
+        #
+        # # we prepare the square symmetric distance matrix
+        # matrix = [[0 for x in range(self.size)] for x in range(self.size)]
+        #
+        # # we compute the similarities and fill the matrix
+        # length = len(self.dependencies)
+        # for id1 in range(length - 1):
+        #     for id2 in range(id1 + 1, length):
+        #         d1 = self.dependencies[id1]
+        #         d2 = self.dependencies[id2]
+        #         sn1, sn2 = d1['source_name'], d2['source_name']
+        #         if sn1 != sn2:
+        #             n, i, j = 0, co[sn1], co[sn2]
+        #             for di1 in d1['imports']:
+        #                 for di2 in d2['imports']:
+        #                     if di1['from'] == di2['from']:
+        #                         n += len([0 for x in di1['import']
+        #                                   if x in di2['import']])
+        #
+        #             if n > 0:
+        #                 s = matrix[i][j] + n
+        #                 matrix[i][j] = s
+        #                 matrix[j][i] = s
+        #
+        # # we compute the order with a TSP solver, set the sorted keys and save
+        # order = solve_tsp(matrix)
+        # sorted_keys = [co[k] for k in order]
+        # self._write_order('similarity', sorted_keys)
+        pass
 
     def _compute_group_order(self):
         # just here for consistency
@@ -469,9 +470,9 @@ class MatrixBuilder(object):
                 return False, "Item %s is not a string" % str(i)
             if not isinstance(l[i + 1], list):
                 return False, "Item %s is not a list" % str(i + 1)
-            if not MatrixBuilder._is_list_of_string(l[i + 1]):
-                return False, "List %s has non-string items" % str(
-                    old_div(i, 2) + 1)
+            # if not MatrixBuilder._is_list_of_string(l[i + 1]):
+            #     return False, "List %s has non-string items" % str(
+            #         old_div(i, 2) + 1)
         return True, ""
 
     @staticmethod
@@ -756,3 +757,130 @@ class MatrixBuilder(object):
         else:
             m = i - 1
         return self.matrices[m]
+
+
+# pass a list of modules to instantiate a matrix
+# the matrix will construct Module instances through os.walk
+# then parse all the code and construct Import instances
+
+
+class NewMatrix(object):
+    def __init__(self, modules):
+        unsorted_modules = []
+        for module in modules:
+            try:
+                unsorted_modules.append(Module(module))
+            except FileNotFoundError as e:
+                print('Warning: %s' % e, file=sys.stderr)
+
+        self.modules = sorted(unsorted_modules, key=lambda x: x.path)
+
+    def parse(self):
+        pass
+
+
+class Module(object):
+    def __init__(self, name):
+        self.name = name.replace(os.sep, '.')
+        self.path = os.path.abspath(Module.resolve_path(self.name))
+        self.submodules = []
+
+        if self.path.endswith('__init__.py'):
+            parent = os.path.dirname(self.path)
+            self.submodules = self.walk(parent)
+
+    @staticmethod
+    def resolve_path(module):
+        """
+        Built-in method for getting a module's path within Python path.
+
+        Args:
+            module (str): name of the module without .py extension.
+
+                Example: 'a.b' or 'a/b', not 'a/b.py'
+
+        Returns:
+            str: absolute path to this module, None if not found.
+        """
+        for path in sys.path:
+            module_path = os.path.join(path, module.replace('.', os.sep))
+            if os.path.isdir(module_path):
+                module_path = '%s%s__init__.py' % (module_path, os.sep)
+                if os.path.exists(module_path):
+                    return module_path
+            elif os.path.exists(module_path + '.py'):
+                return module_path + '.py'
+        raise FileNotFoundError(str(module))
+
+    def walk(self, path):
+        result = self._walk(path)
+        # Ensure resulting list of files is always in the same order
+        return sorted(result)
+
+    def _walk(self, path):
+        """
+        Walk recursively into subdirectories of a package directory.
+
+        Return a list of all Python files found (*.py).
+
+        Args:
+            path (str): path of the package.
+
+        Returns:
+            list of str: submodules as absolute paths.
+        """
+        result = []
+        for item in os.listdir(path):
+            sub_item = os.path.join(path, item)
+            if os.path.isdir(sub_item):
+                result.extend(self._walk(sub_item))
+            elif sub_item.endswith('.py'):
+                result.append(os.path.abspath(sub_item))
+        return result
+
+    def imports(self):
+        result = self.parse(self.path)
+        for path in self.submodules:
+            result.extend(self.parse(path))
+        return result
+
+    def parse(self, file):
+        imports = []
+
+        code = open(file).read()
+        try:
+            body = ast.parse(code).body
+        except SyntaxError:
+            code = open(self.path).read().encode('utf-8')
+            body = ast.parse(code).body
+        for node in body:
+            if isinstance(node, ast.Import):
+                names = [n.name for n in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                # We rebuild the module name if it is a relative import
+                if node.level > len(self.name.split('.')):
+                    # Level is too high for our module path
+                    continue
+                elif node.level > 0:
+                    module = self.name
+                    level = node.level
+                    while level != 0:
+                        module = os.path.splitext(module)[0]
+                        level -= 1
+                    module += '.' + node.module if node.module else ''
+                else:
+                    module = node.module
+                names = ['%s.%s' % (module, n.name) for n in node.names]
+            else:
+                continue
+
+            for name in names:
+                imports.append(Import(name, self))
+
+        return imports
+
+
+class Import(object):
+    def __init__(self, name, by):
+        self.name = name
+        self.by = by
