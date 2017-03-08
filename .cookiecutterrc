@@ -31,7 +31,7 @@ default_context:
     full_name:                       'Timothee Mazzucotelli'
     github_username:                 'Pawamoy'
     gitter:                          'yes'
-    landscape:                       'yes'
+    landscape:                       'no'
     package_name:                    'dependenpy'
     project_name:                    'Dependenpy'
     project_short_description:       'A Python module that build dependency matrices between other modules.'
