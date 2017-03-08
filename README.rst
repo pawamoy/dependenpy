@@ -19,11 +19,11 @@ Dependenpy
     :target: https://travis-ci.org/Pawamoy/dependenpy/
 
 .. |codacy| image:: https://api.codacy.com/project/badge/Grade/REPLACE_WITH_PROJECT_ID
-    :target: https://www.codacy.com/app/Pawamoy/dependenpy/
+    :target: https://www.codacy.com/app/Pawamoy/dependenpy/dashboard
     :alt: Codacy Code Quality Status
 
-.. |pyup| image:: https://pyup.io/account/repos/github/pawamoy/dependenpy/shield.svg
-    :target: https://pyup.io/account/repos/github/pawamoy/dependenpy/
+.. |pyup| image:: https://pyup.io/repos/github/Pawamoy/dependenpy/shield.svg
+    :target: https://pyup.io/repos/github/Pawamoy/dependenpy/
     :alt: Updates
 
 .. |gitter| image:: https://badges.gitter.im/Pawamoy/dependenpy.svg
