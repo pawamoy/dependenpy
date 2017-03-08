@@ -62,7 +62,7 @@ License
 
 Software licensed under `ISC`_ license.
 
-.. _ISC : https://www.isc.org/downloads/software-support-policy/isc-license/
+.. _ISC: https://www.isc.org/downloads/software-support-policy/isc-license/
 
 Installation
 ============
@@ -131,7 +131,8 @@ The Django package `django-meerkat`_ uses it to display the matrices with Highch
 Documentation
 =============
 
-https://github.com/Pawamoy/dependenpy/wiki
+http://dependenpy.readthedocs.io/en/latest/
+
 
 Development
 ===========
