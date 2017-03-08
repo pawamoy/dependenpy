@@ -17,8 +17,8 @@ Dependenpy
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/Pawamoy/dependenpy/
 
-.. |codacy| image:: https://api.codacy.com/project/badge/Grade/REPLACE_WITH_PROJECT_ID
-    :target: https://www.codacy.com/app/Pawamoy/dependenpy/
+.. |codacy| image:: https://api.codacy.com/project/badge/Grade/6cac1ad3e1a34d349ef4dd73cf3e5276
+    :target: https://www.codacy.com/app/Pawamoy/dependenpy/dashboard
     :alt: Codacy Code Quality Status
 
 .. |pyup| image:: https://pyup.io/account/repos/github/pawamoy/dependenpy/shield.svg
