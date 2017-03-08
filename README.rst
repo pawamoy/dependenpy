@@ -7,7 +7,7 @@ Dependenpy
 
 
 |travis|
-|codecov|
+|codacy|
 |landscape|
 |version|
 |wheel|
@@ -19,16 +19,16 @@ Dependenpy
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/Pawamoy/dependenpy/
 
-.. |codecov| image:: https://codecov.io/github/Pawamoy/dependenpy/coverage.svg?branch=master
-    :alt: Coverage Status
-    :target: https://codecov.io/github/Pawamoy/dependenpy/
-
 .. |landscape| image:: https://landscape.io/github/Pawamoy/dependenpy/master/landscape.svg?style=flat
     :target: https://landscape.io/github/Pawamoy/dependenpy/
     :alt: Code Quality Status
 
-.. |pyup| image:: https://pyup.io/repos/github/pawamoy/dependenpy/shield.svg
-    :target: https://pyup.io/repos/github/pawamoy/dependenpy/
+.. |codacy| image:: https://api.codacy.com/project/badge/Grade/REPLACE_WITH_PROJECT_ID
+    :target: https://www.codacy.com/app/Pawamoy/dependenpy/
+    :alt: Codacy Code Quality Status
+
+.. |pyup| image:: https://pyup.io/account/repos/github/pawamoy/dependenpy/shield.svg
+    :target: https://pyup.io/account/repos/github/pawamoy/dependenpy/
     :alt: Updates
 
 .. |gitter| image:: https://badges.gitter.im/Pawamoy/dependenpy.svg
@@ -53,7 +53,7 @@ License
 
 Software licensed under `ISC`_ license.
 
-.. _ISC : https://www.isc.org/downloads/software-support-policy/isc-license/
+.. _ISC: https://www.isc.org/downloads/software-support-policy/isc-license/
 
 Installation
 ============
