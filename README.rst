@@ -27,7 +27,6 @@ Dependenpy
     :target: https://landscape.io/github/Pawamoy/dependenpy/
     :alt: Code Quality Status
 
-
 .. |pyup| image:: https://pyup.io/repos/github/pawamoy/dependenpy/shield.svg
     :target: https://pyup.io/repos/github/pawamoy/dependenpy/
     :alt: Updates
@@ -66,7 +65,8 @@ Installation
 Documentation
 =============
 
-https://github.com/Pawamoy/dependenpy/wiki
+http://dependenpy.readthedocs.io/en/latest/
+
 
 Development
 ===========
