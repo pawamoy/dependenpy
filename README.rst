@@ -52,7 +52,7 @@ based on ``from ... import ...`` commands in their modules.
 For now, its purpose is purely informational.
 
 The module is composed of two classes: MatrixBuilder,
-which is initialized with a list of packages findable is sys.path, and Matrix,
+which is initialized with a list of packages available is ``sys.path``, and Matrix,
 which is an autonomous class containing matrix data.
 This list of packages can be a string (one package), a list of string (several)
 or another type of list, used to define groups of packages with a legend.
