@@ -30,10 +30,6 @@ Dependenpy
     :target: https://pyup.io/repos/github/Pawamoy/dependenpy/
     :alt: Updates
 
-.. |gitter| image:: https://badges.gitter.im/Pawamoy/dependenpy.svg
-    :target: https://gitter.im/Pawamoy/dependenpy
-    :alt: Join the chat at https://gitter.im/Pawamoy/dependenpy
-
 .. |version| image:: https://img.shields.io/pypi/v/dependenpy.svg?style=flat
     :target: https://pypi.python.org/pypi/dependenpy/
     :alt: PyPI Package latest release
@@ -41,6 +37,11 @@ Dependenpy
 .. |wheel| image:: https://img.shields.io/pypi/wheel/dependenpy.svg?style=flat
     :target: https://pypi.python.org/pypi/dependenpy/
     :alt: PyPI Wheel
+
+.. |gitter| image:: https://badges.gitter.im/Pawamoy/dependenpy.svg
+    :target: https://gitter.im/Pawamoy/dependenpy
+    :alt: Join the chat at https://gitter.im/Pawamoy/dependenpy
+
 
 
 .. end-badges
@@ -131,8 +132,9 @@ The Django package `django-meerkat`_ uses it to display the matrices with Highch
 Documentation
 =============
 
-http://dependenpy.readthedocs.io/en/latest/
+`On ReadTheDocs`_
 
+.. _`On ReadTheDocs`: http://dependenpy.readthedocs.io/
 
 Development
 ===========
