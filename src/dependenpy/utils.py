@@ -641,7 +641,7 @@ class MatrixBuilder(object):
             dict of dict: imports.
         """
         sum_from = OrderedDict()
-        code = open(module['path']).read()
+        code = open(module['path'], encoding='utf-8').read()
         try:
             body = ast.parse(code).body
         except SyntaxError:
