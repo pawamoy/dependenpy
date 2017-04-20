@@ -28,7 +28,7 @@ def read(*names, **kwargs):
 
 setup(
     name='dependenpy',
-    version='2.0.2',
+    version='2.0.3',
     license='ISC',
     description='A Python module that build dependency matrices '
                 'between other modules.',

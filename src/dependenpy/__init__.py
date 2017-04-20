@@ -11,5 +11,5 @@ be able to build a dependency matrix and use it for other purposes.
 from __future__ import unicode_literals
 
 __author__ = 'Timothée Mazzucotelli <timothee.mazzucotelli@gmail.com>'
-__version__ = '2.0.2'
+__version__ = '2.0.3'
 __all__ = ()

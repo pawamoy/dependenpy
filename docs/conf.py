@@ -32,7 +32,7 @@ project = u'Dependenpy'
 year = '2017'
 author = u'Timothee Mazzucotelli'
 copyright = '{0}, {1}'.format(year, author)
-version = release = u'2.0.2'
+version = release = u'2.0.3'
 
 pygments_style = 'trac'
 templates_path = ['.']
