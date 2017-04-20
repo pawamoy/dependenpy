@@ -34,7 +34,7 @@ default_context:
     package_name:                    'dependenpy'
     project_name:                    'Dependenpy'
     project_short_description:       'A Python module that build dependency matrices between other modules.'
-    python_versions:                 '2.7,3.4,3.5,3.6,3.7-dev,pypy'
+    python_versions:                 '3.4,3.5,3.6,3.7-dev,pypy'
     pyup:                            'yes'
     release_date:                    '2016-10-06'
     repo_name:                       'dependenpy'
