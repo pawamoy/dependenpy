@@ -12,7 +12,6 @@ matrix:
   - {python: '3.5', env: TOX_ENV=checkstyle}
   - {python: '3.5', env: TOX_ENV=checkspell}
   - {python: '3.5', env: TOX_ENV=checklink}
-  - {python: '2.7', env: 'TOX_ENV=py27,codacy'}
   - {python: '3.4', env: 'TOX_ENV=py34,codacy'}
   - {python: '3.5', env: 'TOX_ENV=py35,codacy'}
   - {python: '3.6', env: 'TOX_ENV=py36,codacy'}
