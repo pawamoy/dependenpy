@@ -3,9 +3,8 @@
 """Main test script."""
 
 
-
-import dependenpy
+from dependenpy.cli import main
 
 def test_main():
     """Main test method."""
-    assert dependenpy  # use your library here
+    main([])
