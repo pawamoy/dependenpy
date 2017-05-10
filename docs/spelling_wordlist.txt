@@ -16,3 +16,6 @@ Timothee
 Mazzucotelli
 django
 highcharts
+wip
+WIP
+serializers

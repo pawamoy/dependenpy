@@ -5,14 +5,14 @@ Changelog
 3.0.0 (2017-05-??)
 ==================
 
-This version is a big refactor. The code is way more object oriented,
+This version is a big refactoring. The code is way more object oriented,
 cleaner, shorter, simpler, smarter, more user friendly- in short: better.
 
 Some of the previous features are still not fully implemented.
 
 The usage stays about the same, in two steps:
 
-- the initialisation of a ``DSM`` object (the package structure),
+- the initialization of a ``DSM`` object (the package structure),
 - the generation of dependency data (parsing the code thanks to ``ast``).
 
 Additional features:
