@@ -16,6 +16,7 @@ from __future__ import division, print_function, unicode_literals
 
 import ast
 import csv
+import functools
 import json
 import os
 import sys
@@ -759,128 +760,223 @@ class MatrixBuilder(object):
         return self.matrices[m]
 
 
-# pass a list of modules to instantiate a matrix
-# the matrix will construct Module instances through os.walk
-# then parse all the code and construct Import instances
+#####################################################################
+#             %%%%%        NEW VERSION      %%%%%%                  #
+#####################################################################
 
 
-class NewMatrix(object):
-    def __init__(self, modules):
-        unsorted_modules = []
-        for module in modules:
-            try:
-                unsorted_modules.append(Module(module))
-            except FileNotFoundError as e:
-                print('Warning: %s' % e, file=sys.stderr)
-
-        self.modules = sorted(unsorted_modules, key=lambda x: x.path)
-
-    def parse(self):
-        pass
+from importlib.util import find_spec
+from os.path import basename, dirname, exists, isdir, isfile, join, splitext
 
 
-class Module(object):
-    def __init__(self, name):
-        self.name = name.replace(os.sep, '.')
-        self.path = os.path.abspath(Module.resolve_path(self.name))
-        self.submodules = []
+class DSM(object):
+    def __init__(self, packages):
+        self._cache = {}
+        self.packages = []
+        for p in packages:
+            if exists(p):
+                if isdir(p) and isfile(join(p, os.sep, '__init__.py')):
+                    self.packages.append(Package(basename(p), p, self))
+                elif isfile(p) and p.endswith('__init__.py'):
+                    p = dirname(p)
+                    self.packages.append(Package(basename(p), p, self))
+            else:
+                spec = find_spec(p)
+                if spec is not None:
+                    package = Package(
+                        spec.name, spec.submodule_search_locations[0], self)
+                    self.packages.append(package)
 
-        if self.path.endswith('__init__.py'):
-            parent = os.path.dirname(self.path)
-            self.submodules = self.walk(parent)
+    def print(self):
+        print(self)
+        for p in self.packages:
+            p.print(indent='  ')
 
-    @staticmethod
-    def resolve_path(module):
-        """
-        Built-in method for getting a module's path within Python path.
+    def build_dependencies(self):
+        for p in self.packages:
+            p.build_dependencies()
 
-        Args:
-            module (str): name of the module without .py extension.
+    def get_target(self, target):
+        if target not in self._cache:
+            self._cache[target] = self._get_target(target)
+        return self._cache[target]
 
-                Example: 'a.b' or 'a/b', not 'a/b.py'
+    def _get_target(self, target):
+        parts = target
+        if isinstance(parts, str):
+            parts = target.split('.')
+        for p in self.packages:
+            if parts[0] == p.name:
+                if len(parts) == 1:
+                    return p
+                target = p.get_target(parts[1:])
+                if target:
+                    return target
+                if len(parts) < 3:
+                    return p
+        return None
 
-        Returns:
-            str: absolute path to this module, None if not found.
-        """
-        for path in sys.path:
-            module_path = os.path.join(path, module.replace('.', os.sep))
-            if os.path.isdir(module_path):
-                module_path = '%s%s__init__.py' % (module_path, os.sep)
-                if os.path.exists(module_path):
-                    return module_path
-            elif os.path.exists(module_path + '.py'):
-                return module_path + '.py'
-        raise FileNotFoundError(str(module))
 
-    def walk(self, path):
-        result = self._walk(path)
-        # Ensure resulting list of files is always in the same order
-        return sorted(result)
+class TreeNode(object):
+    @property
+    def root(self):
+        node = self
+        while node.package is not None:
+            node = node.package
+        return node
 
-    def _walk(self, path):
-        """
-        Walk recursively into subdirectories of a package directory.
+    @property
+    def depth(self):
+        if hasattr(self, '_depth'):
+            return self._depth
+        depth, node = 1, self
+        while node.package is not None:
+            depth += 1
+            node = node.package
+        self._depth = depth
+        return depth
 
-        Return a list of all Python files found (*.py).
+    def absolute_name(self, depth=-1):
+        node, node_depth = self, self.depth
+        if depth < 0:
+            depth = node_depth
+        while node_depth > depth and node.package is not None:
+            node = node.package
+            node_depth -= 1
+        names = []
+        while node is not None:
+            names.append(node.name)
+            node = node.package
+        return '.'.join(reversed(names))
 
-        Args:
-            path (str): path of the package.
 
-        Returns:
-            list of str: submodules as absolute paths.
-        """
-        result = []
-        for item in os.listdir(path):
-            sub_item = os.path.join(path, item)
-            if os.path.isdir(sub_item):
-                result.extend(self._walk(sub_item))
-            elif sub_item.endswith('.py'):
-                result.append(os.path.abspath(sub_item))
-        return result
+class Package(TreeNode):
+    def __init__(self, name, path, dsm, package=None):
+        self._cache = {}
+        self.name = name
+        self.path = path
+        self.package = package
+        self.subpackages = []
+        self.modules = []
+        self.dsm = dsm
+        for m in os.listdir(path):
+            abs_m = join(path, m)
+            if isfile(abs_m) and m.endswith('.py'):
+                self.modules.append(Module(
+                    splitext(m)[0], abs_m, self))
+            elif isdir(abs_m) and isfile(join(abs_m, '__init__.py')):
+                self.subpackages.append(Package(m, abs_m, dsm, self))
 
-    def imports(self):
-        result = self.parse(self.path)
-        for path in self.submodules:
-            result.extend(self.parse(path))
-        return result
+    def __str__(self):
+        return self.name
 
-    def parse(self, file):
-        imports = []
+    def print(self, indent=''):
+        print(indent + str(self))
+        for m in self.modules:
+            m.print(indent=indent + '  ')
+        for sp in self.subpackages:
+            sp.print(indent=indent + '  ')
 
-        code = open(file).read()
+    @property
+    def is_subpackage(self):
+        return self.package is not None
+
+    @property
+    def is_root(self):
+        return self.package is None
+
+    def build_dependencies(self):
+        for m in self.modules:
+            m.build_dependencies()
+        for sp in self.subpackages:
+            sp.build_dependencies()
+
+    def get_target(self, target):
+        parts = target
+        if isinstance(parts, str):
+            parts = target.split('.')
+        for m in self.modules:
+            if parts[0] == m.name:
+                if len(parts) < 3:
+                    return m
+        for sp in self.subpackages:
+            if parts[0] == sp.name:
+                if len(parts) == 1:
+                    return sp
+                target = sp.get_target(parts[1:])
+                if target:
+                    return target
+                if len(parts) < 3:
+                    return sp
+        return None
+
+
+class Module(TreeNode):
+    def __init__(self, name, path, package):
+        self.name = name
+        self.path = path
+        self.package = package
+        self.dependencies = []
+
+    def __str__(self):
+        return self.name
+
+    def print(self, indent=''):
+        print(indent + str(self))
+        for d in self.dependencies:
+            external = '! ' if d.external else ''
+            print(indent + '  ' + external + str(d))
+
+    def build_dependencies(self):
+        dsm = self.package.dsm
+        for _import in self.parse_code():
+            target = dsm.get_target(_import['target'])
+            if target:
+                _import['target'] = target
+            self.dependencies.append(Dependency(source=self, **_import))
+
+    def parse_code(self):
+        code = open(self.path).read()
         try:
             body = ast.parse(code).body
         except SyntaxError:
-            code = open(self.path).read().encode('utf-8')
+            code = code.encode('utf-8')
             body = ast.parse(code).body
-        for node in body:
+        return self.get_imports(body)
+
+    def get_imports(self, ast_body):
+        imports = []
+        for node in ast_body:
             if isinstance(node, ast.Import):
-                names = [n.name for n in node.names]
+                imports.extend({'target': name.name, 'lineno': node.lineno}
+                               for name in node.names)
             elif isinstance(node, ast.ImportFrom):
-                # We rebuild the module name if it is a relative import
-                if node.level > len(self.name.split('.')):
-                    # Level is too high for our module path
-                    continue
-                elif node.level > 0:
-                    module = self.name
-                    level = node.level
-                    while level != 0:
-                        module = os.path.splitext(module)[0]
-                        level -= 1
-                    module += '.' + node.module if node.module else ''
-                else:
-                    module = node.module
-                names = ['%s.%s' % (module, n.name) for n in node.names]
-            else:
-                continue
-
-            for name in names:
-                imports.append(Import(name, self))
-
+                for name in node.names:
+                    name = (
+                        self.absolute_name(self.depth - node.level) + '.'
+                        if node.level > 0 else ''
+                    ) + (
+                        node.module + '.' if node.module else ''
+                    ) + name.name
+                    imports.append({'target': name, 'lineno': node.lineno})
+            elif isinstance(node, (ast.ClassDef, ast.FunctionDef)):
+                # recursion here to get semi-dynamic imports
+                imports.extend(self.get_imports(node.body))
         return imports
 
 
-class Import(object):
-    def __init__(self, name, by):
-        self.name = name
-        self.by = by
+class Dependency(object):
+    def __init__(self, source, lineno, target):
+        self.source = source
+        self.lineno = lineno
+        self.target = target
+
+    def __str__(self):
+        return '%s imports %s (line %s)' % (
+            self.source,
+            self.target if self.external else self.target.absolute_name(),
+            self.lineno)
+
+    @property
+    def external(self):
+        return isinstance(self.target, str)
