@@ -18,13 +18,17 @@ Why does this file exist, and why not put this in __main__?
 """
 import argparse
 
+from .dsm import DSM
 
-parser = argparse.ArgumentParser(description='Command description.')
-parser.add_argument('names', metavar='NAME', nargs=argparse.ZERO_OR_MORE,
-                    help="A name of something.")
+parser = argparse.ArgumentParser(
+    description='Command line tool for dependenpy Python package.')
+parser.add_argument('packages', metavar='PACKAGES', nargs=argparse.ONE_OR_MORE,
+                    help='The package list.')
 
 
 def main(args=None):
     """Main function."""
     args = parser.parse_args(args=args)
-    print(args.names)
+    dsm = DSM(args.packages)
+    dsm.build_dependencies()
+    dsm.print()

@@ -12,13 +12,18 @@ from importlib.util import find_spec
 from os.path import basename, dirname, exists, isdir, isfile, join, splitext
 
 
+# TODO: add warnings for errors
+# TODO: add option to reference a module path from another
+# (example: os.path = posixpath)
+# TODO: handle wrong subpackages (os.wrong)
+
 class DSM(object):
     def __init__(self, packages):
         self._cache = {}
         self.packages = []
         for p in packages:
             if exists(p):
-                if isdir(p) and isfile(join(p, os.sep, '__init__.py')):
+                if isdir(p) and isfile(join(p, '__init__.py')):
                     self.packages.append(Package(basename(p), p, self))
                 elif isfile(p) and p.endswith('__init__.py'):
                     p = dirname(p)
@@ -26,9 +31,18 @@ class DSM(object):
             else:
                 spec = find_spec(p)
                 if spec is not None:
-                    package = Package(
-                        spec.name, spec.submodule_search_locations[0], self)
+                    if spec.submodule_search_locations:
+                        path = spec.submodule_search_locations[0]
+                    elif spec.origin and spec.origin != 'built-in':
+                        path = spec.origin
+                    else:
+                        continue
+                    package = Package(spec.name, path, self)
                     self.packages.append(package)
+
+    def __str__(self):
+        return 'Dependency DSM for packages: [%s]' % ', '.join(
+            [str(p) for p in self.packages])
 
     def print(self):
         print(self)
@@ -60,7 +74,7 @@ class DSM(object):
         return None
 
 
-class TreeNode(object):
+class _TreeNode(object):
     def __init__(self):
         self._depth = None
 
@@ -96,7 +110,7 @@ class TreeNode(object):
         return '.'.join(reversed(names))
 
 
-class Package(TreeNode):
+class Package(_TreeNode):
     def __init__(self, name, path, dsm, package=None):
         super().__init__()
         self._cache = {}
@@ -106,6 +120,9 @@ class Package(TreeNode):
         self.subpackages = []
         self.modules = []
         self.dsm = dsm
+        if isfile(path):
+            self.modules.append(Module(name, path, self))
+            return
         for m in os.listdir(path):
             abs_m = join(path, m)
             if isfile(abs_m) and m.endswith('.py'):
@@ -158,7 +175,7 @@ class Package(TreeNode):
         return None
 
 
-class Module(TreeNode):
+class Module(_TreeNode):
     def __init__(self, name, path, package):
         super().__init__()
         self.name = name
