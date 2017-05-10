@@ -2,7 +2,9 @@
 
 """Main test script."""
 
-import os
-import unittest
+from dependenpy.cli import main
 
-from dependenpy import DSM
+
+def test_main():
+    """Main test method."""
+    main([])
