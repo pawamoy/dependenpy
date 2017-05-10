@@ -8,9 +8,8 @@ This is the main and only module of dependenpy package.
 
 import ast
 import os
-from os.path import basename, dirname, exists, isdir, isfile, join, splitext
-
 from importlib.util import find_spec
+from os.path import basename, dirname, exists, isdir, isfile, join, splitext
 
 
 class DSM(object):
@@ -62,6 +61,9 @@ class DSM(object):
 
 
 class TreeNode(object):
+    def __init__(self):
+        self._depth = None
+
     @property
     def root(self):
         node = self
@@ -71,7 +73,7 @@ class TreeNode(object):
 
     @property
     def depth(self):
-        if hasattr(self, '_depth'):
+        if self._depth is not None:
             return self._depth
         depth, node = 1, self
         while node.package is not None:
@@ -96,6 +98,7 @@ class TreeNode(object):
 
 class Package(TreeNode):
     def __init__(self, name, path, dsm, package=None):
+        super().__init__()
         self._cache = {}
         self.name = name
         self.path = path
@@ -157,6 +160,7 @@ class Package(TreeNode):
 
 class Module(TreeNode):
     def __init__(self, name, path, package):
+        super().__init__()
         self.name = name
         self.path = path
         self.package = package

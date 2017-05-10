@@ -8,9 +8,9 @@ your Python code, i.e. which module needs which other module. You will then
 be able to build a dependency matrix and use it for other purposes.
 """
 
-from .dsm import DSM, Package, Module, Dependency
+from .dsm import DSM, Dependency, Module, Package
 
 
+__all__ = ('DSM', 'Dependency', 'Module', 'Package')
 __author__ = 'Timothée Mazzucotelli <timothee.mazzucotelli@gmail.com>'
 __version__ = '2.0.3'
-__all__ = ('DSM', 'Package', 'Module', 'Dependency')
