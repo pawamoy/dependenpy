@@ -18,7 +18,7 @@ from os.path import basename, dirname, exists, isdir, isfile, join, splitext
 # TODO: handle wrong subpackages (os.wrong)
 
 class DSM(object):
-    def __init__(self, packages):
+    def __init__(self, *packages):
         self._cache = {}
         self.packages = []
         for p in packages:
@@ -72,6 +72,24 @@ class DSM(object):
                 if len(parts) < 3:
                     return p
         return None
+
+    # matrix = [[0 for _ in range(len(dsm.modules))] for __ in range(len(dsm.modules))]
+    # for i, m in enumerate(sorted(dsm.modules, key=lambda x: x.absolute_name())):
+    #     m.index = i
+    # for i, m in enumerate(sorted(dsm.modules, key=lambda x: x.absolute_name())):
+    #     for d in m.dependencies:
+    #         matrix[i][m.index] += 1
+
+    @property
+    def modules(self):
+        modules = []
+        for p in self.packages:
+            modules.extend(p.modules)
+            modules.extend(p.submodules)
+        return modules
+
+    def _invalidate_cache(self):
+        self._cache = {}
 
 
 class _TreeNode(object):
@@ -173,6 +191,17 @@ class Package(_TreeNode):
                 if len(parts) < 3:
                     return sp
         return None
+
+    @property
+    def submodules(self):
+        submodules = []
+        for sp in self.subpackages:
+            submodules.extend(sp.modules)
+            submodules.extend(sp.submodules)
+        return submodules
+
+    def _invalidate_cache(self):
+        self._cache = {}
 
 
 class Module(_TreeNode):

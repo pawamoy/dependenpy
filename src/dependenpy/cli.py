@@ -29,6 +29,6 @@ parser.add_argument('packages', metavar='PACKAGES', nargs=argparse.ONE_OR_MORE,
 def main(args=None):
     """Main function."""
     args = parser.parse_args(args=args)
-    dsm = DSM(args.packages)
+    dsm = DSM(*args.packages)
     dsm.build_dependencies()
     dsm.print()
