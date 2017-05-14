@@ -16,6 +16,7 @@ from os.path import basename, dirname, exists, isdir, isfile, join, splitext
 # TODO: add option to reference a module path from another
 # (example: os.path = posixpath)
 # TODO: handle wrong subpackages (os.wrong)
+# TODO: make DSM a root node (share some code with Package)
 
 class DSM(object):
     def __init__(self, *packages):
@@ -73,12 +74,14 @@ class DSM(object):
                     return p
         return None
 
-    # matrix = [[0 for _ in range(len(dsm.modules))] for __ in range(len(dsm.modules))]
-    # for i, m in enumerate(sorted(dsm.modules, key=lambda x: x.absolute_name())):
-    #     m.index = i
-    # for i, m in enumerate(sorted(dsm.modules, key=lambda x: x.absolute_name())):
-    #     for d in m.dependencies:
-    #         matrix[i][m.index] += 1
+    def matrix(self, depth):
+        matrix = [[0 for _ in range(len(self.modules))] for __ in range(len(self.modules))]
+        modules = sorted(self.get_modules(depth), key=lambda x: x.absolute_name())
+        for i, m in enumerate(modules):
+            m.index = i
+        for i, m in enumerate(modules):
+            for d in m.dependencies:
+                matrix[i][m.index] += 1
 
     @property
     def modules(self):
@@ -88,7 +91,7 @@ class DSM(object):
             modules.extend(p.submodules)
         return modules
 
-    def _invalidate_cache(self):
+    def _reset_cache(self):
         self._cache = {}
 
 
@@ -200,7 +203,7 @@ class Package(_TreeNode):
             submodules.extend(sp.submodules)
         return submodules
 
-    def _invalidate_cache(self):
+    def _reset_cache(self):
         self._cache = {}
 
 
