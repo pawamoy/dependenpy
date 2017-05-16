@@ -74,14 +74,42 @@ class DSM(object):
                     return p
         return None
 
-    def matrix(self, depth):
-        matrix = [[0 for _ in range(len(self.modules))] for __ in range(len(self.modules))]
-        modules = sorted(self.get_modules(depth), key=lambda x: x.absolute_name())
+    def as_matrix(self):
+        modules = self.modules
+        size = len(modules)
+        matrix = [[0 for _ in range(size)] for __ in range(size)]
+        modules = sorted(modules, key=lambda x: x.absolute_name())
         for i, m in enumerate(modules):
             m.index = i
         for i, m in enumerate(modules):
             for d in m.dependencies:
-                matrix[i][m.index] += 1
+                matrix[i][d.target.index] += 1
+        return matrix
+
+    def as_dict(self):
+        modules = self.modules
+        dictionary = {}
+        modules = sorted(modules, key=lambda x: x.absolute_name())
+        for m in modules:
+            if not m.dependencies:
+                continue
+            name = m.absolute_name()
+            if dictionary.get(name, None) is None:
+                dictionary[name] = {}
+            for d in m.dependencies:
+                target_name = d.target.absolute_name()
+                if dictionary[name].get(target_name, None) is None:
+                    dictionary[name][target_name] = 0
+                dictionary[name][target_name] += 1
+        return dictionary
+
+    # def as_treemap(self):
+    #     packages = self.packages
+    #     size = len(packages)
+    #     treemap = [[(0, None) for _ in range(size)] for __ in range(size)]
+    #     for i, p in enumerate(packages):
+    #         for j, q in enumerate(packages):
+    #             treemap[i][j][1] =
 
     @property
     def modules(self):
