@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""
-dependenpy utils module.
-
-This is the main and only module of dependenpy package.
-"""
+"""dependenpy dsm module."""
 
 import ast
 import os
+import sys
+from copy import deepcopy
 from importlib.util import find_spec
 from os.path import basename, dirname, exists, isdir, isfile, join, splitext
 
@@ -17,6 +15,8 @@ from os.path import basename, dirname, exists, isdir, isfile, join, splitext
 # (example: os.path = posixpath)
 # TODO: handle wrong subpackages (os.wrong)
 # TODO: make DSM a root node (share some code with Package)
+# TODO: write serializers/formatters to output DSM
+
 
 class DSM(object):
     def __init__(self, *packages):
@@ -45,10 +45,37 @@ class DSM(object):
         return 'Dependency DSM for packages: [%s]' % ', '.join(
             [str(p) for p in self.packages])
 
-    def print(self):
-        print(self)
-        for p in self.packages:
-            p.print(indent='  ')
+    def print(self, output=sys.stdout, dependencies=True, matrix=True, depth=0):
+        if matrix:
+            keys, matrix = self.as_matrix(depth=depth)
+            max_key_length = max(len(k) for k in keys)
+            max_dep_length = len(str(max(j for i in matrix for j in i)))
+            key_index_length = len(str(len(keys)))
+            column_length = max(key_index_length, max_dep_length)
+            # first line spacing
+            output.write((' %s||' % (' ' * (max_key_length + key_index_length + 4))))
+            # first line headers
+            for i, _ in enumerate(keys):
+                output.write(('{:^%s}|' % column_length).format(i))
+            output.write('\n')
+            # line of dashes
+            output.write((' %s-+-%s-++' % (
+                '-' * max_key_length, '-' * key_index_length)))
+            for i, _ in enumerate(keys):
+                output.write(('%s+' % ('-' * column_length)))
+            output.write('\n')
+            # lines
+            for i, k in enumerate(keys):
+                output.write((' {:>%s} | {:>%s} ||' % (max_key_length, key_index_length)).format(k, i))
+                for v in matrix[i]:
+                    output.write(('{:>%s}|' % column_length).format(v))
+                output.write('\n')
+            output.write('\n')
+        if dependencies:
+            output.write(str(self) + '\n')
+            for p in self.packages:
+                p.print(output=output, indent='  ')
+        output.flush()
 
     def build_dependencies(self):
         for p in self.packages:
@@ -74,32 +101,59 @@ class DSM(object):
                     return p
         return None
 
-    def as_matrix(self):
+    def as_matrix(self, depth=0):
         modules = self.modules
-        size = len(modules)
+
+        if depth < 1:
+            keys = modules
+        else:
+            keys = []
+            for m in modules:
+                if m.depth <= depth:
+                    keys.append(m)
+                    continue
+                package = m.package
+                while package.depth > depth and package.package:
+                    package = package.package
+                if package not in keys:
+                    keys.append(package)
+
+        size = len(keys)
         matrix = [[0 for _ in range(size)] for __ in range(size)]
-        modules = sorted(modules, key=lambda x: x.absolute_name())
-        for i, m in enumerate(modules):
-            m.index = i
-        for i, m in enumerate(modules):
-            for d in m.dependencies:
-                matrix[i][d.target.index] += 1
-        return matrix
+        keys = sorted(keys, key=lambda k: k.absolute_name())
+
+        if depth < 1:
+            for i, k in enumerate(keys):
+                k.index = i
+            for i, k in enumerate(keys):
+                for d in k.dependencies:
+                    if d.external:
+                        continue
+                    if isinstance(d.target, Module):
+                        matrix[i][d.target.index] += 1
+                    elif isinstance(d.target, Package):
+                        for m in d.target.modules:
+                            if m.name == '__init__':
+                                matrix[i][m.index] += 1
+                                break
+        else:
+            for i, k in enumerate(keys):
+                for j, l in enumerate(keys):
+                    matrix[i][j] = k.cardinal(to=l)
+        return [k.absolute_name() for k in keys], matrix
 
     def as_dict(self):
         modules = self.modules
         dictionary = {}
-        modules = sorted(modules, key=lambda x: x.absolute_name())
+        base_dict = {m.absolute_name(): 0 for m in modules}
         for m in modules:
-            if not m.dependencies:
-                continue
             name = m.absolute_name()
             if dictionary.get(name, None) is None:
-                dictionary[name] = {}
+                dictionary[name] = deepcopy(base_dict)
             for d in m.dependencies:
+                if isinstance(d.target, str):
+                    continue
                 target_name = d.target.absolute_name()
-                if dictionary[name].get(target_name, None) is None:
-                    dictionary[name][target_name] = 0
                 dictionary[name][target_name] += 1
         return dictionary
 
@@ -115,7 +169,6 @@ class DSM(object):
     def modules(self):
         modules = []
         for p in self.packages:
-            modules.extend(p.modules)
             modules.extend(p.submodules)
         return modules
 
@@ -126,6 +179,11 @@ class DSM(object):
 class _TreeNode(object):
     def __init__(self):
         self._depth = None
+
+    def __contains__(self, item):
+        if self == item:
+            return True
+        return False
 
     @property
     def root(self):
@@ -145,9 +203,9 @@ class _TreeNode(object):
         self._depth = depth
         return depth
 
-    def absolute_name(self, depth=-1):
+    def absolute_name(self, depth=0):
         node, node_depth = self, self.depth
-        if depth < 0:
+        if depth < 1:
             depth = node_depth
         while node_depth > depth and node.package is not None:
             node = node.package
@@ -183,12 +241,19 @@ class Package(_TreeNode):
     def __str__(self):
         return self.name
 
-    def print(self, indent=''):
-        print(indent + str(self))
+    def __contains__(self, item):
+        if self == item:
+            return True
+        if item in self.submodules:
+            return True
+        return False
+
+    def print(self, output=sys.stdout, indent=''):
+        output.write(indent + str(self) + '\n')
         for m in self.modules:
-            m.print(indent=indent + '  ')
+            m.print(output=output, indent=indent + '  ')
         for sp in self.subpackages:
-            sp.print(indent=indent + '  ')
+            sp.print(output=output, indent=indent + '  ')
 
     @property
     def is_subpackage(self):
@@ -226,6 +291,7 @@ class Package(_TreeNode):
     @property
     def submodules(self):
         submodules = []
+        submodules.extend(self.modules)
         for sp in self.subpackages:
             submodules.extend(sp.modules)
             submodules.extend(sp.submodules)
@@ -233,6 +299,12 @@ class Package(_TreeNode):
 
     def _reset_cache(self):
         self._cache = {}
+
+    def cardinal(self, to):
+        count = 0
+        for m in self.submodules:
+            count += m.cardinal(to)
+        return count
 
 
 class Module(_TreeNode):
@@ -246,17 +318,20 @@ class Module(_TreeNode):
     def __str__(self):
         return self.name
 
-    def print(self, indent=''):
-        print(indent + str(self))
+    def print(self, output=sys.stdout, indent=''):
+        output.write(indent + str(self) + '\n')
         for d in self.dependencies:
             external = '! ' if d.external else ''
-            print(indent + '  ' + external + str(d))
+            output.write(indent + '  ' + external + str(d) + '\n')
 
     def build_dependencies(self):
         dsm = self.package.dsm
         for _import in self.parse_code():
             target = dsm.get_target(_import['target'])
             if target:
+                what = _import['target'].split('.')[-1]
+                if what != target.name:
+                    _import['what'] = what
                 _import['target'] = target
             self.dependencies.append(Dependency(source=self, **_import))
 
@@ -289,16 +364,26 @@ class Module(_TreeNode):
                 imports.extend(self.get_imports(node.body))
         return imports
 
+    def cardinal(self, to):
+        valid_dependencies = (d for d in self.dependencies if not d.external)
+        count = 0
+        for d in valid_dependencies:
+            if d.target in to:
+                count += 1
+        return count
+
 
 class Dependency(object):
-    def __init__(self, source, lineno, target):
+    def __init__(self, source, lineno, target, what=None):
         self.source = source
         self.lineno = lineno
         self.target = target
+        self.what = what
 
     def __str__(self):
-        return '%s imports %s (line %s)' % (
+        return '%s imports %s%s (line %s)' % (
             self.source,
+            '%s from ' % self.what if self.what else '',
             self.target if self.external else self.target.absolute_name(),
             self.lineno)
 
