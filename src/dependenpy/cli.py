@@ -16,19 +16,62 @@ Why does this file exist, and why not put this in __main__?
 
   Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
+
 import argparse
+import sys
 
 from .dsm import DSM
 
 parser = argparse.ArgumentParser(
+    add_help=False,
     description='Command line tool for dependenpy Python package.')
+
+parser.add_argument('-d', '--depth', default='-1', type=int, dest='depth',
+                    help='Matrix depth. Default: 2 if one package, '
+                         'otherwise 1.')
+parser.add_argument('-l', '--show-dependencies-list', action='store_true',
+                    dest='dependencies', default=False,
+                    help='Show the dependencies list. Default: false.')
+parser.add_argument('-m', '--show-matrix', action='store_true',
+                    dest='matrix', default=False,
+                    help='Show the matrix. Default: false.')
+parser.add_argument('-o', '--output', action='store', dest='output',
+                    default=sys.stdout,
+                    help='File to write to. Default: stdout.')
+parser.add_argument('-v', '--version', action='version',
+                    version='%(prog)s 1.0',
+                    help="Show program's version number and exit.")
+parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
+                    help='Show this help message and exit.')
 parser.add_argument('packages', metavar='PACKAGES', nargs=argparse.ONE_OR_MORE,
-                    help='The package list.')
+                    help='The package list. Can be a comma-separated list. '
+                         'Each package must be either '
+                         'a valid path or a package in PYTHONPATH.')
 
 
 def main(args=None):
     """Main function."""
     args = parser.parse_args(args=args)
-    dsm = DSM(*args.packages)
+
+    if not (args.matrix or args.dependencies):
+        parser.error('You must show at least matrix (-m), dependencies (-l) '
+                     'or both (-ml).')
+
+    packages = []
+    for package in args.packages:
+        if ',' in package:
+            packages.extend(package.split(','))
+        else:
+            packages.append(package)
+
+    dsm = DSM(*packages)
     dsm.build_dependencies()
-    dsm.print()
+
+    depth = args.depth
+    if depth == -1:
+        depth = 2 if len(packages) == 1 else 1
+
+    dsm.print(output=args.output,
+              dependencies=args.dependencies,
+              matrix=args.matrix,
+              depth=depth)
