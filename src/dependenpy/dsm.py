@@ -52,9 +52,9 @@ class DSM(object):
             max_dep_length = len(str(max(j for i in matrix for j in i)))
             key_index_length = len(str(len(keys)))
             column_length = max(key_index_length, max_dep_length)
-            # first line spacing
-            output.write((' %s||' % (' ' * (max_key_length + key_index_length + 4))))
-            # first line headers
+            # first line left headers
+            output.write((' {:>%s} | {:>%s} ||' % (max_key_length, key_index_length)).format('Module', 'Id'))
+            # first line column headers
             for i, _ in enumerate(keys):
                 output.write(('{:^%s}|' % column_length).format(i))
             output.write('\n')
@@ -91,13 +91,15 @@ class DSM(object):
         if isinstance(parts, str):
             parts = target.split('.')
         for p in self.packages:
-            if parts[0] == p.name:
-                if len(parts) == 1:
+            first_part_size = p.name.count('.') + 1
+            if '.'.join(parts[0:first_part_size]) == p.name:
+                right_part_size = len(parts) - first_part_size + 1
+                if right_part_size == 1:
                     return p
-                target = p.get_target(parts[1:])
+                target = p.get_target(parts[first_part_size:])
                 if target:
                     return target
-                if len(parts) < 3:
+                if right_part_size < 3:
                     return p
         return None
 
@@ -179,11 +181,6 @@ class DSM(object):
 class _TreeNode(object):
     def __init__(self):
         self._depth = None
-
-    def __contains__(self, item):
-        if self == item:
-            return True
-        return False
 
     @property
     def root(self):
@@ -293,7 +290,6 @@ class Package(_TreeNode):
         submodules = []
         submodules.extend(self.modules)
         for sp in self.subpackages:
-            submodules.extend(sp.modules)
             submodules.extend(sp.submodules)
         return submodules
 
@@ -317,6 +313,13 @@ class Module(_TreeNode):
 
     def __str__(self):
         return self.name
+
+    def __contains__(self, item):
+        if self == item:
+            return True
+        elif self.package == item and self.name == '__init__':
+            return True
+        return False
 
     def print(self, output=sys.stdout, indent=''):
         output.write(indent + str(self) + '\n')

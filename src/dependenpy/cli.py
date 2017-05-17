@@ -54,8 +54,7 @@ def main(args=None):
     args = parser.parse_args(args=args)
 
     if not (args.matrix or args.dependencies):
-        parser.error('You must show at least matrix (-m), dependencies (-l) '
-                     'or both (-ml).')
+        args.matrix = True
 
     packages = []
     for package in args.packages:
