@@ -76,6 +76,133 @@ Installation
 Usage
 =====
 
+Version 3
+---------
+
+Version 3 introduces a command-line tool:
+
+Example:
+
+.. code:: bash
+
+    dependenpy -h
+
+Result:
+
+.. code:: bash
+
+    usage: dependenpy [-d DEPTH] [-l] [-m] [-o OUTPUT] [-v] [-h] PACKAGES [PACKAGES ...]
+
+    Command line tool for dependenpy Python package.
+
+    positional arguments:
+      PACKAGES              The package list. Can be a comma-separated list. Each package must be either a valid path or a package in PYTHONPATH.
+
+    optional arguments:
+      -d DEPTH, --depth DEPTH
+                            Matrix depth. Default: 2 if one package, otherwise 1.
+      -l, --show-dependencies-list
+                            Show the dependencies list. Default: false.
+      -m, --show-matrix     Show the matrix. Default: false.
+      -o OUTPUT, --output OUTPUT
+                            File to write to. Default: stdout.
+      -v, --version         Show program's version number and exit.
+      -h, --help            Show this help message and exit.
+
+Example:
+
+.. code:: bash
+
+    dependenpy dependenpy
+    dependenpy dependenpy --depth=2
+
+Result:
+
+.. code:: bash
+
+                  Module | Id ||0|1|2|3|
+     --------------------+----++-+-+-+-+
+     dependenpy.__init__ |  0 ||0|0|0|4|
+     dependenpy.__main__ |  1 ||0|0|1|0|
+          dependenpy.cli |  2 ||0|0|0|1|
+          dependenpy.dsm |  3 ||0|0|0|0|
+
+Example:
+
+.. code:: bash
+
+    dependenpy -l dependenpy
+
+Result:
+
+.. code:: bash
+
+    Dependency DSM for packages: [dependenpy]
+      dependenpy
+        __main__
+          ! __main__ imports sys (line 13)
+          __main__ imports main from dependenpy.cli (line 15)
+        dsm
+          ! dsm imports ast (line 5)
+          ! dsm imports os (line 6)
+          ! dsm imports sys (line 7)
+          ! dsm imports copy.deepcopy (line 8)
+          ! dsm imports importlib.util.find_spec (line 9)
+          ! dsm imports os.path.basename (line 10)
+          ! dsm imports os.path.dirname (line 10)
+          ! dsm imports os.path.exists (line 10)
+          ! dsm imports os.path.isdir (line 10)
+          ! dsm imports os.path.isfile (line 10)
+          ! dsm imports os.path.join (line 10)
+          ! dsm imports os.path.splitext (line 10)
+        cli
+          ! cli imports argparse (line 20)
+          ! cli imports sys (line 21)
+          cli imports DSM from dependenpy.dsm (line 23)
+        __init__
+          __init__ imports DSM from dependenpy.dsm (line 11)
+          __init__ imports Dependency from dependenpy.dsm (line 11)
+          __init__ imports Module from dependenpy.dsm (line 11)
+          __init__ imports Package from dependenpy.dsm (line 11)
+
+Example:
+
+.. code:: bash
+
+    dependenpy json,setuptools
+    dependenpy json setuptools
+
+Result:
+
+.. code:: bash
+
+         Module | Id ||0 |1 |
+     -----------+----++--+--+
+           json |  0 || 5| 0|
+     setuptools |  1 || 0|75|
+
+You can still use dependenpy programmatically:
+
+.. code:: python
+
+    from dependenpy import DSM
+
+    django_dsm = DSM('django')  # build the module tree
+    django_dsm.build_dependencies()  # actually parse the code
+
+    keys, matrix = django_dsm.as_matrix(depth=2)
+    django_deps = django.as_dict()
+    django_treemap = django.as_treemap()  # soon
+
+    other_dsm = DSM('django', 'meerkat', 'appsettings', 'dependenpy', 'archan')
+    other_dsm.build_dependencies()
+    with open('output', 'w') as output:
+        other_dsm.print(matrix=True, depth=1, dependencies=True, output=output)
+
+
+Version 2
+---------
+
 .. code:: python
 
     from dependenpy.utils import MatrixBuilder
@@ -140,10 +267,3 @@ Development
 ===========
 
 To run all the tests: ``tox``
-
-Thanks
-======
-
-Thanks to `dmishin`_ for the TSP solver, needed to compute the similarity order.
-
-.. _dmishin: https://github.com/dmishin
