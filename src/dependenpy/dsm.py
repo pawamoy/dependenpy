@@ -45,37 +45,48 @@ class DSM(object):
         return 'Dependency DSM for packages: [%s]' % ', '.join(
             [str(p) for p in self.packages])
 
-    def print(self, output=sys.stdout, dependencies=True, matrix=True, depth=0):
+    def print(self,
+              output=sys.stdout,
+              dependencies=True,
+              matrix=True,
+              depth=0):
         if matrix:
             keys, matrix = self.as_matrix(depth=depth)
             max_key_length = max(len(k) for k in keys)
             max_dep_length = len(str(max(j for i in matrix for j in i)))
-            key_index_length = len(str(len(keys)))
-            column_length = max(key_index_length, max_dep_length)
+            key_col_length = len(str(len(keys)))
+            key_line_length = max(key_col_length, 2)
+            column_length = max(key_col_length, max_dep_length)
             # first line left headers
-            output.write((' {:>%s} | {:>%s} ||' % (max_key_length, key_index_length)).format('Module', 'Id'))
+            print((' {:>%s} | {:>%s} ||' % (
+                max_key_length, key_line_length
+            )).format('Module', 'Id'), file=output, end='')
             # first line column headers
             for i, _ in enumerate(keys):
-                output.write(('{:^%s}|' % column_length).format(i))
-            output.write('\n')
+                print(('{:^%s}|' % column_length).format(i),
+                      file=output, end='')
+            print('')
             # line of dashes
-            output.write((' %s-+-%s-++' % (
-                '-' * max_key_length, '-' * key_index_length)))
+            print((' %s-+-%s-++' % ('-' * max_key_length,
+                                    '-' * key_line_length)),
+                  file=output, end='')
             for i, _ in enumerate(keys):
-                output.write(('%s+' % ('-' * column_length)))
-            output.write('\n')
+                print(('%s+' % ('-' * column_length)), file=output, end='')
+            print('')
             # lines
             for i, k in enumerate(keys):
-                output.write((' {:>%s} | {:>%s} ||' % (max_key_length, key_index_length)).format(k, i))
+                print((' {:>%s} | {:>%s} ||' % (
+                    max_key_length, key_line_length
+                )).format(k, i), file=output, end='')
                 for v in matrix[i]:
-                    output.write(('{:>%s}|' % column_length).format(v))
-                output.write('\n')
-            output.write('\n')
+                    print(('{:>%s}|' % column_length).format(v),
+                          file=output, end='')
+                print('')
+            print('')
         if dependencies:
-            output.write(str(self) + '\n')
+            print(str(self), file=output)
             for p in self.packages:
                 p.print(output=output, indent='  ')
-        output.flush()
 
     def build_dependencies(self):
         for p in self.packages:
@@ -239,14 +250,24 @@ class Package(_TreeNode):
         return self.name
 
     def __contains__(self, item):
+        if item in self._cache:
+            return self._cache[item]
         if self == item:
+            self._cache[item] = True
             return True
-        if item in self.submodules:
-            return True
+        for m in self.modules:
+            if item in m:
+                self._cache[item] = True
+                return True
+        for sp in self.subpackages:
+            if item in sp:
+                self._cache[item] = True
+                return True
+        self._cache[item] = False
         return False
 
     def print(self, output=sys.stdout, indent=''):
-        output.write(indent + str(self) + '\n')
+        print(indent + str(self), file=output)
         for m in self.modules:
             m.print(output=output, indent=indent + '  ')
         for sp in self.subpackages:
@@ -322,10 +343,10 @@ class Module(_TreeNode):
         return False
 
     def print(self, output=sys.stdout, indent=''):
-        output.write(indent + str(self) + '\n')
+        print(indent + str(self), file=output)
         for d in self.dependencies:
             external = '! ' if d.external else ''
-            output.write(indent + '  ' + external + str(d) + '\n')
+            print(indent + '  ' + external + str(d), file=output)
 
     def build_dependencies(self):
         dsm = self.package.dsm

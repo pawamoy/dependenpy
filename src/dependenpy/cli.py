@@ -59,8 +59,10 @@ def main(args=None):
     packages = []
     for package in args.packages:
         if ',' in package:
-            packages.extend(package.split(','))
-        else:
+            for p in package.split(','):
+                if p not in packages:
+                    packages.append(p)
+        elif package not in packages:
             packages.append(package)
 
     dsm = DSM(*packages)
@@ -70,7 +72,15 @@ def main(args=None):
     if depth == -1:
         depth = 2 if len(packages) == 1 else 1
 
-    dsm.print(output=args.output,
-              dependencies=args.dependencies,
-              matrix=args.matrix,
-              depth=depth)
+    if isinstance(args.output, str):
+        args.output = open(args.output, 'w')
+
+    try:
+        dsm.print(output=args.output,
+                  dependencies=args.dependencies,
+                  matrix=args.matrix,
+                  depth=depth)
+    except BrokenPipeError:
+        return 1
+
+    return 0
