@@ -22,6 +22,7 @@ import sys
 
 from .dsm import DSM
 
+
 parser = argparse.ArgumentParser(
     add_help=False,
     description='Command line tool for dependenpy Python package.')
@@ -56,6 +57,7 @@ def main(args=None):
     if not (args.matrix or args.dependencies):
         args.matrix = True
 
+    # split comma-separated args
     packages = []
     for package in args.packages:
         if ',' in package:
@@ -65,9 +67,9 @@ def main(args=None):
         elif package not in packages:
             packages.append(package)
 
-    dsm = DSM(*packages)
-    dsm.build_dependencies()
+    dsm = DSM(*packages, build_tree=True, build_dependencies=True)
 
+    # guess convenient depth
     depth = args.depth
     if depth == -1:
         depth = 2 if len(packages) == 1 else 1
@@ -81,6 +83,7 @@ def main(args=None):
                   matrix=args.matrix,
                   depth=depth)
     except BrokenPipeError:
+        # avoid traceback
         return 1
 
     return 0

@@ -46,17 +46,8 @@ Dependenpy
 
 .. end-badges
 
-A Python module that build dependency matrices between other modules.
-
-This Python module can build the dependency matrices of a project's packages,
-based on ``from ... import ...`` commands in their modules.
-For now, its purpose is purely informational.
-
-The module is composed of two classes: MatrixBuilder,
-which is initialized with a list of packages available is ``sys.path``, and Matrix,
-which is an autonomous class containing matrix data.
-This list of packages can be a string (one package), a list of string (several)
-or another type of list, used to define groups of packages with a legend.
+Dependenpy allows you to build a dependency matrix for a set of Python packages.
+To do this, it reads and searches the source code for import statements.
 
 License
 =======

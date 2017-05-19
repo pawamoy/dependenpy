@@ -6,8 +6,9 @@ import ast
 import os
 import sys
 from copy import deepcopy
-from importlib.util import find_spec
-from os.path import basename, dirname, exists, isdir, isfile, join, splitext
+from os.path import isdir, isfile, join, splitext
+
+from .finder import PackageFinder, PackageSpec
 
 
 # TODO: add warnings for errors
@@ -15,107 +16,154 @@ from os.path import basename, dirname, exists, isdir, isfile, join, splitext
 # (example: os.path = posixpath)
 # TODO: handle wrong subpackages (os.wrong)
 # TODO: make DSM a root node (share some code with Package)
-# TODO: write serializers/formatters to output DSM
 
-
-class DSM(object):
-    def __init__(self, *packages):
-        self._cache = {}
+class _DSMPackageSharedNode(object):
+    def __init__(self, build_tree=True):
+        self._target_cache = {}
+        self._item_cache = {}
+        self._contains_cache = {}
+        self._build_tree = build_tree
+        self.modules = []
         self.packages = []
-        for p in packages:
-            if exists(p):
-                if isdir(p) and isfile(join(p, '__init__.py')):
-                    self.packages.append(Package(basename(p), p, self))
-                elif isfile(p) and p.endswith('__init__.py'):
-                    p = dirname(p)
-                    self.packages.append(Package(basename(p), p, self))
-            else:
-                spec = find_spec(p)
-                if spec is not None:
-                    if spec.submodule_search_locations:
-                        path = spec.submodule_search_locations[0]
-                    elif spec.origin and spec.origin != 'built-in':
-                        path = spec.origin
-                    else:
-                        continue
-                    package = Package(spec.name, path, self)
-                    self.packages.append(package)
 
-    def __str__(self):
-        return 'Dependency DSM for packages: [%s]' % ', '.join(
-            [str(p) for p in self.packages])
+        if build_tree:
+            self.build_tree()
 
-    def print(self,
-              output=sys.stdout,
-              dependencies=True,
-              matrix=True,
-              depth=0):
-        if matrix:
-            keys, matrix = self.as_matrix(depth=depth)
-            max_key_length = max(len(k) for k in keys)
-            max_dep_length = len(str(max(j for i in matrix for j in i)))
-            key_col_length = len(str(len(keys)))
-            key_line_length = max(key_col_length, 2)
-            column_length = max(key_col_length, max_dep_length)
-            # first line left headers
-            print((' {:>%s} | {:>%s} ||' % (
-                max_key_length, key_line_length
-            )).format('Module', 'Id'), file=output, end='')
-            # first line column headers
-            for i, _ in enumerate(keys):
-                print(('{:^%s}|' % column_length).format(i),
-                      file=output, end='')
-            print('')
-            # line of dashes
-            print((' %s-+-%s-++' % ('-' * max_key_length,
-                                    '-' * key_line_length)),
-                  file=output, end='')
-            for i, _ in enumerate(keys):
-                print(('%s+' % ('-' * column_length)), file=output, end='')
-            print('')
-            # lines
-            for i, k in enumerate(keys):
-                print((' {:>%s} | {:>%s} ||' % (
-                    max_key_length, key_line_length
-                )).format(k, i), file=output, end='')
-                for v in matrix[i]:
-                    print(('{:>%s}|' % column_length).format(v),
-                          file=output, end='')
-                print('')
-            print('')
-        if dependencies:
-            print(str(self), file=output)
-            for p in self.packages:
-                p.print(output=output, indent='  ')
+    def __contains__(self, item):
+        if item not in self._contains_cache:
+            self._contains_cache[item] = self._contains(item)
+        return self._contains_cache[item]
 
-    def build_dependencies(self):
+    def __getitem__(self, item):
+        depth = item.count('.') + 1
+        parts = item.split('.', 1)
+        for m in self.modules:
+            if parts[0] == m.name:
+                if depth == 1:
+                    return m
         for p in self.packages:
-            p.build_dependencies()
+            if parts[0] == p.name:
+                if depth == 1:
+                    return p
+                item = p.get(parts[1])
+                if item:
+                    return item
+        raise KeyError(item)
+
+    @property
+    def submodules(self):
+        submodules = []
+        submodules.extend(self.modules)
+        for p in self.packages:
+            submodules.extend(p.submodules)
+        return submodules
+
+    def build_tree(self):
+        pass  # to be overriden
+
+    def _contains(self, item):
+        if self is item:
+            return True
+        for m in self.modules:
+            if item in m:
+                return True
+        for p in self.packages:
+            if item in p:
+                return True
+        return False
+
+    def get(self, item):
+        if item not in self._item_cache:
+            try:
+                item = self.__getitem__(item)
+            except KeyError:
+                item = None
+            self._item_cache[item] = item
+        return self._item_cache[item]
 
     def get_target(self, target):
-        if target not in self._cache:
-            self._cache[target] = self._get_target(target)
-        return self._cache[target]
+        if target not in self._target_cache:
+            self._target_cache[target] = self._get_target(target)
+        return self._target_cache[target]
 
     def _get_target(self, target):
-        parts = target
-        if isinstance(parts, str):
-            parts = target.split('.')
+        depth = target.count('.') + 1
+        parts = target.split('.', 1)
+        for m in self.modules:
+            if parts[0] == m.name:
+                if depth < 3:
+                    return m
         for p in self.packages:
-            first_part_size = p.name.count('.') + 1
-            if '.'.join(parts[0:first_part_size]) == p.name:
-                right_part_size = len(parts) - first_part_size + 1
-                if right_part_size == 1:
+            if parts[0] == p.name:
+                if depth == 1:
                     return p
-                target = p.get_target(parts[first_part_size:])
+                target = p._get_target(parts[1])
                 if target:
                     return target
-                if right_part_size < 3:
+                if depth < 3:
                     return p
         return None
 
+    def build_dependencies(self):
+        for m in self.modules:
+            m.build_dependencies()
+        for p in self.packages:
+            p.build_dependencies()
+
+    def print(self,
+              output=sys.stdout,
+              matrix=True,
+              dependencies=True,
+              depth=0,
+              indent=''):
+        if matrix:
+            self.print_matrix(output, depth)
+        if dependencies:
+            self.print_dependencies(output, indent)
+
+    def print_matrix(self, output=sys.stdout, depth=0):
+        keys, matrix = self.as_matrix(depth=depth)
+        max_key_length = max(len(k) for k in keys)
+        max_dep_length = len(str(max(j for i in matrix for j in i)))
+        key_col_length = len(str(len(keys)))
+        key_line_length = max(key_col_length, 2)
+        column_length = max(key_col_length, max_dep_length)
+        # first line left headers
+        print((' {:>%s} | {:>%s} ||' % (
+            max_key_length, key_line_length
+        )).format('Module', 'Id'), file=output, end='')
+        # first line column headers
+        for i, _ in enumerate(keys):
+            print(('{:^%s}|' % column_length).format(i),
+                  file=output, end='')
+        print('')
+        # line of dashes
+        print((' %s-+-%s-++' % ('-' * max_key_length,
+                                '-' * key_line_length)),
+              file=output, end='')
+        for i, _ in enumerate(keys):
+            print(('%s+' % ('-' * column_length)), file=output, end='')
+        print('')
+        # lines
+        for i, k in enumerate(keys):
+            print((' {:>%s} | {:>%s} ||' % (
+                max_key_length, key_line_length
+            )).format(k, i), file=output, end='')
+            for v in matrix[i]:
+                print(('{:>%s}|' % column_length).format(v),
+                      file=output, end='')
+            print('')
+        print('')
+
+    def print_dependencies(self, output=sys.stdout, indent=''):
+        print(indent + str(self), file=output)
+        for m in self.modules:
+            m.print_dependencies(output=output, indent=indent + '  ')
+        for p in self.packages:
+            p.print_dependencies(output=output, indent=indent + '  ')
+
     def as_matrix(self, depth=0):
-        modules = self.modules
+        modules = self.submodules
 
         if depth < 1:
             keys = modules
@@ -156,7 +204,7 @@ class DSM(object):
         return [k.absolute_name() for k in keys], matrix
 
     def as_dict(self):
-        modules = self.modules
+        modules = self.submodules
         dictionary = {}
         base_dict = {m.absolute_name(): 0 for m in modules}
         for m in modules:
@@ -170,28 +218,22 @@ class DSM(object):
                 dictionary[name][target_name] += 1
         return dictionary
 
-    # def as_treemap(self):
-    #     packages = self.packages
-    #     size = len(packages)
-    #     treemap = [[(0, None) for _ in range(size)] for __ in range(size)]
-    #     for i, p in enumerate(packages):
-    #         for j, q in enumerate(packages):
-    #             treemap[i][j][1] =
-
-    @property
-    def modules(self):
-        modules = []
-        for p in self.packages:
-            modules.extend(p.submodules)
-        return modules
-
-    def _reset_cache(self):
-        self._cache = {}
+    def as_treemap(self):
+        # packages = self.packages
+        # size = len(packages)
+        # treemap = [[(0, None) for _ in range(size)] for __ in range(size)]
+        # for i, p in enumerate(packages):
+        #     for j, q in enumerate(packages):
+        #         treemap[i][j][1] =
+        pass
 
 
-class _TreeNode(object):
+class _PackageModuleSharedNode(object):
     def __init__(self):
-        self._depth = None
+        self._depth_cache = None
+
+    def __str__(self):
+        return self.absolute_name()
 
     @property
     def root(self):
@@ -202,13 +244,13 @@ class _TreeNode(object):
 
     @property
     def depth(self):
-        if self._depth is not None:
-            return self._depth
+        if self._depth_cache is not None:
+            return self._depth_cache
         depth, node = 1, self
         while node.package is not None:
             depth += 1
             node = node.package
-        self._depth = depth
+        self._depth_cache = depth
         return depth
 
     def absolute_name(self, depth=0):
@@ -225,53 +267,60 @@ class _TreeNode(object):
         return '.'.join(reversed(names))
 
 
-class Package(_TreeNode):
-    def __init__(self, name, path, dsm, package=None):
-        super().__init__()
-        self._cache = {}
+class DSM(_DSMPackageSharedNode):
+    def __init__(self, *packages, build_tree=True, build_dependencies=True):
+        self.finder = PackageFinder()
+
+        specs = []
+        for package in packages:
+            try:
+                specs.append(self.finder.find(package))
+            except ModuleNotFoundError:
+                pass
+
+        self.specs = PackageSpec.combine(specs)
+
+        super().__init__(build_tree)
+
+        if build_tree and build_dependencies:
+            self.build_dependencies()
+
+    def __str__(self):
+        return 'Dependency DSM for packages: [%s]' % ', '.join(
+            [p.name for p in self.packages])
+
+    def build_tree(self):
+        for spec in self.specs:
+            if spec.ismodule:
+                self.modules.append(Module(spec.name, spec.path, dsm=self))
+            else:
+                self.packages.append(Package(
+                    spec.name, spec.path,
+                    dsm=self, limit_to=spec.limit_to,
+                    build_tree=self._build_tree,
+                    build_dependencies=False))
+
+
+class Package(_DSMPackageSharedNode, _PackageModuleSharedNode):
+    def __init__(self,
+                 name,
+                 path,
+                 dsm=None,
+                 package=None,
+                 limit_to=None,
+                 build_tree=True,
+                 build_dependencies=True):
         self.name = name
         self.path = path
         self.package = package
-        self.subpackages = []
-        self.modules = []
         self.dsm = dsm
-        if isfile(path):
-            self.modules.append(Module(name, path, self))
-            return
-        for m in os.listdir(path):
-            abs_m = join(path, m)
-            if isfile(abs_m) and m.endswith('.py'):
-                self.modules.append(Module(
-                    splitext(m)[0], abs_m, self))
-            elif isdir(abs_m) and isfile(join(abs_m, '__init__.py')):
-                self.subpackages.append(Package(m, abs_m, dsm, self))
+        self.limit_to = limit_to or []
 
-    def __str__(self):
-        return self.name
+        _DSMPackageSharedNode.__init__(self, build_tree)
+        _PackageModuleSharedNode.__init__(self)
 
-    def __contains__(self, item):
-        if item in self._cache:
-            return self._cache[item]
-        if self == item:
-            self._cache[item] = True
-            return True
-        for m in self.modules:
-            if item in m:
-                self._cache[item] = True
-                return True
-        for sp in self.subpackages:
-            if item in sp:
-                self._cache[item] = True
-                return True
-        self._cache[item] = False
-        return False
-
-    def print(self, output=sys.stdout, indent=''):
-        print(indent + str(self), file=output)
-        for m in self.modules:
-            m.print(output=output, indent=indent + '  ')
-        for sp in self.subpackages:
-            sp.print(output=output, indent=indent + '  ')
+        if build_tree and build_dependencies:
+            self.build_dependencies()
 
     @property
     def is_subpackage(self):
@@ -281,41 +330,29 @@ class Package(_TreeNode):
     def is_root(self):
         return self.package is None
 
-    def build_dependencies(self):
-        for m in self.modules:
-            m.build_dependencies()
-        for sp in self.subpackages:
-            sp.build_dependencies()
-
-    def get_target(self, target):
-        parts = target
-        if isinstance(parts, str):
-            parts = target.split('.')
-        for m in self.modules:
-            if parts[0] == m.name:
-                if len(parts) < 3:
-                    return m
-        for sp in self.subpackages:
-            if parts[0] == sp.name:
-                if len(parts) == 1:
-                    return sp
-                target = sp.get_target(parts[1:])
-                if target:
-                    return target
-                if len(parts) < 3:
-                    return sp
-        return None
-
-    @property
-    def submodules(self):
-        submodules = []
-        submodules.extend(self.modules)
-        for sp in self.subpackages:
-            submodules.extend(sp.submodules)
-        return submodules
-
-    def _reset_cache(self):
-        self._cache = {}
+    def build_tree(self):
+        for m in os.listdir(self.path):
+            abs_m = join(self.path, m)
+            if isfile(abs_m) and m.endswith('.py'):
+                name = splitext(m)[0]
+                if not self.limit_to or name in self.limit_to:
+                    self.modules.append(Module(name, abs_m, self.dsm, self))
+            elif isdir(abs_m) and isfile(join(abs_m, '__init__.py')):
+                names = []
+                new_limit_to = []
+                if self.limit_to:
+                    for l in self.limit_to:
+                        if '.' in l:
+                            name, l = l.split('.')
+                            names.append(name)
+                            new_limit_to.append(l)
+                        else:
+                            names.append(l)
+                if not names or m in names:
+                    self.packages.append(
+                        Package(m, abs_m, self.dsm, self, new_limit_to,
+                                build_tree=self._build_tree,
+                                build_dependencies=False))
 
     def cardinal(self, to):
         count = 0
@@ -324,34 +361,35 @@ class Package(_TreeNode):
         return count
 
 
-class Module(_TreeNode):
-    def __init__(self, name, path, package):
+class Module(_PackageModuleSharedNode):
+    def __init__(self, name, path, dsm=None, package=None):
         super().__init__()
         self.name = name
         self.path = path
         self.package = package
+        self.dsm = dsm
         self.dependencies = []
 
-    def __str__(self):
-        return self.name
-
+    # override _TreeNode's
     def __contains__(self, item):
-        if self == item:
+        if self is item:
             return True
-        elif self.package == item and self.name == '__init__':
+        elif self.package is item and self.name == '__init__':
             return True
         return False
 
-    def print(self, output=sys.stdout, indent=''):
-        print(indent + str(self), file=output)
+    def print_dependencies(self, output=sys.stdout, indent=''):
+        print(indent + self.name, file=output)
         for d in self.dependencies:
             external = '! ' if d.external else ''
             print(indent + '  ' + external + str(d), file=output)
 
     def build_dependencies(self):
-        dsm = self.package.dsm
+        highest = self.dsm or self.root
+        if self is highest:
+            highest = _PackageModuleSharedNode()
         for _import in self.parse_code():
-            target = dsm.get_target(_import['target'])
+            target = highest.get_target(_import['target'])
             if target:
                 what = _import['target'].split('.')[-1]
                 if what != target.name:
