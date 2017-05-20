@@ -67,23 +67,34 @@ def main(args=None):
         elif package not in packages:
             packages.append(package)
 
-    dsm = DSM(*packages, build_tree=True, build_dependencies=True)
-
     # guess convenient depth
     depth = args.depth
     if depth == -1:
         depth = 2 if len(packages) == 1 else 1
 
-    if isinstance(args.output, str):
-        args.output = open(args.output, 'w')
+    # open file if not stdout
+    output = args.output
+    if isinstance(output, str):
+        output = open(output, 'w')
+
+    dsm = DSM(*packages, build_tree=True, build_dependencies=True)
+
+    if dsm.empty:
+        return 1
 
     try:
-        dsm.print(output=args.output,
+        dsm.print(output=output,
                   dependencies=args.dependencies,
                   matrix=args.matrix,
                   depth=depth)
     except BrokenPipeError:
         # avoid traceback
-        return 1
+        return 2
+
+    try:
+        output.close()
+    except IOError:
+        # avoid traceback
+        return 2
 
     return 0

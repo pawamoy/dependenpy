@@ -11,17 +11,15 @@ from os.path import isdir, isfile, join, splitext
 from .finder import PackageFinder, PackageSpec
 
 
-# TODO: add warnings for errors
 # TODO: add option to reference a module path from another
 # (example: os.path = posixpath)
-# TODO: handle wrong subpackages (os.wrong)
-# TODO: make DSM a root node (share some code with Package)
 
 class _DSMPackageSharedNode(object):
     def __init__(self, build_tree=True):
         self._target_cache = {}
         self._item_cache = {}
         self._contains_cache = {}
+        self._matrix_cache = {}
         self._build_tree = build_tree
         self.modules = []
         self.packages = []
@@ -49,6 +47,13 @@ class _DSMPackageSharedNode(object):
                 if item:
                     return item
         raise KeyError(item)
+
+    def __bool__(self):
+        return bool(self.modules or self.packages)
+
+    @property
+    def empty(self):
+        return not bool(self)
 
     @property
     def submodules(self):
@@ -117,17 +122,18 @@ class _DSMPackageSharedNode(object):
               depth=0,
               indent=''):
         if matrix:
-            self.print_matrix(output, depth)
+            self.print_matrix(depth=depth, output=output)
         if dependencies:
-            self.print_dependencies(output, indent)
+            self.print_dependencies(indent=indent, output=output)
 
-    def print_matrix(self, output=sys.stdout, depth=0):
+    def print_matrix(self, depth=0, output=sys.stdout):
         keys, matrix = self.as_matrix(depth=depth)
         max_key_length = max(len(k) for k in keys)
         max_dep_length = len(str(max(j for i in matrix for j in i)))
         key_col_length = len(str(len(keys)))
         key_line_length = max(key_col_length, 2)
         column_length = max(key_col_length, max_dep_length)
+        print('', file=output)
         # first line left headers
         print((' {:>%s} | {:>%s} ||' % (
             max_key_length, key_line_length
@@ -155,14 +161,17 @@ class _DSMPackageSharedNode(object):
             print('')
         print('')
 
-    def print_dependencies(self, output=sys.stdout, indent=''):
+    def print_dependencies(self, indent='', output=sys.stdout):
         print(indent + str(self), file=output)
         for m in self.modules:
-            m.print_dependencies(output=output, indent=indent + '  ')
+            m.print_dependencies(indent=indent + '  ', output=output)
         for p in self.packages:
-            p.print_dependencies(output=output, indent=indent + '  ')
+            p.print_dependencies(indent=indent + '  ', output=output)
 
     def as_matrix(self, depth=0):
+        if self._matrix_cache:
+            return self._matrix_cache
+
         modules = self.submodules
 
         if depth < 1:
@@ -201,7 +210,11 @@ class _DSMPackageSharedNode(object):
             for i, k in enumerate(keys):
                 for j, l in enumerate(keys):
                     matrix[i][j] = k.cardinal(to=l)
-        return [k.absolute_name() for k in keys], matrix
+
+        self._matrix_cache['keys'] = [k.absolute_name() for k in keys]
+        self._matrix_cache['matrix'] = matrix
+
+        return self._matrix_cache['keys'], self._matrix_cache['matrix']
 
     def as_dict(self):
         modules = self.submodules
@@ -270,15 +283,24 @@ class _PackageModuleSharedNode(object):
 class DSM(_DSMPackageSharedNode):
     def __init__(self, *packages, build_tree=True, build_dependencies=True):
         self.finder = PackageFinder()
+        self.specs = []
+        self.not_found = []
 
         specs = []
         for package in packages:
-            try:
-                specs.append(self.finder.find(package))
-            except ModuleNotFoundError:
-                pass
+            spec = self.finder.find(package)
+            if spec:
+                specs.append(spec)
+            else:
+                self.not_found.append(package)
+
+        if not specs:
+            print('** dependenpy: DSM empty.', file=sys.stderr)
 
         self.specs = PackageSpec.combine(specs)
+
+        for m in self.not_found:
+            print('** dependenpy: Not found: %s.' % m, file=sys.stderr)
 
         super().__init__(build_tree)
 
@@ -337,6 +359,8 @@ class Package(_DSMPackageSharedNode, _PackageModuleSharedNode):
                 name = splitext(m)[0]
                 if not self.limit_to or name in self.limit_to:
                     self.modules.append(Module(name, abs_m, self.dsm, self))
+
+            # TODO: option to enforce or not presence of __init__.py
             elif isdir(abs_m) and isfile(join(abs_m, '__init__.py')):
                 names = []
                 new_limit_to = []
@@ -355,10 +379,7 @@ class Package(_DSMPackageSharedNode, _PackageModuleSharedNode):
                                 build_dependencies=False))
 
     def cardinal(self, to):
-        count = 0
-        for m in self.submodules:
-            count += m.cardinal(to)
-        return count
+        return sum(m.cardinal(to) for m in self.submodules)
 
 
 class Module(_PackageModuleSharedNode):
@@ -427,12 +448,8 @@ class Module(_PackageModuleSharedNode):
         return imports
 
     def cardinal(self, to):
-        valid_dependencies = (d for d in self.dependencies if not d.external)
-        count = 0
-        for d in valid_dependencies:
-            if d.target in to:
-                count += 1
-        return count
+        return sum(1 for _ in filter(
+            lambda d: not d.external and d.target in to, self.dependencies))
 
 
 class Dependency(object):
@@ -444,7 +461,7 @@ class Dependency(object):
 
     def __str__(self):
         return '%s imports %s%s (line %s)' % (
-            self.source,
+            self.source.name,
             '%s from ' % self.what if self.what else '',
             self.target if self.external else self.target.absolute_name(),
             self.lineno)

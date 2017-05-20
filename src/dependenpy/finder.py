@@ -88,4 +88,4 @@ class PackageFinder(object):
             package_spec = finder.find(package)
             if package_spec:
                 return package_spec
-        raise ModuleNotFoundError(package)
+        return None
