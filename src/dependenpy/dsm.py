@@ -14,7 +14,106 @@ from .finder import PackageFinder, PackageSpec
 # TODO: add option to reference a module path from another
 # (example: os.path = posixpath)
 
-class _DSMPackageSharedNode(object):
+
+class Matrix(object):
+    def __init__(self, *nodes, depth=0):
+        modules = []
+        for node in nodes:
+            if node.ismodule:
+                modules.append(node)
+            elif node.ispackage or node.isdsm:
+                modules.extend(node.submodules)
+
+        if depth < 1:
+            keys = modules
+        else:
+            keys = []
+            for m in modules:
+                if m.depth <= depth:
+                    keys.append(m)
+                    continue
+                package = m.package
+                while package.depth > depth and package.package:
+                    package = package.package
+                if package not in keys:
+                    keys.append(package)
+
+        size = len(keys)
+        matrix = [[0 for _ in range(size)] for __ in range(size)]
+        keys = sorted(keys, key=lambda k: k.absolute_name())
+
+        if depth < 1:
+            for i, k in enumerate(keys):
+                k.index = i
+            for i, k in enumerate(keys):
+                for d in k.dependencies:
+                    if d.external or d.target.absolute_name() not in keys:
+                        continue
+                    if isinstance(d.target, Module):
+                        matrix[i][d.target.index] += 1
+                    elif isinstance(d.target, Package):
+                        for m in d.target.modules:
+                            if m.name == '__init__':
+                                matrix[i][m.index] += 1
+                                break
+        else:
+            for i, k in enumerate(keys):
+                for j, l in enumerate(keys):
+                    matrix[i][j] = k.cardinal(to=l)
+
+        self.keys = [k.absolute_name() for k in keys]
+        self.matrix = matrix
+
+    def print(self, output=sys.stdout):
+        max_key_length = max(len(k) for k in self.keys)
+        max_dep_length = len(str(max(j for i in self.matrix for j in i)))
+        key_col_length = len(str(len(self.keys)))
+        key_line_length = max(key_col_length, 2)
+        column_length = max(key_col_length, max_dep_length)
+        print('', file=output)
+        # first line left headers
+        print((' {:>%s} | {:>%s} ||' % (
+            max_key_length, key_line_length
+        )).format('Module', 'Id'), file=output, end='')
+        # first line column headers
+        for i, _ in enumerate(self.keys):
+            print(('{:^%s}|' % column_length).format(i),
+                  file=output, end='')
+        print('')
+        # line of dashes
+        print((' %s-+-%s-++' % ('-' * max_key_length,
+                                '-' * key_line_length)),
+              file=output, end='')
+        for i, _ in enumerate(self.keys):
+            print(('%s+' % ('-' * column_length)), file=output, end='')
+        print('')
+        # lines
+        for i, k in enumerate(self.keys):
+            print((' {:>%s} | {:>%s} ||' % (
+                max_key_length, key_line_length
+            )).format(k, i), file=output, end='')
+            for v in self.matrix[i]:
+                print(('{:>%s}|' % column_length).format(v),
+                      file=output, end='')
+            print('')
+        print('')
+
+
+class _Node(object):
+    @property
+    def ismodule(self):
+        return isinstance(self, Module)
+
+    @property
+    def ispackage(self):
+        return isinstance(self, Package)
+
+    @property
+    def isdsm(self):
+        return isinstance(self, DSM)
+
+
+class _DSMPackageNode(_Node):
     def __init__(self, build_tree=True):
         self._target_cache = {}
         self._item_cache = {}
@@ -127,39 +226,8 @@ class _DSMPackageSharedNode(object):
             self.print_dependencies(indent=indent, output=output)
 
     def print_matrix(self, depth=0, output=sys.stdout):
-        keys, matrix = self.as_matrix(depth=depth)
-        max_key_length = max(len(k) for k in keys)
-        max_dep_length = len(str(max(j for i in matrix for j in i)))
-        key_col_length = len(str(len(keys)))
-        key_line_length = max(key_col_length, 2)
-        column_length = max(key_col_length, max_dep_length)
-        print('', file=output)
-        # first line left headers
-        print((' {:>%s} | {:>%s} ||' % (
-            max_key_length, key_line_length
-        )).format('Module', 'Id'), file=output, end='')
-        # first line column headers
-        for i, _ in enumerate(keys):
-            print(('{:^%s}|' % column_length).format(i),
-                  file=output, end='')
-        print('')
-        # line of dashes
-        print((' %s-+-%s-++' % ('-' * max_key_length,
-                                '-' * key_line_length)),
-              file=output, end='')
-        for i, _ in enumerate(keys):
-            print(('%s+' % ('-' * column_length)), file=output, end='')
-        print('')
-        # lines
-        for i, k in enumerate(keys):
-            print((' {:>%s} | {:>%s} ||' % (
-                max_key_length, key_line_length
-            )).format(k, i), file=output, end='')
-            for v in matrix[i]:
-                print(('{:>%s}|' % column_length).format(v),
-                      file=output, end='')
-            print('')
-        print('')
+        matrix = self.as_matrix(depth=depth)
+        matrix.print(output=output)
 
     def print_dependencies(self, indent='', output=sys.stdout):
         print(indent + str(self), file=output)
@@ -169,52 +237,11 @@ class _DSMPackageSharedNode(object):
             p.print_dependencies(indent=indent + '  ', output=output)
 
     def as_matrix(self, depth=0):
-        if self._matrix_cache:
-            return self._matrix_cache
-
-        modules = self.submodules
-
-        if depth < 1:
-            keys = modules
-        else:
-            keys = []
-            for m in modules:
-                if m.depth <= depth:
-                    keys.append(m)
-                    continue
-                package = m.package
-                while package.depth > depth and package.package:
-                    package = package.package
-                if package not in keys:
-                    keys.append(package)
-
-        size = len(keys)
-        matrix = [[0 for _ in range(size)] for __ in range(size)]
-        keys = sorted(keys, key=lambda k: k.absolute_name())
-
-        if depth < 1:
-            for i, k in enumerate(keys):
-                k.index = i
-            for i, k in enumerate(keys):
-                for d in k.dependencies:
-                    if d.external:
-                        continue
-                    if isinstance(d.target, Module):
-                        matrix[i][d.target.index] += 1
-                    elif isinstance(d.target, Package):
-                        for m in d.target.modules:
-                            if m.name == '__init__':
-                                matrix[i][m.index] += 1
-                                break
-        else:
-            for i, k in enumerate(keys):
-                for j, l in enumerate(keys):
-                    matrix[i][j] = k.cardinal(to=l)
-
-        self._matrix_cache['keys'] = [k.absolute_name() for k in keys]
-        self._matrix_cache['matrix'] = matrix
-
-        return self._matrix_cache['keys'], self._matrix_cache['matrix']
+        if depth in self._matrix_cache:
+            return self._matrix_cache[depth]
+        matrix = Matrix(self, depth=depth)
+        self._matrix_cache[depth] = matrix
+        return self._matrix_cache[depth]
 
     def as_dict(self):
         modules = self.submodules
@@ -241,7 +268,7 @@ class _DSMPackageSharedNode(object):
         pass
 
 
-class _PackageModuleSharedNode(object):
+class _PackageModuleNode(_Node):
     def __init__(self):
         self._depth_cache = None
 
@@ -280,15 +307,20 @@ class _PackageModuleSharedNode(object):
         return '.'.join(reversed(names))
 
 
-class DSM(_DSMPackageSharedNode):
-    def __init__(self, *packages, build_tree=True, build_dependencies=True):
+class DSM(_DSMPackageNode):
+    def __init__(self,
+                 *packages,
+                 build_tree=True,
+                 build_dependencies=True,
+                 enforce_init=True):
         self.finder = PackageFinder()
         self.specs = []
         self.not_found = []
+        self.enforce_init = enforce_init
 
         specs = []
         for package in packages:
-            spec = self.finder.find(package)
+            spec = self.finder.find(package, enforce_init=enforce_init)
             if spec:
                 specs.append(spec)
             else:
@@ -320,10 +352,11 @@ class DSM(_DSMPackageSharedNode):
                     spec.name, spec.path,
                     dsm=self, limit_to=spec.limit_to,
                     build_tree=self._build_tree,
-                    build_dependencies=False))
+                    build_dependencies=False,
+                    enforce_init=self.enforce_init))
 
 
-class Package(_DSMPackageSharedNode, _PackageModuleSharedNode):
+class Package(_DSMPackageNode, _PackageModuleNode):
     def __init__(self,
                  name,
                  path,
@@ -331,15 +364,17 @@ class Package(_DSMPackageSharedNode, _PackageModuleSharedNode):
                  package=None,
                  limit_to=None,
                  build_tree=True,
-                 build_dependencies=True):
+                 build_dependencies=True,
+                 enforce_init=True):
         self.name = name
         self.path = path
         self.package = package
         self.dsm = dsm
         self.limit_to = limit_to or []
+        self.enforce_init = enforce_init
 
-        _DSMPackageSharedNode.__init__(self, build_tree)
-        _PackageModuleSharedNode.__init__(self)
+        _DSMPackageNode.__init__(self, build_tree)
+        _PackageModuleNode.__init__(self)
 
         if build_tree and build_dependencies:
             self.build_dependencies()
@@ -352,6 +387,18 @@ class Package(_DSMPackageSharedNode, _PackageModuleSharedNode):
     def is_root(self):
         return self.package is None
 
+    def split_limits_heads(self):
+        heads = []
+        new_limit_to = []
+        for l in self.limit_to:
+            if '.' in l:
+                name, l = l.split('.', 1)
+                heads.append(name)
+                new_limit_to.append(l)
+            else:
+                heads.append(l)
+        return heads, new_limit_to
+
     def build_tree(self):
         for m in os.listdir(self.path):
             abs_m = join(self.path, m)
@@ -359,30 +406,21 @@ class Package(_DSMPackageSharedNode, _PackageModuleSharedNode):
                 name = splitext(m)[0]
                 if not self.limit_to or name in self.limit_to:
                     self.modules.append(Module(name, abs_m, self.dsm, self))
-
-            # TODO: option to enforce or not presence of __init__.py
-            elif isdir(abs_m) and isfile(join(abs_m, '__init__.py')):
-                names = []
-                new_limit_to = []
-                if self.limit_to:
-                    for l in self.limit_to:
-                        if '.' in l:
-                            name, l = l.split('.')
-                            names.append(name)
-                            new_limit_to.append(l)
-                        else:
-                            names.append(l)
-                if not names or m in names:
-                    self.packages.append(
-                        Package(m, abs_m, self.dsm, self, new_limit_to,
-                                build_tree=self._build_tree,
-                                build_dependencies=False))
+            elif isdir(abs_m):
+                if isfile(join(abs_m, '__init__.py')) or not self.enforce_init:
+                    heads, new_limit_to = self.split_limits_heads()
+                    if not heads or m in heads:
+                        self.packages.append(
+                            Package(m, abs_m, self.dsm, self, new_limit_to,
+                                    build_tree=self._build_tree,
+                                    build_dependencies=False,
+                                    enforce_init=self.enforce_init))
 
     def cardinal(self, to):
         return sum(m.cardinal(to) for m in self.submodules)
 
 
-class Module(_PackageModuleSharedNode):
+class Module(_PackageModuleNode):
     def __init__(self, name, path, dsm=None, package=None):
         super().__init__()
         self.name = name
@@ -408,7 +446,7 @@ class Module(_PackageModuleSharedNode):
     def build_dependencies(self):
         highest = self.dsm or self.root
         if self is highest:
-            highest = _PackageModuleSharedNode()
+            highest = _PackageModuleNode()
         for _import in self.parse_code():
             target = highest.get_target(_import['target'])
             if target:
@@ -423,8 +461,11 @@ class Module(_PackageModuleSharedNode):
         try:
             body = ast.parse(code).body
         except SyntaxError:
-            code = code.encode('utf-8')
-            body = ast.parse(code).body
+            try:
+                code = code.encode('utf-8')
+                body = ast.parse(code).body
+            except SyntaxError:
+                return []
         return self.get_imports(body)
 
     def get_imports(self, ast_body):

@@ -42,21 +42,23 @@ class PackageSpec(object):
 
 
 class LocalPackageFinder(object):
-    def find(self, package):
+    def find(self, package, **kwargs):
         if not exists(package):
             return None
-        # TODO: option to enforce or not presence of __init__.py
-        if isdir(package) and isfile(join(package, '__init__.py')):
-            name, path = basename(package), package
+        name, path = None, None
+        enforce_init = kwargs.pop('enforce_init', True)
+        if isdir(package):
+            if isfile(join(package, '__init__.py')) or not enforce_init:
+                name, path = basename(package), package
         elif isfile(package) and package.endswith('.py'):
             name, path = splitext(basename(package))[0], package
-        else:
-            return None
-        return PackageSpec(name, path)
+        if name and path:
+            return PackageSpec(name, path)
+        return None
 
 
 class InstalledPackageFinder(object):
-    def find(self, package):
+    def find(self, package, **kwargs):
         spec = find_spec(package)
         if spec is None:
             return None
@@ -83,9 +85,9 @@ class PackageFinder(object):
         else:
             self.finders = [f() for f in finders]
 
-    def find(self, package):
+    def find(self, package, **kwargs):
         for finder in self.finders:
-            package_spec = finder.find(package)
+            package_spec = finder.find(package, **kwargs)
             if package_spec:
                 return package_spec
         return None

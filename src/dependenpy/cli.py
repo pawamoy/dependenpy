@@ -30,12 +30,16 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-d', '--depth', default='-1', type=int, dest='depth',
                     help='Matrix depth. Default: 2 if one package, '
                          'otherwise 1.')
+parser.add_argument('-i', '--enforce-init', action='store_true',
+                    dest='enforce_init', default=False,
+                    help='Enforce presence of __init__.py when listing '
+                         'directories. Default: false.')
 parser.add_argument('-l', '--show-dependencies-list', action='store_true',
                     dest='dependencies', default=False,
                     help='Show the dependencies list. Default: false.')
 parser.add_argument('-m', '--show-matrix', action='store_true',
                     dest='matrix', default=False,
-                    help='Show the matrix. Default: false.')
+                    help='Show the matrix. Default: true if neither -l or -m.')
 parser.add_argument('-o', '--output', action='store', dest='output',
                     default=sys.stdout,
                     help='File to write to. Default: stdout.')
@@ -77,7 +81,8 @@ def main(args=None):
     if isinstance(output, str):
         output = open(output, 'w')
 
-    dsm = DSM(*packages, build_tree=True, build_dependencies=True)
+    dsm = DSM(*packages, build_tree=True, build_dependencies=True,
+              enforce_init=args.enforce_init)
 
     if dsm.empty:
         return 1
@@ -88,12 +93,6 @@ def main(args=None):
                   matrix=args.matrix,
                   depth=depth)
     except BrokenPipeError:
-        # avoid traceback
-        return 2
-
-    try:
-        output.close()
-    except IOError:
         # avoid traceback
         return 2
 
