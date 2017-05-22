@@ -13,4 +13,4 @@ from .dsm import DSM, Dependency, Matrix, Module, Package
 
 __all__ = ('DSM', 'Dependency', 'Matrix', 'Module', 'Package')
 __author__ = 'Timothée Mazzucotelli <timothee.mazzucotelli@gmail.com>'
-__version__ = '2.0.3'
+__version__ = '3.0.0'
