@@ -65,7 +65,7 @@ def main(args=None):
         args (list of str): the arguments passed to the program.
 
     Returns:
-        int: return code being 0 (ok), 1 (dsm empty) or 2 (error).
+        int: return code being 0 (OK), 1 (dsm empty) or 2 (error).
     """
     args = parser.parse_args(args=args)
 

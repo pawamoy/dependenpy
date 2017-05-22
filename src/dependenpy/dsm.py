@@ -5,16 +5,17 @@ dependenpy dsm module.
 
 This is the core module of dependenpy. It contains the following classes:
 
-- DSM: to create a DSM-capable object for a list of packages,
-- Package: which represents a Python package,
-- Module: which represents a Python module,
-- Depdendency: which represents a dependency between two modules,
-- Matrix: to create a matrix (two-dimensions square array plus keys) given
+- ``DSM``: to create a DSM-capable object for a list of packages,
+- ``Package``: which represents a Python package,
+- ``Module``: which represents a Python module,
+- ``Dependency``: which represents a dependency between two modules,
+- ``Matrix``: to create a matrix (two-dimensions square array plus keys) given
   a list of DSMs, packages and/or modules.
 
-It also contains private classes to share some code between DSM, Package
-and Module: _Node, _DSMPackageNode and _PackageModuleNode. They are called
-nodes because the layout of a Python package is a tree.
+It also contains private classes to share some code between ``DSM``,
+``Package`` and ``Module``: ``_Node``, ``_DSMPackageNode`` and
+``_PackageModuleNode``. They are called nodes because the layout of a Python
+package is a tree.
 """
 
 import ast
@@ -111,7 +112,7 @@ class _DSMPackageNode(_Node):
 
     def __bool__(self):
         """
-        Node as boolean.
+        Node as Boolean.
 
         Returns:
             bool: result of node.empty.
@@ -132,10 +133,10 @@ class _DSMPackageNode(_Node):
     @property
     def submodules(self):
         """
-        Property to return all submodules of the node, recursively.
+        Property to return all sub-modules of the node, recursively.
 
         Returns:
-            list of Module: the submodules.
+            list of Module: the sub-modules.
         """
         submodules = []
         submodules.extend(self.modules)
@@ -169,7 +170,7 @@ class _DSMPackageNode(_Node):
 
     def get(self, item):
         """
-        Get item through __getitem__ and cache the result.
+        Get item through ``__getitem__`` and cache the result.
 
         Args:
             item (str): name of package or module.
@@ -231,7 +232,7 @@ class _DSMPackageNode(_Node):
 
     def build_dependencies(self):
         """
-        Recursively build the dependencies for submodules and subpackages.
+        Recursively build the dependencies for sub-modules and sub-packages.
 
         Iterate on node's modules then packages and call their
         build_dependencies methods.
@@ -429,8 +430,8 @@ class DSM(_DSMPackageNode):
             build_tree (bool): auto-build the tree or not.
             build_dependencies (bool): auto-build the dependencies or not.
             enforce_init (bool):
-                if True, only treat directories if they contain an __init__.py
-                file.
+                if True, only treat directories if they contain an
+                ``__init__.py`` file.
         """
         self.finder = PackageFinder()
         self.specs = []
@@ -506,8 +507,8 @@ class Package(_DSMPackageNode, _PackageModuleNode):
             build_tree (bool): auto-build the tree or not.
             build_dependencies (bool): auto-build the dependencies or not.
             enforce_init (bool):
-                if True, only treat directories if they contain an __init__.py
-                file.
+                if True, only treat directories if they contain an
+                ``__init__.py`` file.
         """
         self.name = name
         self.path = path
@@ -525,7 +526,7 @@ class Package(_DSMPackageNode, _PackageModuleNode):
     @property
     def is_subpackage(self):
         """
-        Property to tell if this node is a subpackage.
+        Property to tell if this node is a sub-package.
 
         Returns:
             bool: this package has a parent.
@@ -625,7 +626,7 @@ class Module(_PackageModuleNode):
         Returns:
             bool:
                 True if self is item or item is self's package and
-                self if an __init__ module.
+                self if an ``__init__`` module.
         """
         if self is item:
             return True
@@ -779,10 +780,10 @@ class Matrix(object):
             *nodes (list of DSM/Package/Module):
                 the nodes on which to build the matrix.
             depth (int): the depth of the matrix. This depth is always
-                absolute, meaning that building a matrix with a subpackage
+                absolute, meaning that building a matrix with a sub-package
                 "A.B.C" and a depth of 1 will return a matrix of size 1,
-                containing A only. To see the matrix for the submodules and
-                subpackages in C, you will have to give depth=4.
+                containing A only. To see the matrix for the sub-modules and
+                sub-packages in C, you will have to give depth=4.
         """
         modules = []
         for node in nodes:
@@ -838,7 +839,8 @@ class Matrix(object):
         Print the matrix in a file or on standard output by default.
 
         Args:
-            output (file): descriptor to an opened file (default to stdout).
+            output (file):
+                descriptor to an opened file (default to standard output).
         """
         max_key_length = max(len(k) for k in self.keys)
         max_dep_length = len(str(max(j for i in self.matrix for j in i)))

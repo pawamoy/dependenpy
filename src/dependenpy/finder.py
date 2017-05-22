@@ -71,7 +71,7 @@ class PackageSpec(object):
 
     def find(self, package, **kwargs):
         """
-        Find method. To be overriden.
+        Find method. To be overridden.
 
         Args:
             package (str): package to find. 
