@@ -12,7 +12,7 @@ class PackageSpec(object):
     def __init__(self, name, path, limit_to=None):
         """
         Initialization method.
-        
+
         Args:
             name (str): name of the package.
             path (str): path to the package.
@@ -28,6 +28,7 @@ class PackageSpec(object):
 
     def __eq__(self, y):
         """Equality method."""
+        # pylama:ignore=W0212
         return self.__key() == y.__key()
 
     def __hash__(self):
@@ -42,9 +43,9 @@ class PackageSpec(object):
     def add(self, spec):
         """
         Add limitations of given spec to self's.
-        
+
         Args:
-            spec (PackageSpec): another spec. 
+            spec (PackageSpec): another spec.
         """
         for limit in spec.limit_to:
             if limit not in self.limit_to:
@@ -53,10 +54,10 @@ class PackageSpec(object):
     @staticmethod
     def combine(specs):
         """
-        Combine package specifications' limitations. 
-        
+        Combine package specifications' limitations.
+
         Args:
-            specs (list of PackageSpec): the package specifications. 
+            specs (list of PackageSpec): the package specifications.
 
         Returns:
             list of PackageSpec: the new, merged list of PackageSpec.
@@ -74,8 +75,8 @@ class PackageSpec(object):
         Find method. To be overridden.
 
         Args:
-            package (str): package to find. 
-            **kwargs (): additional keyword arguments used by custom finders. 
+            package (str): package to find.
+            **kwargs (): additional keyword arguments used by custom finders.
 
         Returns:
             PackageSpec: the PackageSpec corresponding to the package, or None.
@@ -91,8 +92,8 @@ class LocalPackageFinder(object):
         Find method.
 
         Args:
-            package (str): package to find. 
-            **kwargs (): additional keyword arguments. 
+            package (str): package to find.
+            **kwargs (): additional keyword arguments.
 
         Returns:
             PackageSpec: the PackageSpec corresponding to the package, or None.
@@ -119,8 +120,8 @@ class InstalledPackageFinder(object):
         Find method.
 
         Args:
-            package (str): package to find. 
-            **kwargs (): additional keyword arguments. 
+            package (str): package to find.
+            **kwargs (): additional keyword arguments.
 
         Returns:
             PackageSpec: the PackageSpec corresponding to the package, or None.
@@ -147,14 +148,14 @@ class InstalledPackageFinder(object):
 class PackageFinder(object):
     """
     Main package finder class.
-    
+
     Initialize it with a list of package finder classes (not instances).
     """
 
     def __init__(self, finders=None):
         """
         Initialization method.
-        
+
         Args:
             finders (list of classes):
                 list of package finder classes (not instances) in a specific
@@ -168,12 +169,12 @@ class PackageFinder(object):
     def find(self, package, **kwargs):
         """
         Find a package using package finders.
-        
+
         Return the first package found.
-        
+
         Args:
-            package (str): package to find. 
-            **kwargs (): additional keyword arguments used by finders. 
+            package (str): package to find.
+            **kwargs (): additional keyword arguments used by finders.
 
         Returns:
             PackageSpec: if package found, else None

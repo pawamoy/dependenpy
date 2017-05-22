@@ -60,7 +60,6 @@ class _DSMPackageNode(_Node):
         self._item_cache = {}
         self._contains_cache = {}
         self._matrix_cache = {}
-        self._build_tree = build_tree
         self.modules = []
         self.packages = []
 
@@ -216,6 +215,7 @@ class _DSMPackageNode(_Node):
             if parts[0] == p.name:
                 if depth == 1:
                     return p
+                # pylama:ignore=W0212
                 target = p._get_target(parts[1])
                 if target:
                     return target
@@ -469,7 +469,7 @@ class DSM(_DSMPackageNode):
                 self.packages.append(Package(
                     spec.name, spec.path,
                     dsm=self, limit_to=spec.limit_to,
-                    build_tree=self._build_tree,
+                    build_tree=True,
                     build_dependencies=False,
                     enforce_init=self.enforce_init))
 
@@ -548,13 +548,13 @@ class Package(_DSMPackageNode, _PackageModuleNode):
         """
         heads = []
         new_limit_to = []
-        for l in self.limit_to:
-            if '.' in l:
-                name, l = l.split('.', 1)
+        for limit in self.limit_to:
+            if '.' in limit:
+                name, limit = limit.split('.', 1)
                 heads.append(name)
-                new_limit_to.append(l)
+                new_limit_to.append(limit)
             else:
-                heads.append(l)
+                heads.append(limit)
         return heads, new_limit_to
 
     def build_tree(self):
@@ -571,7 +571,7 @@ class Package(_DSMPackageNode, _PackageModuleNode):
                     if not heads or m in heads:
                         self.packages.append(
                             Package(m, abs_m, self.dsm, self, new_limit_to,
-                                    build_tree=self._build_tree,
+                                    build_tree=True,
                                     build_dependencies=False,
                                     enforce_init=self.enforce_init))
 
@@ -798,8 +798,8 @@ class Matrix(object):
                     continue
                 package = m.package
                 while (package.depth > depth and
-                           package.package and
-                               package not in nodes):
+                       package.package and
+                       package not in nodes):
                     package = package.package
                 if package not in keys:
                     keys.append(package)
@@ -873,4 +873,4 @@ class Matrix(object):
 
 
 class TreeMap(object):
-    pass
+    """TreeMap class."""
