@@ -20,6 +20,7 @@ Why does this file exist, and why not put this in __main__?
 import argparse
 import sys
 
+from . import __version__
 from .dsm import DSM
 
 
@@ -44,7 +45,7 @@ parser.add_argument('-o', '--output', action='store', dest='output',
                     default=sys.stdout,
                     help='File to write to. Default: stdout.')
 parser.add_argument('-v', '--version', action='version',
-                    version='%(prog)s 1.0',
+                    version='dependenpy %s' % __version__,
                     help="Show program's version number and exit.")
 parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
                     help='Show this help message and exit.')
@@ -55,7 +56,17 @@ parser.add_argument('packages', metavar='PACKAGES', nargs=argparse.ONE_OR_MORE,
 
 
 def main(args=None):
-    """Main function."""
+    """
+    Main function.
+
+    This function is the command line entry point.
+
+    Args:
+        args (list of str): the arguments passed to the program.
+
+    Returns:
+        int: return code being 0 (ok), 1 (dsm empty) or 2 (error).
+    """
     args = parser.parse_args(args=args)
 
     if not (args.matrix or args.dependencies):
@@ -74,7 +85,10 @@ def main(args=None):
     # guess convenient depth
     depth = args.depth
     if depth == -1:
-        depth = 2 if len(packages) == 1 else 1
+        if len(packages) == 1:
+            depth = packages[0].count('.') + 2
+        else:
+            depth = min(p.count('.') for p in packages) + 1
 
     # open file if not stdout
     output = args.output

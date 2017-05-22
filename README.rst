@@ -92,6 +92,8 @@ Result:
     optional arguments:
       -d DEPTH, --depth DEPTH
                             Matrix depth. Default: 2 if one package, otherwise 1.
+      -i, --enforce-init    Enforce presence of __init__.py when listing
+                            directories. Default: false.
       -l, --show-dependencies-list
                             Show the dependencies list. Default: false.
       -m, --show-matrix     Show the matrix. Default: false.
@@ -172,24 +174,31 @@ Result:
            json |  0 || 5| 0|
      setuptools |  1 || 0|75|
 
-You can still use dependenpy programmatically:
+You can also use dependenpy programmatically:
 
 .. code:: python
 
     from dependenpy import DSM
 
-    django_dsm = DSM('django')  # build the module tree
-    django_dsm.build_dependencies()  # actually parse the code
+    # create DSM
+    dsm = DSM('django')
 
-    keys, matrix = django_dsm.as_matrix(depth=2)
-    django_deps = django.as_dict()
-    django_treemap = django.as_treemap()  # soon
+    # transform as matrix, dict of deps or treemap
+    matrix = dsm.as_matrix(depth=2)
+    deps = dsm.as_dict()
+    treemap = dsm.as_treemap()  # soon
 
-    other_dsm = DSM('django', 'meerkat', 'appsettings', 'dependenpy', 'archan')
-    other_dsm.build_dependencies()
+    # initialize with many packages
+    dsm = DSM('django', 'meerkat', 'appsettings', 'dependenpy', 'archan')
     with open('output', 'w') as output:
-        other_dsm.print(matrix=True, depth=1, dependencies=True, output=output)
+        dsm.print(matrix=True, depth=1, dependencies=True, output=output)
 
+    # access packages and modules
+    meerkat = dsm['meerkat']  # or dsm.get('meerkat')
+    finder = dsm['dependenpy.finder']  # or even dsm['dependenpy']['finder']
+
+    # instances of DSM and Package all have print, as_matrix, etc. methods
+    meerkat.print_matrix(depth=2)
 
 Version 2
 ---------
