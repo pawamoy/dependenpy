@@ -27,10 +27,6 @@ from os.path import isdir, isfile, join, splitext
 from .finder import PackageFinder, PackageSpec
 
 
-# TODO: add option to reference a module path from another
-# (example: os.path = posixpath)
-
-
 class _Node(object):
     """Shared code between DSM, Package and Module."""
 
@@ -768,7 +764,7 @@ class Matrix(object):
     Matrix class.
 
     A class to build a matrix given a list of nodes. After instantiation,
-    it has two attributes: matrix, a 2-dimensions array, and keys, the names
+    it has two attributes: data, a 2-dimensions array, and keys, the names
     of the entities in the corresponding order.
     """
 
@@ -809,7 +805,7 @@ class Matrix(object):
                     keys.append(package)
 
         size = len(keys)
-        matrix = [[0 for _ in range(size)] for __ in range(size)]
+        data = [[0 for _ in range(size)] for __ in range(size)]
         keys = sorted(keys, key=lambda k: k.absolute_name())
 
         if depth < 1:
@@ -820,19 +816,19 @@ class Matrix(object):
                     if d.external or d.target.absolute_name() not in keys:
                         continue
                     if isinstance(d.target, Module):
-                        matrix[i][d.target.index] += 1
+                        data[i][d.target.index] += 1
                     elif isinstance(d.target, Package):
                         for m in d.target.modules:
                             if m.name == '__init__':
-                                matrix[i][m.index] += 1
+                                data[i][m.index] += 1
                                 break
         else:
             for i, k in enumerate(keys):
                 for j, l in enumerate(keys):
-                    matrix[i][j] = k.cardinal(to=l)
+                    data[i][j] = k.cardinal(to=l)
 
         self.keys = [k.absolute_name() for k in keys]
-        self.matrix = matrix
+        self.data = data
 
     def print(self, output=sys.stdout):
         """
@@ -843,7 +839,7 @@ class Matrix(object):
                 descriptor to an opened file (default to standard output).
         """
         max_key_length = max(len(k) for k in self.keys)
-        max_dep_length = len(str(max(j for i in self.matrix for j in i)))
+        max_dep_length = len(str(max(j for i in self.data for j in i)))
         key_col_length = len(str(len(self.keys)))
         key_line_length = max(key_col_length, 2)
         column_length = max(key_col_length, max_dep_length)
@@ -869,7 +865,7 @@ class Matrix(object):
             print((' {:>%s} | {:>%s} ||' % (
                 max_key_length, key_line_length
             )).format(k, i), file=output, end='')
-            for v in self.matrix[i]:
+            for v in self.data[i]:
                 print(('{:>%s}|' % column_length).format(v),
                       file=output, end='')
             print('')
