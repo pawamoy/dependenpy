@@ -29,12 +29,11 @@ parser = argparse.ArgumentParser(
     description='Command line tool for dependenpy Python package.')
 
 parser.add_argument('-d', '--depth', default='-1', type=int, dest='depth',
-                    help='Matrix depth. Default: 2 if one package, '
-                         'otherwise 1.')
+                    help='Matrix depth. Default: best guess.')
 parser.add_argument('-i', '--enforce-init', action='store_true',
                     dest='enforce_init', default=False,
                     help='Enforce presence of __init__.py when listing '
-                         'directories. Default: false.')
+                         'directories. Make execution faster. Default: false.')
 parser.add_argument('-l', '--show-dependencies-list', action='store_true',
                     dest='dependencies', default=False,
                     help='Show the dependencies list. Default: false.')
