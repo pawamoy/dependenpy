@@ -2,7 +2,7 @@
 Changelog
 =========
 
-3.0.0 (2017-05-??)
+3.0.0 (2017-05-23)
 ==================
 
 This version is a big refactoring. The code is way more object oriented,
