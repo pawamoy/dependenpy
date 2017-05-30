@@ -19,12 +19,47 @@ package is a tree.
 """
 
 import ast
+import json
 import os
 import sys
 from copy import deepcopy
 from os.path import isdir, isfile, join, splitext
 
 from .finder import PackageFinder, PackageSpec
+
+
+CSV = 'csv'
+JSON = 'json'
+TEXT = 'text'
+FORMAT = (CSV, JSON, TEXT)
+
+
+class _PrintMixin(object):
+    def print(self, output=sys.stdout, format=TEXT, **kwargs):
+        """
+        Print the object in a file or on standard output by default.
+
+        Args:
+            format (str): output format (csv, json or text).
+            output (file):
+                descriptor to an opened file (default to standard output).
+            **kwargs (): additional arguments.
+        """
+        if format == TEXT:
+            print(self._to_text(**kwargs), file=output)
+        elif format == CSV:
+            print(self._to_csv(**kwargs), file=output)
+        elif format == JSON:
+            print(self._to_json(**kwargs), file=output)
+
+    def _to_text(self, **kwargs):
+        raise NotImplementedError
+
+    def _to_csv(self, **kwargs):
+        raise NotImplementedError
+
+    def _to_json(self, **kwargs):
+        raise NotImplementedError
 
 
 class _Node(object):
@@ -60,6 +95,7 @@ class _DSMPackageNode(_Node):
         self._item_cache = {}
         self._contains_cache = {}
         self._matrix_cache = {}
+        self._treemap_cache = None
         self.modules = []
         self.packages = []
 
@@ -222,6 +258,9 @@ class _DSMPackageNode(_Node):
                 # FIXME: can lead to internal dep instead of external
                 # see example with django.contrib.auth.forms
                 # importing forms from django
+                # Idea: when parsing files with ast, record what objects
+                # are defined in the module. Then check here if the given
+                # part is one of these objects.
                 if depth < 3:
                     return p
         return None
@@ -238,51 +277,60 @@ class _DSMPackageNode(_Node):
         for p in self.packages:
             p.build_dependencies()
 
-    def print(self,
-              matrix=True,
-              dependencies=True,
-              output=sys.stdout,
-              **kwargs):
-        """
-        Shortcut to call print methods.
-
-        Args:
-            matrix (bool): whether to print matrix or not.
-            dependencies (bool): whether to print dependencies list or not.
-            output (file): file descriptor on which to write.
-            **kwargs (): additional keyword arguments to related print methods.
-        """
-        if matrix:
-            depth = kwargs.pop('depth', 0)
-            self.print_matrix(depth=depth, output=output)
-        if dependencies:
-            indent = kwargs.pop('indent', '')
-            self.print_dependencies(indent=indent, output=output)
-
-    def print_matrix(self, depth=0, output=sys.stdout):
+    def print_matrix(self, format=TEXT, output=sys.stdout, depth=0, **kwargs):
         """
         Print the matrix for self's nodes.
 
         Args:
-            depth (int): depth of the matrix.
+            format (str): output format (csv, json or text).
             output (file): file descriptor on which to write.
+            depth (int): depth of the matrix.
         """
         matrix = self.as_matrix(depth=depth)
-        matrix.print(output=output)
+        matrix.print(format=format, output=output, **kwargs)
 
-    def print_dependencies(self, indent='', output=sys.stdout):
+    def print_treemap(self, format=TEXT, output=sys.stdout, **kwargs):
         """
-        Print the dependencies for self's nodes.
+        Print the matrix for self's nodes.
 
         Args:
-            indent (str): indent as spaces (add two spaces each recursion).
+            format (str): output format (csv, json or text).
             output (file): file descriptor on which to write.
         """
-        print(indent + str(self), file=output)
+        treemap = self.as_treemap()
+        treemap.print(format=format, output=output, **kwargs)
+
+    def _to_text(self, **kwargs):
+        indent = kwargs.pop('indent', 2)
+        base_indent = kwargs.pop('base_indent', None)
+        if base_indent is None:
+            base_indent = indent
+            indent = 0
+        text = [' ' * indent + str(self) + '\n']
+        new_indent = indent + base_indent
         for m in self.modules:
-            m.print_dependencies(indent=indent + '  ', output=output)
+            text.append(m._to_text(indent=new_indent, base_indent=base_indent))
         for p in self.packages:
-            p.print_dependencies(indent=indent + '  ', output=output)
+            text.append(p._to_text(indent=new_indent, base_indent=base_indent))
+        return ''.join(text)
+
+    def _to_csv(self, **kwargs):
+        header = kwargs.pop('header', True)
+        modules = sorted(self.submodules, key=lambda x: x.absolute_name())
+        text = ['module,path,target,lineno,what,external\n' if header else '']
+        for m in modules:
+            text.append(m._to_csv(header=False))
+        return ''.join(text)
+
+    def _to_json(self, **kwargs):
+        return json.dumps(self.as_dict(), **kwargs)
+
+    def as_dict(self):
+        return {
+            'name': str(self),
+            'modules': [m.as_dict() for m in self.modules],
+            'packages': [p.as_dict() for p in self.packages]
+        }
 
     def as_matrix(self, depth=0):
         """
@@ -296,30 +344,8 @@ class _DSMPackageNode(_Node):
         """
         if depth in self._matrix_cache:
             return self._matrix_cache[depth]
-        matrix = Matrix(self, depth=depth)
-        self._matrix_cache[depth] = matrix
-        return self._matrix_cache[depth]
-
-    def as_dict(self):
-        """
-        Return the dependencies as a dictionary.
-
-        Returns:
-            dict: the dependencies.
-        """
-        modules = self.submodules
-        dictionary = {}
-        base_dict = {m.absolute_name(): 0 for m in modules}
-        for m in modules:
-            name = m.absolute_name()
-            if dictionary.get(name, None) is None:
-                dictionary[name] = deepcopy(base_dict)
-            for d in m.dependencies:
-                if isinstance(d.target, str):
-                    continue
-                target_name = d.target.absolute_name()
-                dictionary[name][target_name] += 1
-        return dictionary
+        self._matrix_cache[depth] = matrix = Matrix(self, depth=depth)
+        return matrix
 
     def as_treemap(self):
         """
@@ -328,13 +354,10 @@ class _DSMPackageNode(_Node):
         Returns:
             TreeMap: instance of TreeMap.
         """
-        # packages = self.packages
-        # size = len(packages)
-        # treemap = [[(0, None) for _ in range(size)] for __ in range(size)]
-        # for i, p in enumerate(packages):
-        #     for j, q in enumerate(packages):
-        #         treemap[i][j][1] =
-        pass
+        if self._treemap_cache:
+            return self._treemap_cache
+        self._treemap_cache = treemap = TreeMap(self)
+        return treemap
 
 
 class _PackageModuleNode(_Node):
@@ -403,7 +426,7 @@ class _PackageModuleNode(_Node):
         return '.'.join(reversed(names))
 
 
-class DSM(_DSMPackageNode):
+class DSM(_DSMPackageNode, _PrintMixin):
     """
     DSM-capable class.
 
@@ -474,7 +497,7 @@ class DSM(_DSMPackageNode):
                     enforce_init=self.enforce_init))
 
 
-class Package(_DSMPackageNode, _PackageModuleNode):
+class Package(_DSMPackageNode, _PackageModuleNode, _PrintMixin):
     """
     Package class.
 
@@ -588,7 +611,7 @@ class Package(_DSMPackageNode, _PackageModuleNode):
         return sum(m.cardinal(to) for m in self.submodules)
 
 
-class Module(_PackageModuleNode):
+class Module(_PackageModuleNode, _PrintMixin):
     """
     Module class.
 
@@ -630,18 +653,47 @@ class Module(_PackageModuleNode):
             return True
         return False
 
-    def print_dependencies(self, indent='', output=sys.stdout):
-        """
-        Print the dependencies of this module.
+    def as_dict(self, absolute=False):
+        return {
+            'name': self.absolute_name() if absolute else self.name,
+            'path': self.path,
+            'dependencies': [{
+                # 'source': d.source.absolute_name(),  # redundant
+                'target': d.target if d.external else d.target.absolute_name(),
+                'lineno': d.lineno,
+                'what': d.what,
+                'external': d.external
+            } for d in self.dependencies]
+        }
 
-        Args:
-            output (file): opened file to write to.
-            indent (str): indentation string.
-        """
-        print(indent + self.name, file=output)
+    def _to_text(self, **kwargs):
+        indent = kwargs.pop('indent', 2)
+        base_indent = kwargs.pop('base_indent', None)
+        if base_indent is None:
+            base_indent = indent
+            indent = 0
+        text = [' ' * indent + self.name + '\n']
+        new_indent = indent + base_indent
         for d in self.dependencies:
             external = '! ' if d.external else ''
-            print(indent + '  ' + external + str(d), file=output)
+            text.append(' ' * new_indent + external + str(d) + '\n')
+        return ''.join(text)
+
+    def _to_csv(self, **kwargs):
+        header = kwargs.pop('header', True)
+        text = ['module,path,target,lineno,what,external\n' if header else '']
+        name = self.absolute_name()
+        for d in self.dependencies:
+            text.append('%s,%s,%s,%s,%s,%s\n' % (
+                name, self.path,
+                d.target if d.external else d.target.absolute_name(),
+                d.lineno, d.what if d.what else '', d.external
+            ))
+        return ''.join(text)
+
+    def _to_json(self, **kwargs):
+        absolute = kwargs.pop('absolute', False)
+        return json.dumps(self.as_dict(absolute=absolute), **kwargs)
 
     def build_dependencies(self):
         """
@@ -759,7 +811,7 @@ class Dependency(object):
         return isinstance(self.target, str)
 
 
-class Matrix(object):
+class Matrix(_PrintMixin):
     """
     Matrix class.
 
@@ -813,64 +865,90 @@ class Matrix(object):
                 k.index = i
             for i, k in enumerate(keys):
                 for d in k.dependencies:
-                    if d.external or d.target.absolute_name() not in keys:
+                    if d.external:
                         continue
-                    if isinstance(d.target, Module):
+                    if d.target.ismodule and d.target in keys:
                         data[i][d.target.index] += 1
-                    elif isinstance(d.target, Package):
-                        for m in d.target.modules:
-                            if m.name == '__init__':
-                                data[i][m.index] += 1
-                                break
+                    elif d.target.ispackage:
+                        m = d.target.get('__init__')
+                        if m is not None and m in keys:
+                            data[i][m.index] += 1
         else:
             for i, k in enumerate(keys):
                 for j, l in enumerate(keys):
                     data[i][j] = k.cardinal(to=l)
 
+        self.size = size
         self.keys = [k.absolute_name() for k in keys]
         self.data = data
 
-    def print(self, output=sys.stdout):
-        """
-        Print the matrix in a file or on standard output by default.
+    @staticmethod
+    def cast(keys, data):
+        matrix = Matrix()
+        matrix.keys = keys
+        matrix.data = data
+        return matrix
 
-        Args:
-            output (file):
-                descriptor to an opened file (default to standard output).
-        """
+    @property
+    def total(self):
+        return sum(j for i in self.data for j in i)
+
+    def _to_csv(self, **kwargs):
+        text = ['module,', ','.join(self.keys), '\n']
+        for i, k in enumerate(self.keys):
+            text.append('%s,%s\n' % (k, ','.join(map(str, self.data[i]))))
+        return ''.join(text)
+
+    def _to_json(self, **kwargs):
+        return json.dumps({'keys': self.keys, 'data': self.data}, **kwargs)
+
+    def _to_text(self, **kwargs):
+        if not self.keys or not self.data:
+            return ''
         max_key_length = max(len(k) for k in self.keys)
         max_dep_length = len(str(max(j for i in self.data for j in i)))
         key_col_length = len(str(len(self.keys)))
         key_line_length = max(key_col_length, 2)
         column_length = max(key_col_length, max_dep_length)
-        print('', file=output)
+
         # first line left headers
-        print((' {:>%s} | {:>%s} ||' % (
+        text = [('\n {:>%s} | {:>%s} ||' % (
             max_key_length, key_line_length
-        )).format('Module', 'Id'), file=output, end='')
+        )).format('Module', 'Id')]
         # first line column headers
         for i, _ in enumerate(self.keys):
-            print(('{:^%s}|' % column_length).format(i),
-                  file=output, end='')
-        print('')
+            text.append(('{:^%s}|' % column_length).format(i))
+        text.append('\n')
         # line of dashes
-        print((' %s-+-%s-++' % ('-' * max_key_length,
-                                '-' * key_line_length)),
-              file=output, end='')
+        text.append((' %s-+-%s-++' % (
+            '-' * max_key_length, '-' * key_line_length)))
         for i, _ in enumerate(self.keys):
-            print(('%s+' % ('-' * column_length)), file=output, end='')
-        print('')
+            text.append('%s+' % ('-' * column_length))
+        text.append('\n')
         # lines
         for i, k in enumerate(self.keys):
-            print((' {:>%s} | {:>%s} ||' % (
+            text.append((' {:>%s} | {:>%s} ||' % (
                 max_key_length, key_line_length
-            )).format(k, i), file=output, end='')
+            )).format(k, i))
             for v in self.data[i]:
-                print(('{:>%s}|' % column_length).format(v),
-                      file=output, end='')
-            print('')
-        print('')
+                text.append(('{:>%s}|' % column_length).format(v))
+            text.append('\n')
+        text.append('\n')
+
+        return ''.join(text)
 
 
-class TreeMap(object):
+class TreeMap(_PrintMixin):
     """TreeMap class."""
+
+    def __init__(self, *nodes):
+        pass  # TODO: implement TreeMap
+
+    def _to_csv(self, **kwargs):
+        return ''
+
+    def _to_json(self, **kwargs):
+        return ''
+
+    def _to_text(self, **kwargs):
+        return ''

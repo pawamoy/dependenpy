@@ -21,7 +21,7 @@ import argparse
 import sys
 
 from . import __version__
-from .dsm import DSM
+from .dsm import DSM, FORMAT
 
 
 parser = argparse.ArgumentParser(
@@ -30,16 +30,22 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-d', '--depth', default='-1', type=int, dest='depth',
                     help='Matrix depth. Default: best guess.')
+parser.add_argument('-f', '--format', choices=FORMAT, default='text',
+                    dest='format', help='Output format. Default: text.')
 parser.add_argument('-i', '--enforce-init', action='store_true',
                     dest='enforce_init', default=False,
                     help='Enforce presence of __init__.py when listing '
                          'directories. Make execution faster. Default: false.')
-parser.add_argument('-l', '--show-dependencies-list', action='store_true',
-                    dest='dependencies', default=False,
-                    help='Show the dependencies list. Default: false.')
-parser.add_argument('-m', '--show-matrix', action='store_true',
-                    dest='matrix', default=False,
-                    help='Show the matrix. Default: true if neither -l or -m.')
+mxg = parser.add_mutually_exclusive_group(required=False)
+mxg.add_argument('-l', '--show-dependencies-list', action='store_true',
+                 dest='dependencies', default=False,
+                 help='Show the dependencies list. Default: false.')
+mxg.add_argument('-m', '--show-matrix', action='store_true',
+                 dest='matrix', default=False,
+                 help='Show the matrix. Default: true unless -l or -t.')
+mxg.add_argument('-t', '--show-treemap', action='store_true',
+                 dest='treemap', default=False,
+                 help='Show the treemap. Default: false.')
 parser.add_argument('-o', '--output', action='store', dest='output',
                     default=sys.stdout,
                     help='File to write to. Default: stdout.')
@@ -68,7 +74,7 @@ def main(args=None):
     """
     args = parser.parse_args(args=args)
 
-    if not (args.matrix or args.dependencies):
+    if not (args.matrix or args.dependencies or args.treemap):
         args.matrix = True
 
     # split comma-separated args
@@ -101,10 +107,12 @@ def main(args=None):
         return 1
 
     try:
-        dsm.print(output=output,
-                  dependencies=args.dependencies,
-                  matrix=args.matrix,
-                  depth=depth)
+        if args.dependencies:
+            dsm.print(format=args.format, output=output, indent=1)
+        elif args.matrix:
+            dsm.print_matrix(format=args.format, output=output, depth=depth)
+        elif args.treemap:
+            dsm.print_treemap(format=args.format, output=output)
     except BrokenPipeError:
         # avoid traceback
         return 2
