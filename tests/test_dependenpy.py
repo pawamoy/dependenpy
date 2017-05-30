@@ -8,7 +8,9 @@ from dependenpy.dsm import DSM, Dependency, Module, Package
 
 def test_main():
     """Main test method."""
-    assert main(['-lm', 'dependenpy']) == 0
+    assert main(['-l', 'dependenpy']) == 0
+    assert main(['-m', 'dependenpy']) == 0
+    assert main(['-t', 'dependenpy']) == 0
     assert main(['dependenpy', '-d100']) == 0
     assert main(['do not exist']) == 1
     assert main(['dependenpy,internal,dependenpy']) == 0

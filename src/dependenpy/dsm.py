@@ -22,7 +22,6 @@ import ast
 import json
 import os
 import sys
-from copy import deepcopy
 from os.path import isdir, isfile, join, splitext
 
 from .finder import PackageFinder, PackageSpec
@@ -326,6 +325,12 @@ class _DSMPackageNode(_Node):
         return json.dumps(self.as_dict(), **kwargs)
 
     def as_dict(self):
+        """
+        Return the dependencies as a dictionary.
+
+        Returns:
+            dict: dictionary of dependencies.
+        """
         return {
             'name': str(self),
             'modules': [m.as_dict() for m in self.modules],
@@ -654,6 +659,12 @@ class Module(_PackageModuleNode, _PrintMixin):
         return False
 
     def as_dict(self, absolute=False):
+        """
+        Return the dependencies as a dictionary.
+
+        Returns:
+            dict: dictionary of dependencies.
+        """
         return {
             'name': self.absolute_name() if absolute else self.name,
             'path': self.path,
@@ -884,6 +895,7 @@ class Matrix(_PrintMixin):
 
     @staticmethod
     def cast(keys, data):
+        """Cast a set of keys and an array to a Matrix object."""
         matrix = Matrix()
         matrix.keys = keys
         matrix.data = data
@@ -891,6 +903,7 @@ class Matrix(_PrintMixin):
 
     @property
     def total(self):
+        """Return the total number of dependencies within this matrix."""
         return sum(j for i in self.data for j in i)
 
     def _to_csv(self, **kwargs):
@@ -942,6 +955,12 @@ class TreeMap(_PrintMixin):
     """TreeMap class."""
 
     def __init__(self, *nodes):
+        """
+        Initialization method.
+
+        Arguments:
+            *nodes (list of Node): the nodes from which to build the treemap.
+        """
         pass  # TODO: implement TreeMap
 
     def _to_csv(self, **kwargs):
