@@ -32,7 +32,7 @@ Reference
     .. automethod:: get_target
     .. automethod:: print
     .. automethod:: print_matrix
-    .. automethod:: print_dependencies
+    .. automethod:: print_treemap
 
 .. autoclass:: dependenpy.dsm.Package
     :members:
@@ -50,7 +50,7 @@ Reference
     .. automethod:: get_target
     .. automethod:: print
     .. automethod:: print_matrix
-    .. automethod:: print_dependencies
+    .. automethod:: print_treemap
 
 .. autoclass:: dependenpy.dsm.Module
     :members:
@@ -64,14 +64,26 @@ Reference
 
     .. automethod:: __init__
 
-.. autoclass:: dependenpy.dsm.Matrix
-    :members:
-
-    .. automethod:: __init__
-
 ``dependenpy.finder``
 ---------------------
 
 .. automodule:: dependenpy.finder
     :members:
 
+``dependenpy.node``
+-------------------
+
+.. automodule:: dependenpy.node
+    :members:
+
+``dependenpy.printer``
+----------------------
+
+.. automodule:: dependenpy.printer
+    :members:
+
+``dependenpy.structures``
+-------------------------
+
+.. automodule:: dependenpy.structures
+    :members:

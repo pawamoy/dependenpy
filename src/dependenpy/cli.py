@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Module that contains the command line app.
+Module that contains the command line application.
 
 Why does this file exist, and why not put this in __main__?
 
@@ -21,7 +21,8 @@ import argparse
 import sys
 
 from . import __version__
-from .dsm import DSM, FORMAT
+from .dsm import DSM
+from .printer import FORMAT
 
 
 parser = argparse.ArgumentParser(
