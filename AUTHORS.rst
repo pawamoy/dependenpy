@@ -2,4 +2,7 @@
 Authors
 =======
 
-* Timothee Mazzucotelli - http://pawamoy.github.io/
+* Pierre Parrend
+* Timothée Mazzucotelli
+* Florent Colin
+* Jean-Louis Mandel
