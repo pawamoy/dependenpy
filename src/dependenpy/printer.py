@@ -4,7 +4,6 @@
 
 import sys
 
-
 CSV = 'csv'
 JSON = 'json'
 TEXT = 'text'

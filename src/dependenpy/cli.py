@@ -24,7 +24,6 @@ from . import __version__
 from .dsm import DSM
 from .printer import FORMAT
 
-
 parser = argparse.ArgumentParser(
     add_help=False,
     description='Command line tool for dependenpy Python package.')
