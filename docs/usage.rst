@@ -158,7 +158,8 @@ Example:
 Create a Dependency
 '''''''''''''''''''
 
-A dependency is a simple object that require
+A dependency is a simple object that require:
+
 - ``source``: the ``Module`` instance importing the item,
 - ``lineno``: the line number at which the import occurred,
 - ``target``: the ``Package`` or ``Module`` instance from which the item is imported
