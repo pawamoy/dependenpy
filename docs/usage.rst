@@ -57,9 +57,9 @@ in ``sys.path``).
 
 Three keyword arguments can be given to ``DSM``:
 
-- ``build_tree``: boolean
-- ``build_dependencies``: boolean
-- ``enforce_init``: boolean
+- ``build_tree``: Boolean
+- ``build_dependencies``: Boolean
+- ``enforce_init``: Boolean
 
 The three of them defaults to true.
 
@@ -77,10 +77,10 @@ been built.
 Using true for both ``build_tree`` and ``build_dependencies`` is recommended
 since it is done pretty quickly, even for big projects like Django.
 
-Turning ``enforce_init`` to false will make the exploration of subdirectories
-complete: by default, a subdirectory is not explored if it does not contain
+Turning ``enforce_init`` to false will make the exploration of sub-directories
+complete: by default, a sub-directory is not explored if it does not contain
 an ``__init__.py`` file. It makes the building of the tree faster. But in some
-cases, you might want to still explore the subdirectory even without
+cases, you might want to still explore the sub-directory even without
 ``__init__.py``. In that case, use ``enforce_init=False``. Note that
 depending on the tree, the build might take longer.
 
@@ -122,8 +122,8 @@ Argument ``limit_to`` can be used this way:
     django_auth = Package('django', 'path/to/django',
                           limit_to=['contrib.auth'])
 
-Of course, you could also have build a the django_auth Package by directly
-specify the name and path of the subdirectory, but using limit_to allows you
+Of course, you could also have build a the ``django_auth`` Package by directly
+specify the name and path of the sub-directory, but using limit_to allows you
 to build the full tree, starting at the root (Django's directory).
 
 .. code:: python
@@ -138,7 +138,7 @@ Create a Module
 
 To create a ``Module`` object, initialize it with a name and a path.
 These two arguments are the only one required. Name should be the name of
-the Python module (the file without the .py extension), and path should be
+the Python module (the file without the ``.py`` extension), and path should be
 the path to the file on the file system.
 
 As for ``Package``, ``dsm`` and ``package`` arguments can be passed when
@@ -232,13 +232,13 @@ module:
     dsm = DSM('django')
     dsm.print(format=JSON)
 
-Dependending on the format chosen, additional keyword arguments can be passed
+Depending on the format chosen, additional keyword arguments can be passed
 to the print method:
 
 - text format: ``indent``, indentation value (integer)
 - CSV format: ``header``, True or False, to display the headers (columns names)
 - JSON format: every arguments accepted by ``json.dumps``, and in the case
-  of a ``Module`` instance, ``absolute`` boolean to switch between output
+  of a ``Module`` instance, ``absolute`` Boolean to switch between output
   of absolute and relative paths.
 
 For ``DSM`` and ``Package`` instances, shortcuts to print a matrix and a

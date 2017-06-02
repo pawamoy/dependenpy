@@ -26,3 +26,6 @@ dsm
 DSM
 instantiation
 mixin
+treemap
+treemaps
+accessor
