@@ -6,6 +6,7 @@ Contents
    :maxdepth: 2
 
    readme
+   usage
    reference
    contributing
    authors

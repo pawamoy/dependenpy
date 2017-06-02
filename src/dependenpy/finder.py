@@ -27,12 +27,10 @@ class PackageSpec(object):
         return self.name, self.path
 
     def __eq__(self, y):
-        """Equality method."""
         # pylama:ignore=W0212
         return self.__key() == y.__key()
 
     def __hash__(self):
-        """Hash method."""
         return hash(self.__key())
 
     @property
@@ -70,21 +68,23 @@ class PackageSpec(object):
                 new_specs[spec].add(spec)
         return list(new_specs.values())
 
+
+class PackageFinder(object):
     def find(self, package, **kwargs):
         """
-        Find method. To be overridden.
+        Find method.
 
         Args:
             package (str): package to find.
-            **kwargs (): additional keyword arguments used by custom finders.
+            **kwargs (): additional keyword arguments.
 
         Returns:
             PackageSpec: the PackageSpec corresponding to the package, or None.
         """
-        return None
+        raise NotImplementedError
 
 
-class LocalPackageFinder(object):
+class LocalPackageFinder(PackageFinder):
     """Finder to find local packages (directories on the disk)."""
 
     def find(self, package, **kwargs):
@@ -112,7 +112,7 @@ class LocalPackageFinder(object):
         return None
 
 
-class InstalledPackageFinder(object):
+class InstalledPackageFinder(PackageFinder):
     """Finder to find installed Python packages using importlib."""
 
     def find(self, package, **kwargs):
@@ -145,7 +145,7 @@ class InstalledPackageFinder(object):
         return None
 
 
-class PackageFinder(object):
+class Finder(object):
     """
     Main package finder class.
 

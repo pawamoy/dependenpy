@@ -18,6 +18,12 @@ extensions = [
     'sphinx.ext.viewcode',
 ]
 
+autodoc_default_flags = [
+    'members',
+    'special-members',
+    'show-inheritance'
+]
+
 if os.getenv('SPELLCHECK'):
     extensions += 'sphinxcontrib.spelling',
     spelling_show_suggestions = True

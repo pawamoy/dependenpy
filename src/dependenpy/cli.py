@@ -22,42 +22,50 @@ import sys
 
 from . import __version__
 from .dsm import DSM
-from .printer import FORMAT
+from .printer import CSV, FORMAT, JSON
 
 parser = argparse.ArgumentParser(
     add_help=False,
     description='Command line tool for dependenpy Python package.')
+mxg = parser.add_mutually_exclusive_group(required=False)
 
-parser.add_argument('-d', '--depth', default='-1', type=int, dest='depth',
-                    help='Matrix depth. Default: best guess.')
+parser.add_argument('packages', metavar='PACKAGES', nargs=argparse.ONE_OR_MORE,
+                    help='The package list. Can be a comma-separated list. '
+                         'Each package must be either '
+                         'a valid path or a package in PYTHONPATH.')
+
+parser.add_argument('-d', '--depth', default=None, type=int, dest='depth',
+                    help='Specify matrix depth (only for -m option). '
+                         'Default: best guess.')
 parser.add_argument('-f', '--format', choices=FORMAT, default='text',
                     dest='format', help='Output format. Default: text.')
-parser.add_argument('-i', '--enforce-init', action='store_true',
-                    dest='enforce_init', default=False,
-                    help='Enforce presence of __init__.py when listing '
-                         'directories. Make execution faster. Default: false.')
-mxg = parser.add_mutually_exclusive_group(required=False)
+parser.add_argument('-g', '--greedy', action='store_true',
+                    dest='greedy', default=False,
+                    help='Explore subdirectories even if they do not contain '
+                         'an __init__.py file. Can make execution slower. '
+                         'Default: false.')
+parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
+                    help='Show this help message and exit.')
+parser.add_argument('-i', '--indent', default=None, type=int, dest='indent',
+                    help='Specify output indentation (only for -l option). '
+                         'CSV will not be indented. Text will always have '
+                         'new-lines, but JSON can be minified with a '
+                         'negative value. Default: best guess.')
 mxg.add_argument('-l', '--show-dependencies-list', action='store_true',
                  dest='dependencies', default=False,
                  help='Show the dependencies list. Default: false.')
 mxg.add_argument('-m', '--show-matrix', action='store_true',
                  dest='matrix', default=False,
                  help='Show the matrix. Default: true unless -l or -t.')
-mxg.add_argument('-t', '--show-treemap', action='store_true',
-                 dest='treemap', default=False,
-                 help='Show the treemap. Default: false.')
 parser.add_argument('-o', '--output', action='store', dest='output',
                     default=sys.stdout,
-                    help='File to write to. Default: stdout.')
+                    help='Output to given file. Default: stdout.')
+mxg.add_argument('-t', '--show-treemap', action='store_true',
+                 dest='treemap', default=False,
+                 help='Show the treemap (work in progress). Default: false.')
 parser.add_argument('-v', '--version', action='version',
                     version='dependenpy %s' % __version__,
-                    help="Show program's version number and exit.")
-parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
-                    help='Show this help message and exit.')
-parser.add_argument('packages', metavar='PACKAGES', nargs=argparse.ONE_OR_MORE,
-                    help='The package list. Can be a comma-separated list. '
-                         'Each package must be either '
-                         'a valid path or a package in PYTHONPATH.')
+                    help='Show the current version of the program and exit.')
 
 
 def main(args=None):
@@ -89,7 +97,7 @@ def main(args=None):
 
     # guess convenient depth
     depth = args.depth
-    if depth == -1:
+    if depth is None:
         if len(packages) == 1:
             depth = packages[0].count('.') + 2
         else:
@@ -101,14 +109,24 @@ def main(args=None):
         output = open(output, 'w')
 
     dsm = DSM(*packages, build_tree=True, build_dependencies=True,
-              enforce_init=args.enforce_init)
+              enforce_init=not args.greedy)
 
     if dsm.empty:
         return 1
 
+    indent = args.indent
+    if indent is None:
+        if args.format == CSV:
+            indent = 0
+        else:
+            indent = 2
+    elif indent < 0 and args.format == JSON:
+        # special case for json.dumps indent argument
+        indent = None
+
     try:
         if args.dependencies:
-            dsm.print(format=args.format, output=output, indent=1)
+            dsm.print(format=args.format, output=output, indent=indent)
         elif args.matrix:
             dsm.print_matrix(format=args.format, output=output, depth=depth)
         elif args.treemap:
