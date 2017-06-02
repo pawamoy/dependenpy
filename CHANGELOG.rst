@@ -2,6 +2,16 @@
 Changelog
 =========
 
+3.1.0 (2017-06-02)
+==================
+
+- Change ``-i, --enforce-init`` option to its contrary ``-g, --greedy``.
+- Add ``-i, --indent`` option to specify indentation level.
+- Options ``-l``, ``-m`` and ``-t`` are now mutually exclusive.
+- Fix matrix build for depth 0.
+- Print methods have been improved.
+- Update documentation.
+
 3.0.0 (2017-05-23)
 ==================
 
