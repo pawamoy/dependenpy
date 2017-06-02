@@ -11,7 +11,5 @@ be able to build a dependency matrix and use it for other purposes.
 from .dsm import DSM, Dependency, Module, Package
 from .structures import Matrix, TreeMap
 
-
 __all__ = ('DSM', 'Dependency', 'Matrix', 'Module', 'Package', 'TreeMap')
-__author__ = 'Timothée Mazzucotelli <timothee.mazzucotelli@gmail.com>'
-__version__ = '3.0.0'
+__version__ = '3.1.0'

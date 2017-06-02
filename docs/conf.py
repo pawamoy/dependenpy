@@ -6,9 +6,6 @@ from __future__ import unicode_literals
 
 import os
 
-
-
-
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -19,6 +16,12 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
+]
+
+autodoc_default_flags = [
+    'members',
+    'special-members',
+    'show-inheritance'
 ]
 
 if os.getenv('SPELLCHECK'):
@@ -32,7 +35,7 @@ project = u'Dependenpy'
 year = '2017'
 author = u'Timothee Mazzucotelli'
 copyright = '{0}, {1}'.format(year, author)
-version = release = u'3.0.0'
+version = release = u'3.1.0'
 
 pygments_style = 'trac'
 templates_path = ['.']

@@ -79,25 +79,39 @@ Result:
 
 .. code:: bash
 
-    usage: dependenpy [-d DEPTH] [-l] [-m] [-o OUTPUT] [-v] [-h] PACKAGES [PACKAGES ...]
+    usage: dependenpy [-d DEPTH] [-f {csv,json,text}] [-g] [-h] [-i INDENT] [-l]
+                      [-m] [-o OUTPUT] [-t] [-v]
+                      PACKAGES [PACKAGES ...]
 
     Command line tool for dependenpy Python package.
 
     positional arguments:
-      PACKAGES              The package list. Can be a comma-separated list. Each package must be either a valid path or a package in PYTHONPATH.
+      PACKAGES              The package list. Can be a comma-separated list. Each
+                            package must be either a valid path or a package in
+                            PYTHONPATH.
 
     optional arguments:
       -d DEPTH, --depth DEPTH
-                            Matrix depth. Default: 2 if one package, otherwise 1.
-      -i, --enforce-init    Enforce presence of __init__.py when listing
-                            directories. Default: false.
+                            Specify matrix depth (only for -m option). Default:
+                            best guess.
+      -f {csv,json,text}, --format {csv,json,text}
+                            Output format. Default: text.
+      -g, --greedy          Explore subdirectories even if they do not contain an
+                            __init__.py file. Can make execution slower. Default:
+                            false.
+      -h, --help            Show this help message and exit.
+      -i INDENT, --indent INDENT
+                            Specify output indentation (only for -l option). CSV
+                            will not be indented. Text will always have new-lines,
+                            but JSON can be minified with a negative value.
+                            Default: best guess.
       -l, --show-dependencies-list
                             Show the dependencies list. Default: false.
-      -m, --show-matrix     Show the matrix. Default: false.
+      -m, --show-matrix     Show the matrix. Default: true unless -l or -t.
       -o OUTPUT, --output OUTPUT
-                            File to write to. Default: stdout.
-      -v, --version         Show program's version number and exit.
-      -h, --help            Show this help message and exit.
+                            Output to given file. Default: stdout.
+      -t, --show-treemap    Show the treemap (work in progress). Default: false.
+      -v, --version         Show the current version of the program and exit.
 
 Example:
 
@@ -110,66 +124,16 @@ Result:
 
 .. code:: bash
 
-                  Module | Id ||0|1|2|3|
-     --------------------+----++-+-+-+-+
-     dependenpy.__init__ |  0 ||0|0|0|4|
-     dependenpy.__main__ |  1 ||0|0|1|0|
-          dependenpy.cli |  2 ||0|0|0|1|
-          dependenpy.dsm |  3 ||0|0|0|0|
-
-Example:
-
-.. code:: bash
-
-    dependenpy -l dependenpy
-
-Result:
-
-.. code:: bash
-
-    Dependency DSM for packages: [dependenpy]
-      dependenpy
-        __main__
-          ! __main__ imports sys (line 13)
-          __main__ imports main from dependenpy.cli (line 15)
-        dsm
-          ! dsm imports ast (line 5)
-          ! dsm imports os (line 6)
-          ! dsm imports sys (line 7)
-          ! dsm imports copy.deepcopy (line 8)
-          ! dsm imports importlib.util.find_spec (line 9)
-          ! dsm imports os.path.basename (line 10)
-          ! dsm imports os.path.dirname (line 10)
-          ! dsm imports os.path.exists (line 10)
-          ! dsm imports os.path.isdir (line 10)
-          ! dsm imports os.path.isfile (line 10)
-          ! dsm imports os.path.join (line 10)
-          ! dsm imports os.path.splitext (line 10)
-        cli
-          ! cli imports argparse (line 20)
-          ! cli imports sys (line 21)
-          cli imports DSM from dependenpy.dsm (line 23)
-        __init__
-          __init__ imports DSM from dependenpy.dsm (line 11)
-          __init__ imports Dependency from dependenpy.dsm (line 11)
-          __init__ imports Module from dependenpy.dsm (line 11)
-          __init__ imports Package from dependenpy.dsm (line 11)
-
-Example:
-
-.. code:: bash
-
-    dependenpy json,setuptools
-    dependenpy json setuptools
-
-Result:
-
-.. code:: bash
-
-         Module | Id ||0 |1 |
-     -----------+----++--+--+
-           json |  0 || 5| 0|
-     setuptools |  1 || 0|75|
+                    Module | Id ||0|1|2|3|4|5|6|7|
+     ----------------------+----++-+-+-+-+-+-+-+-+
+       dependenpy.__init__ |  0 ||0|0|0|4|0|0|0|2|
+       dependenpy.__main__ |  1 ||0|0|1|0|0|0|0|0|
+            dependenpy.cli |  2 ||1|0|0|1|0|0|3|0|
+            dependenpy.dsm |  3 ||0|0|0|0|2|3|1|0|
+         dependenpy.finder |  4 ||0|0|0|0|0|0|0|0|
+           dependenpy.node |  5 ||0|0|0|0|0|0|1|2|
+        dependenpy.printer |  6 ||0|0|0|0|0|0|0|0|
+     dependenpy.structures |  7 ||0|0|0|0|0|0|1|0|
 
 You can also use dependenpy programmatically:
 

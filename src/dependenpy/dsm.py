@@ -5,17 +5,10 @@ dependenpy dsm module.
 
 This is the core module of dependenpy. It contains the following classes:
 
-- ``DSM``: to create a DSM-capable object for a list of packages,
-- ``Package``: which represents a Python package,
-- ``Module``: which represents a Python module,
-- ``Dependency``: which represents a dependency between two modules,
-- ``Matrix``: to create a matrix (two-dimensions square array plus keys) given
-  a list of DSMs, packages and/or modules.
-
-It also contains private classes to share some code between ``DSM``,
-``Package`` and ``Module``: ``_Node``, ``_DSMPackageNode`` and
-``_PackageModuleNode``. They are called nodes because the layout of a Python
-package is a tree.
+- :class:`DSM`: to create a DSM-capable object for a list of packages,
+- :class:`Package`: which represents a Python package,
+- :class:`Module`: which represents a Python module,
+- :class:`Dependency`: which represents a dependency between two modules.
 """
 
 import ast
@@ -24,7 +17,7 @@ import os
 import sys
 from os.path import isdir, isfile, join, splitext
 
-from .finder import PackageFinder, PackageSpec
+from .finder import Finder, PackageSpec
 from .node import LeafNode, NodeMixin, RootNode
 from .printer import PrintMixin
 
@@ -55,7 +48,7 @@ class DSM(RootNode, NodeMixin, PrintMixin):
                 if True, only treat directories if they contain an
                 ``__init__.py`` file.
         """
-        self.finder = PackageFinder()
+        self.finder = Finder()
         self.specs = []
         self.not_found = []
         self.enforce_init = enforce_init
@@ -82,12 +75,12 @@ class DSM(RootNode, NodeMixin, PrintMixin):
             self.build_dependencies()
 
     def __str__(self):
-        """String method."""
         return 'Dependency DSM for packages: [%s]' % ', '.join(
             [p.name for p in self.packages])
 
     @property
     def isdsm(self):
+        """Inherited from NodeMixin. Always True."""
         return True
 
     def build_tree(self):
@@ -152,6 +145,7 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
 
     @property
     def ispackage(self):
+        """Inherited from NodeMixin. Always True."""
         return True
 
     @property
@@ -267,6 +261,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
 
     @property
     def ismodule(self):
+        """Inherited from NodeMixin. Always True."""
         return True
 
     def as_dict(self, absolute=False):
@@ -420,7 +415,6 @@ class Dependency(object):
         self.what = what
 
     def __str__(self):
-        """String method."""
         return '%s imports %s%s (line %s)' % (
             self.source.name,
             '%s from ' % self.what if self.what else '',

@@ -4,7 +4,6 @@
 
 import sys
 
-
 CSV = 'csv'
 JSON = 'json'
 TEXT = 'text'
@@ -14,7 +13,7 @@ FORMAT = (CSV, JSON, TEXT)
 class PrintMixin(object):
     """Print mixin class."""
 
-    def print(self, output=sys.stdout, format=TEXT, **kwargs):
+    def print(self, format=TEXT, output=sys.stdout, **kwargs):
         """
         Print the object in a file or on standard output by default.
 
