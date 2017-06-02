@@ -1,16 +1,18 @@
 Usage
 =====
 
-- Importing_
-- ObjectsCreation_
-  - CreateDSM_
-  - CreatePackage_
-  - CreateModule_
-  - CreateDependency_
-  - CreateMatrix_
-  - CreateTreeMap_
-- AccessingElements_
-- PrintContents_
+- :ref:`Importing`
+- :ref:`ObjectsCreation`
+
+  - :ref:`CreateDSM`
+  - :ref:`CreatePackage`
+  - :ref:`CreateModule`
+  - :ref:`CreateDependency`
+  - :ref:`CreateMatrix`
+  - :ref:`CreateTreeMap`
+
+- :ref:`AccessingElements`
+- :ref:`PrintContents`
 
 .. _Importing:
 
@@ -163,12 +165,12 @@ A dependency is a simple object that require
 - and an optional ``what`` argument which defaults to None: the name of the
   imported item.
 
-.. _CreateMatrix::
+.. _CreateMatrix:
 
 Create a Matrix
 '''''''''''''''
 
-.. _CreateTreeMap::
+.. _CreateTreeMap:
 
 Create a TreeMap
 ''''''''''''''''
