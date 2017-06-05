@@ -72,6 +72,9 @@ setup(
     entry_points={
         'console_scripts': [
             'dependenpy = dependenpy.cli:main',
+        ],
+        'archan': [
+            'dependenpy.ArchanProvider = dependenpy.dsm:ArchanProvider'
         ]
     },
 )

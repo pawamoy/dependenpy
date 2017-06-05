@@ -21,7 +21,7 @@ import argparse
 import sys
 
 from . import __version__
-from .dsm import DSM
+from .dsm import DSM, guess_depth
 from .printer import CSV, FORMAT, JSON
 
 parser = argparse.ArgumentParser(
@@ -98,10 +98,7 @@ def main(args=None):
     # guess convenient depth
     depth = args.depth
     if depth is None:
-        if len(packages) == 1:
-            depth = packages[0].count('.') + 2
-        else:
-            depth = min(p.count('.') for p in packages) + 1
+        depth = guess_depth(packages)
 
     # open file if not stdout
     output = args.output
