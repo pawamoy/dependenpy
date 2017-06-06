@@ -9,11 +9,11 @@ try:
         description = 'Provide matrix data about internal dependencies ' \
                       'in a set of packages.'
         arguments = (
-            Argument('packages', list, 'the list of packages to check for'),
+            Argument('packages', list, 'The list of packages to check for.'),
             Argument('enforce_init', bool, default=True,
-                     description='whether to assert presence of '
-                     '__init__.py files in directories'),
-            Argument('depth', int, 'the depth of the matrix to generate'),
+                     description='Whether to assert presence of '
+                     '__init__.py files in directories.'),
+            Argument('depth', int, 'The depth of the matrix to generate.'),
         )
 
         def get_dsm(self, packages, enforce_init=True, depth=None):
