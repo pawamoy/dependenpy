@@ -1,0 +1,14 @@
+analyzers:
+- providers:
+  - dependenpy.InternalDependencies:
+      packages:
+      - dependenpy
+  checkers:
+  - archan.CompleteMediation
+  - archan.EconomyOfMechanism:
+      simplicity_factor: 2
+  - archan.LayeredArchitecture
+  - archan.LeastCommonMechanism:
+      independence_factor: 5
+  - archan.OpenDesign:
+      ok: true
