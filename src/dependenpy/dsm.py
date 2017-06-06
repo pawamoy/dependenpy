@@ -373,6 +373,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
                         node.module + '.' if node.module else ''
                     ) + name.name
                     imports.append({'target': name, 'lineno': node.lineno})
+            # TODO: also add if else try except block
             elif isinstance(node, (ast.ClassDef, ast.FunctionDef)):
                 # recursion here to get semi-dynamic imports
                 imports.extend(self.get_imports(node.body))
