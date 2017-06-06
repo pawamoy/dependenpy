@@ -21,8 +21,8 @@ import argparse
 import sys
 
 from . import __version__
-from .dsm import DSM, guess_depth
-from .printer import CSV, FORMAT, JSON
+from .dsm import DSM
+from .helpers import CSV, FORMAT, JSON, guess_depth
 
 parser = argparse.ArgumentParser(
     add_help=False,

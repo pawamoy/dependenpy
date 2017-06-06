@@ -8,8 +8,8 @@ your Python code, i.e. which module needs which other module. You will then
 be able to build a dependency matrix and use it for other purposes.
 """
 
-from .dsm import ArchanProvider, DSM, Dependency, Module, Package
+from .dsm import DSM, Dependency, Module, Package
 from .structures import Matrix, TreeMap
 
-__all__ = ('ArchanProvider', 'DSM', 'Dependency', 'Matrix', 'Module', 'Package', 'TreeMap')
+__all__ = ('DSM', 'Dependency', 'Matrix', 'Module', 'Package', 'TreeMap')
 __version__ = '3.1.0'

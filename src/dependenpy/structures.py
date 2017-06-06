@@ -4,7 +4,7 @@
 
 import json
 
-from .printer import PrintMixin
+from .helpers import PrintMixin
 
 
 class Matrix(PrintMixin):

@@ -17,16 +17,9 @@ import os
 import sys
 from os.path import isdir, isfile, join, splitext
 
-try:
-    from archan import Provider, Argument
-except ImportError:
-    from collections import namedtuple
-    Provider = object
-    Argument = lambda *a, **k: None
-
 from .finder import Finder, PackageSpec
 from .node import LeafNode, NodeMixin, RootNode
-from .printer import PrintMixin
+from .helpers import PrintMixin
 
 
 class DSM(RootNode, NodeMixin, PrintMixin):
@@ -432,44 +425,3 @@ class Dependency(object):
     def external(self):
         """Property to tell if the dependency's target is a valid node."""
         return isinstance(self.target, str)
-
-
-def guess_depth(packages):
-    if len(packages) == 1:
-        return packages[0].count('.') + 2
-    return min(p.count('.') for p in packages) + 1
-
-
-class ArchanProvider(Provider):
-    name = 'Dependency matrix provider for Archan'
-    description = 'Provide matrix data about internal dependencies ' \
-                  'in a set of packages.'
-    arguments = (
-        Argument('packages', list, 'the list of packages to check for'),
-        Argument(
-            'enforce_init', bool,
-            ' whether to assert presence of __init__.py files in directories'),
-        Argument('depth', int, 'the depth of the matrix to generate'),
-    )
-
-    def get_dsm(self, packages, enforce_init=True, depth=None):
-        """
-        Provide matrix data about internal dependencies in a set of packages.
-
-        Args:
-            *packages (list): the list of packages to check for.
-            enforce_init (bool):
-                whether to assert presence of __init__.py files in directories.
-            depth (int): the depth of the matrix to generate.
-
-        Returns:
-            dict: keys and data in a dictionary (no categories for now).
-        """
-        dsm = DSM(*packages, enforce_init=enforce_init)
-        if depth is None:
-            depth = guess_depth(packages)
-        matrix = dsm.as_matrix(depth=depth)
-        return {
-            'keys': matrix.keys,
-            'data': matrix.data
-        }

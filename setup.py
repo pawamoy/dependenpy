@@ -74,7 +74,7 @@ setup(
             'dependenpy = dependenpy.cli:main',
         ],
         'archan': [
-            'dependenpy.ArchanProvider = dependenpy.dsm:ArchanProvider'
+            'dependenpy.InternalDependencies = dependenpy.plugins:InternalDependencies'  # noqa
         ]
     },
 )

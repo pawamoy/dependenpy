@@ -23,6 +23,8 @@ class PrintMixin(object):
                 descriptor to an opened file (default to standard output).
             **kwargs (): additional arguments.
         """
+        if format is None:
+            format = TEXT
         if format == TEXT:
             print(self._to_text(**kwargs), file=output)
         elif format == CSV:
@@ -38,3 +40,9 @@ class PrintMixin(object):
 
     def _to_json(self, **kwargs):
         raise NotImplementedError
+
+
+def guess_depth(packages):
+    if len(packages) == 1:
+        return packages[0].count('.') + 2
+    return min(p.count('.') for p in packages) + 1

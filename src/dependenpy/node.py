@@ -5,7 +5,6 @@
 import json
 import sys
 
-from .printer import TEXT
 from .structures import Matrix, TreeMap
 
 
@@ -224,7 +223,7 @@ class RootNode(object):
         for p in self.packages:
             p.build_dependencies()
 
-    def print_matrix(self, format=TEXT, output=sys.stdout, depth=0, **kwargs):
+    def print_matrix(self, format=None, output=sys.stdout, depth=0, **kwargs):
         """
         Print the matrix for self's nodes.
 
@@ -236,7 +235,7 @@ class RootNode(object):
         matrix = self.as_matrix(depth=depth)
         matrix.print(format=format, output=output, **kwargs)
 
-    def print_treemap(self, format=TEXT, output=sys.stdout, **kwargs):
+    def print_treemap(self, format=None, output=sys.stdout, **kwargs):
         """
         Print the matrix for self's nodes.
 
