@@ -5,7 +5,8 @@ try:
 
 
     class InternalDependencies(Provider):
-        name = 'dependenpy.InternalDependencies'
+        identifier = 'dependenpy.InternalDependencies'
+        name = 'Internal Dependencies'
         description = 'Provide matrix data about internal dependencies ' \
                       'in a set of packages.'
         arguments = (
@@ -34,10 +35,7 @@ try:
             if depth is None:
                 depth = guess_depth(packages)
             matrix = dsm.as_matrix(depth=depth)
-            return ArchanDSM(
-                entities=matrix.keys,
-                dependency_matrix=matrix.data
-            )
+            return ArchanDSM(data=matrix.data, entities=matrix.keys)
 
 except ImportError:
     class InternalDependencies(object):
