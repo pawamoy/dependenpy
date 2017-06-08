@@ -49,6 +49,7 @@ setup(
         # http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
         'License :: OSI Approved :: ISC License (ISCL)',
         'Operating System :: Unix',
         'Programming Language :: Python',
