@@ -5,7 +5,7 @@
 import json
 import sys
 
-from .structures import Matrix, TreeMap
+from .structures import Graph, Matrix, TreeMap
 
 
 class NodeMixin(object):
@@ -41,6 +41,7 @@ class RootNode(object):
         self._item_cache = {}
         self._contains_cache = {}
         self._matrix_cache = {}
+        self._graph_cache = {}
         self._treemap_cache = None
         self.modules = []
         self.packages = []
@@ -223,6 +224,18 @@ class RootNode(object):
         for p in self.packages:
             p.build_dependencies()
 
+    def print_graph(self, format=None, output=sys.stdout, depth=0, **kwargs):
+        """
+        Print the graph for self's nodes.
+
+        Args:
+            format (str): output format (csv, json or text).
+            output (file): file descriptor on which to write.
+            depth (int): depth of the graph.
+        """
+        graph = self.as_graph(depth=depth)
+        graph.print(format=format, output=output, **kwargs)
+
     def print_matrix(self, format=None, output=sys.stdout, depth=0, **kwargs):
         """
         Print the matrix for self's nodes.
@@ -283,6 +296,21 @@ class RootNode(object):
             'modules': [m.as_dict() for m in self.modules],
             'packages': [p.as_dict() for p in self.packages]
         }
+
+    def as_graph(self, depth=0):
+        """
+        Create a graph with self as node, cache it, return it.
+
+        Args:
+            depth (int): depth of the graph.
+
+        Returns:
+            Graph: an instance of Graph.
+        """
+        if depth in self._graph_cache:
+            return self._graph_cache[depth]
+        self._graph_cache[depth] = graph = Graph(self, depth=depth)
+        return graph
 
     def as_matrix(self, depth=0):
         """

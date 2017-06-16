@@ -39,7 +39,10 @@ parser.add_argument('-d', '--depth', default=None, type=int, dest='depth',
                          'Default: best guess.')
 parser.add_argument('-f', '--format', choices=FORMAT, default='text',
                     dest='format', help='Output format. Default: text.')
-parser.add_argument('-g', '--greedy', action='store_true',
+mxg.add_argument('-g', '--show-graph', action='store_true',
+                 dest='graph', default=False,
+                 help='Show the graph (no text format). Default: false.')
+parser.add_argument('-G', '--greedy', action='store_true',
                     dest='greedy', default=False,
                     help='Explore subdirectories even if they do not contain '
                          'an __init__.py file. Can make execution slower. '
@@ -56,7 +59,7 @@ mxg.add_argument('-l', '--show-dependencies-list', action='store_true',
                  help='Show the dependencies list. Default: false.')
 mxg.add_argument('-m', '--show-matrix', action='store_true',
                  dest='matrix', default=False,
-                 help='Show the matrix. Default: true unless -l or -t.')
+                 help='Show the matrix. Default: true unless -g, -l or -t.')
 parser.add_argument('-o', '--output', action='store', dest='output',
                     default=sys.stdout,
                     help='Output to given file. Default: stdout.')
@@ -82,7 +85,7 @@ def main(args=None):
     """
     args = parser.parse_args(args=args)
 
-    if not (args.matrix or args.dependencies or args.treemap):
+    if not (args.matrix or args.dependencies or args.treemap or args.graph):
         args.matrix = True
 
     # split comma-separated args
@@ -128,6 +131,9 @@ def main(args=None):
             dsm.print_matrix(format=args.format, output=output, depth=depth)
         elif args.treemap:
             dsm.print_treemap(format=args.format, output=output)
+        elif args.graph:
+            dsm.print_graph(format=args.format, output=output,
+                            depth=depth, indent=indent)
     except BrokenPipeError:
         # avoid traceback
         return 2

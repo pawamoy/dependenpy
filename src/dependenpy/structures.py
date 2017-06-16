@@ -162,3 +162,81 @@ class TreeMap(PrintMixin):
 
     def _to_text(self, **kwargs):
         return ''
+
+
+class Vertex(object):
+    def __init__(self, name):
+        self.name = name
+        self.edges_in = set()
+        self.edges_out = set()
+
+    def connect_to(self, vertex, weight=1):
+        for edge in self.edges_out:
+            if vertex == edge.vertex_in:
+                return edge
+        return Edge(self, vertex, weight)
+
+    def connect_from(self, vertex, weight=1):
+        for edge in self.edges_in:
+            if vertex == edge.vertex_out:
+                return edge
+        return Edge(vertex, self, weight)
+
+
+class Edge(object):
+    def __init__(self, vertex_out, vertex_in, weight=1):
+        self.vertex_out = None
+        self.vertex_in = None
+        self.weight = weight
+        self.go_from(vertex_out)
+        self.go_in(vertex_in)
+
+    def go_from(self, vertex):
+        if self.vertex_out:
+            self.vertex_out.edges_out.remove(self)
+        self.vertex_out = vertex
+        vertex.edges_out.add(self)
+
+    def go_in(self, vertex):
+        if self.vertex_in:
+            self.vertex_in.edges_in.remove(self)
+        self.vertex_in = vertex
+        vertex.edges_in.add(self)
+
+
+class Graph(PrintMixin):
+    def __init__(self, *nodes, depth=0):
+        self.edges = set()
+        vertices = []
+        matrix = Matrix(*nodes, depth=depth)
+        for key in matrix.keys:
+            vertices.append(Vertex(key))
+        for l, line in enumerate(matrix.data):
+            for c, cell in enumerate(line):
+                if cell > 0:
+                    self.edges.add(Edge(vertices[l], vertices[c], weight=cell))
+        self.vertices = set(vertices)
+
+    def _to_csv(self, **kwargs):
+        header = kwargs.pop('header', True)
+        text = ['vertex_out,edge_weight,vertex_in\n' if header else '']
+        for edge in self.edges:
+            text.append('%s,%s,%s\n' % (
+                edge.vertex_out.name, edge.weight, edge.vertex_in.name))
+        for vertex in self.vertices:
+            if not (vertex.edges_out or vertex.edges_in):
+                text.append('%s,,\n' % vertex.name)
+        return ''.join(text)
+
+    def _to_json(self, **kwargs):
+        return json.dumps({
+            'vertices': [vertex.name for vertex in self.vertices],
+            'edges': [{
+                'out': edge.vertex_out.name,
+                'weight': edge.weight,
+                'in': edge.vertex_in.name
+            } for edge in self.edges]
+        }, **kwargs)
+
+    def _to_text(self, **kwargs):
+        return ''
