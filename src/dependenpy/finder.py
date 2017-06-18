@@ -22,16 +22,8 @@ class PackageSpec(object):
         self.path = path
         self.limit_to = limit_to or []
 
-    def __key(self):
-        """Return the key used to hash the object: (name, path)."""
-        return self.name, self.path
-
-    def __eq__(self, y):
-        # pylama:ignore=W0212
-        return self.__key() == y.__key()
-
     def __hash__(self):
-        return hash(self.__key())
+        return hash((self.name, self.path))
 
     @property
     def ismodule(self):
@@ -70,6 +62,8 @@ class PackageSpec(object):
 
 
 class PackageFinder(object):
+    """Abstract package finder class."""
+
     def find(self, package, **kwargs):
         """
         Find method.

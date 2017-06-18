@@ -29,3 +29,6 @@ mixin
 treemap
 treemaps
 accessor
+Parrend
+Timothée
+Florent

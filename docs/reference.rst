@@ -22,15 +22,15 @@ Reference
 
 .. automodule:: dependenpy.finder
 
+``dependenpy.helpers``
+----------------------
+
+.. automodule:: dependenpy.helpers
+
 ``dependenpy.node``
 -------------------
 
 .. automodule:: dependenpy.node
-
-``dependenpy.printer``
-----------------------
-
-.. automodule:: dependenpy.printer
 
 ``dependenpy.structures``
 -------------------------

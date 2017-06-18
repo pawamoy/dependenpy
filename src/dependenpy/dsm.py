@@ -18,8 +18,8 @@ import sys
 from os.path import isdir, isfile, join, splitext
 
 from .finder import Finder, PackageSpec
-from .node import LeafNode, NodeMixin, RootNode
 from .helpers import PrintMixin
+from .node import LeafNode, NodeMixin, RootNode
 
 
 class DSM(RootNode, NodeMixin, PrintMixin):
@@ -224,6 +224,10 @@ class Module(LeafNode, NodeMixin, PrintMixin):
     This class represents a Python module (a Python file).
     """
 
+    RECURSIVE_NODES = (
+        ast.ClassDef, ast.FunctionDef, ast.If, ast.IfExp, ast.Try,
+        ast.With, ast.ExceptHandler)
+
     def __init__(self, name, path, dsm=None, package=None):
         """
         Initialization method.
@@ -373,10 +377,10 @@ class Module(LeafNode, NodeMixin, PrintMixin):
                         node.module + '.' if node.module else ''
                     ) + name.name
                     imports.append({'target': name, 'lineno': node.lineno})
-            # TODO: also add if else try except block
-            elif isinstance(node, (ast.ClassDef, ast.FunctionDef)):
-                # recursion here to get semi-dynamic imports
+            elif isinstance(node, Module.RECURSIVE_NODES):
                 imports.extend(self.get_imports(node.body))
+                if isinstance(node, ast.Try):
+                    imports.extend(self.get_imports(node.finalbody))
         return imports
 
     def cardinal(self, to):

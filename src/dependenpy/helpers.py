@@ -43,6 +43,15 @@ class PrintMixin(object):
 
 
 def guess_depth(packages):
+    """
+    Guess the optimal depth to use for the given list of arguments.
+
+    Args:
+        packages (list of str): list of packages.
+
+    Returns:
+        int: guessed depth to use.
+    """
     if len(packages) == 1:
         return packages[0].count('.') + 2
     return min(p.count('.') for p in packages) + 1

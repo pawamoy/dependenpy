@@ -165,6 +165,8 @@ class TreeMap(PrintMixin):
 
 
 class Vertex(object):
+    """Vertex class. Used in Graph class."""
+
     def __init__(self, name):
         self.name = name
         self.edges_in = set()
@@ -184,6 +186,7 @@ class Vertex(object):
 
 
 class Edge(object):
+    """Edge class. Used in Graph class."""
     def __init__(self, vertex_out, vertex_in, weight=1):
         self.vertex_out = None
         self.vertex_in = None
@@ -205,7 +208,26 @@ class Edge(object):
 
 
 class Graph(PrintMixin):
+    """
+    Graph class.
+
+    A class to build a graph given a list of nodes. After instantiation,
+    it has two attributes: vertices, the set of nodes,
+    and edges, the set of edges.
+    """
+
     def __init__(self, *nodes, depth=0):
+        """
+        Initialization method.
+
+        An intermediary matrix is built to ease the creation of the graph.
+
+        Args:
+            *nodes (list of DSM/Package/Module):
+                the nodes on which to build the graph.
+            depth (int): the depth of the intermediary matrix. See
+                the documentation for Matrix class.
+        """
         self.edges = set()
         vertices = []
         matrix = Matrix(*nodes, depth=depth)
