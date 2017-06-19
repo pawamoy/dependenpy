@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""dependenpy plugins module."""
+
 try:
     from archan import Provider, Argument, DSM as ArchanDSM
     from .dsm import DSM as DependenpyDSM
     from .helpers import guess_depth
 
-
     class InternalDependencies(Provider):
+        """Dependenpy provider for Archan."""
+
         identifier = 'dependenpy.InternalDependencies'
         name = 'Internal Dependencies'
         description = 'Provide matrix data about internal dependencies ' \
@@ -39,4 +44,4 @@ try:
 
 except ImportError:
     class InternalDependencies(object):
-        pass
+        """Empty dependenpy provider."""

@@ -13,8 +13,8 @@ This is the core module of dependenpy. It contains the following classes:
 
 import ast
 import json
-import os
 import sys
+from os import listdir
 from os.path import isdir, isfile, join, splitext
 
 from .finder import Finder, PackageSpec
@@ -188,7 +188,7 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
 
     def build_tree(self):
         """Build the tree for this package."""
-        for m in os.listdir(self.path):
+        for m in listdir(self.path):
             abs_m = join(self.path, m)
             if isfile(abs_m) and m.endswith('.py'):
                 name = splitext(m)[0]

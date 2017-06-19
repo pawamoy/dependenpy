@@ -38,7 +38,7 @@ def get_parser():
              'must be either a valid path or a package in PYTHONPATH.')
     parser.add_argument(
         '-d', '--depth', default=None, type=int, dest='depth',
-        help='Specify matrix depth (only for -m option). Default: best guess.')
+        help='Specify matrix or graph depth. Default: best guess.')
     parser.add_argument(
         '-f', '--format', choices=FORMAT, default='text',
         dest='format', help='Output format. Default: text.')
@@ -54,10 +54,9 @@ def get_parser():
         help='Show this help message and exit.')
     parser.add_argument(
         '-i', '--indent', default=None, type=int, dest='indent',
-        help='Specify output indentation (only for -l option). '
-             'CSV will not be indented. Text will always have '
-             'new-lines, but JSON can be minified with a '
-             'negative value. Default: best guess.')
+        help='Specify output indentation. CSV will never be indented. '
+             'Text will always have new-lines. JSON can be minified with '
+             'a negative value. Default: best guess.')
     mxg.add_argument(
         '-l', '--show-dependencies-list', action='store_true',
         dest='dependencies', default=False,
@@ -138,7 +137,8 @@ def main(args=None):
         if args.dependencies:
             dsm.print(format=args.format, output=output, indent=indent)
         elif args.matrix:
-            dsm.print_matrix(format=args.format, output=output, depth=depth)
+            dsm.print_matrix(format=args.format, output=output,
+                             depth=depth, indent=indent)
         elif args.treemap:
             dsm.print_treemap(format=args.format, output=output)
         elif args.graph:

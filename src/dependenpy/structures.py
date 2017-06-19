@@ -168,17 +168,43 @@ class Vertex(object):
     """Vertex class. Used in Graph class."""
 
     def __init__(self, name):
+        """
+        Initialization method.
+
+        Args:
+            name (str): name of the vertex.
+        """
         self.name = name
         self.edges_in = set()
         self.edges_out = set()
 
     def connect_to(self, vertex, weight=1):
+        """
+        Connect this vertex to another one.
+
+        Args:
+            vertex (Vertex): vertex to connect to.
+            weight (int): weight of the edge.
+
+        Returns:
+            Edge: the newly created edge.
+        """
         for edge in self.edges_out:
             if vertex == edge.vertex_in:
                 return edge
         return Edge(self, vertex, weight)
 
     def connect_from(self, vertex, weight=1):
+        """
+        Connect another vertex to this one.
+
+        Args:
+            vertex (Vertex): vertex to connect from.
+            weight (int): weight of the edge.
+
+        Returns:
+            Edge: the newly created edge.
+        """
         for edge in self.edges_in:
             if vertex == edge.vertex_out:
                 return edge
@@ -187,7 +213,16 @@ class Vertex(object):
 
 class Edge(object):
     """Edge class. Used in Graph class."""
+
     def __init__(self, vertex_out, vertex_in, weight=1):
+        """
+        Initialization method.
+
+        Args:
+            vertex_out (Vertex): source vertex (edge going out).
+            vertex_in (Vertex): target vertex (edge going in).
+            weight (int): weight of the edge.
+        """
         self.vertex_out = None
         self.vertex_in = None
         self.weight = weight
@@ -195,12 +230,24 @@ class Edge(object):
         self.go_in(vertex_in)
 
     def go_from(self, vertex):
+        """
+        Tell the edge to go out from this vertex.
+
+        Args:
+            vertex (Vertex): vertex to go from.
+        """
         if self.vertex_out:
             self.vertex_out.edges_out.remove(self)
         self.vertex_out = vertex
         vertex.edges_out.add(self)
 
     def go_in(self, vertex):
+        """
+        Tell the edge to go into this vertex.
+
+        Args:
+            vertex (Vertex): vertex to go into.
+        """
         if self.vertex_in:
             self.vertex_in.edges_in.remove(self)
         self.vertex_in = vertex

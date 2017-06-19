@@ -18,7 +18,7 @@ ignore-patterns:
 dodgy:
   run: true
 frosted:
-  disable: [E401]
+  disable: [E101, E401]
   run: true
 mccabe:
   options: {max-complexity: 10}
@@ -30,12 +30,13 @@ pep8:
   full: true
   options: {max-line-length: 79, single-line-if-stmt: n}
   run: true
+  disable: [N811]
 profile-validator:
   run: true
 pyflakes:
   run: true
 pylint:
-  disable: [bad-continuation, no-name-in-module, no-member, fixme, empty-docstring, django-not-available, invalid-name]
+  disable: [bad-continuation, no-name-in-module, no-member, fixme, empty-docstring, django-not-available, invalid-name, too-few-public-methods, no-self-use]
   options: {max-attributes: 7, max-branches: 12, max-line-length: 79, max-locals: 15,
     max-module-lines: 1000, max-parents: 7, max-public-methods: 20, max-returns: 6,
     max-statements: 50, min-public-methods: 2}
@@ -45,3 +46,4 @@ pyroma:
   run: true
 vulture:
   run: true
+  disable: [unused-function, unused-property, unused-variable]
