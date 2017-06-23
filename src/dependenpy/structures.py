@@ -178,6 +178,9 @@ class Vertex(object):
         self.edges_in = set()
         self.edges_out = set()
 
+    def __str__(self):
+        return self.name
+
     def connect_to(self, vertex, weight=1):
         """
         Connect this vertex to another one.
@@ -228,6 +231,10 @@ class Edge(object):
         self.weight = weight
         self.go_from(vertex_out)
         self.go_in(vertex_in)
+
+    def __str__(self):
+        return '%s --%d--> %s' % (
+            self.vertex_out.name, self.weight, self.vertex_in.name)
 
     def go_from(self, vertex):
         """
