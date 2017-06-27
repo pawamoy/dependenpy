@@ -79,35 +79,32 @@ Result:
 
 .. code:: bash
 
-    usage: dependenpy [-d DEPTH] [-f {csv,json,text}] [-g] [-h] [-i INDENT] [-l]
-                      [-m] [-o OUTPUT] [-t] [-v]
-                      PACKAGES [PACKAGES ...]
+    usage: dependenpy [-d DEPTH] [-f {csv,json,text}] [-g] [-G] [-h] [-i INDENT] [-l] [-m]
+                  [-o OUTPUT] [-t] [-v]
+                  PACKAGES [PACKAGES ...]
 
     Command line tool for dependenpy Python package.
 
     positional arguments:
-      PACKAGES              The package list. Can be a comma-separated list. Each
-                            package must be either a valid path or a package in
-                            PYTHONPATH.
+      PACKAGES              The package list. Can be a comma-separated list. Each package
+                            must be either a valid path or a package in PYTHONPATH.
 
     optional arguments:
       -d DEPTH, --depth DEPTH
-                            Specify matrix depth (only for -m option). Default:
-                            best guess.
+                            Specify matrix or graph depth. Default: best guess.
       -f {csv,json,text}, --format {csv,json,text}
                             Output format. Default: text.
-      -g, --greedy          Explore subdirectories even if they do not contain an
-                            __init__.py file. Can make execution slower. Default:
-                            false.
+      -g, --show-graph      Show the graph (no text format). Default: false.
+      -G, --greedy          Explore subdirectories even if they do not contain an
+                            __init__.py file. Can make execution slower. Default: false.
       -h, --help            Show this help message and exit.
       -i INDENT, --indent INDENT
-                            Specify output indentation (only for -l option). CSV
-                            will not be indented. Text will always have new-lines,
-                            but JSON can be minified with a negative value.
-                            Default: best guess.
+                            Specify output indentation. CSV will never be indented. Text
+                            will always have new-lines. JSON can be minified with a
+                            negative value. Default: best guess.
       -l, --show-dependencies-list
                             Show the dependencies list. Default: false.
-      -m, --show-matrix     Show the matrix. Default: true unless -l or -t.
+      -m, --show-matrix     Show the matrix. Default: true unless -g, -l or -t.
       -o OUTPUT, --output OUTPUT
                             Output to given file. Default: stdout.
       -t, --show-treemap    Show the treemap (work in progress). Default: false.
@@ -124,16 +121,17 @@ Result:
 
 .. code:: bash
 
-                    Module | Id ||0|1|2|3|4|5|6|7|
-     ----------------------+----++-+-+-+-+-+-+-+-+
-       dependenpy.__init__ |  0 ||0|0|0|4|0|0|0|2|
-       dependenpy.__main__ |  1 ||0|0|1|0|0|0|0|0|
-            dependenpy.cli |  2 ||1|0|0|1|0|0|3|0|
-            dependenpy.dsm |  3 ||0|0|0|0|2|3|1|0|
-         dependenpy.finder |  4 ||0|0|0|0|0|0|0|0|
-           dependenpy.node |  5 ||0|0|0|0|0|0|1|2|
-        dependenpy.printer |  6 ||0|0|0|0|0|0|0|0|
-     dependenpy.structures |  7 ||0|0|0|0|0|0|1|0|
+                    Module | Id ||0|1|2|3|4|5|6|7|8|
+     ----------------------+----++-+-+-+-+-+-+-+-+-+
+       dependenpy.__init__ |  0 ||0|0|0|4|0|0|0|0|2|
+       dependenpy.__main__ |  1 ||0|0|1|0|0|0|0|0|0|
+            dependenpy.cli |  2 ||1|0|0|1|0|4|0|0|0|
+            dependenpy.dsm |  3 ||0|0|0|0|2|1|3|0|0|
+         dependenpy.finder |  4 ||0|0|0|0|0|0|0|0|0|
+        dependenpy.helpers |  5 ||0|0|0|0|0|0|0|0|0|
+           dependenpy.node |  6 ||0|0|0|0|0|0|0|0|3|
+        dependenpy.plugins |  7 ||0|0|0|1|0|1|0|0|0|
+     dependenpy.structures |  8 ||0|0|0|0|0|1|0|0|0|
 
 You can also use dependenpy programmatically:
 
@@ -144,15 +142,13 @@ You can also use dependenpy programmatically:
     # create DSM
     dsm = DSM('django')
 
-    # transform as matrix, dict of deps or treemap
+    # transform as matrix
     matrix = dsm.as_matrix(depth=2)
-    deps = dsm.as_dict()
-    treemap = dsm.as_treemap()  # soon
 
     # initialize with many packages
     dsm = DSM('django', 'meerkat', 'appsettings', 'dependenpy', 'archan')
     with open('output', 'w') as output:
-        dsm.print(matrix=True, depth=1, dependencies=True, output=output)
+        dsm.print(format='json', indent=2, output=output)
 
     # access packages and modules
     meerkat = dsm['meerkat']  # or dsm.get('meerkat')
@@ -161,7 +157,7 @@ You can also use dependenpy programmatically:
     # instances of DSM and Package all have print, as_matrix, etc. methods
     meerkat.print_matrix(depth=2)
 
-This module was originally design to work in a Django project.
+This package was originally design to work in a Django project.
 The Django package `django-meerkat`_ uses it to display the matrices with Highcharts.
 
 .. _django-meerkat: https://github.com/Pawamoy/django-meerkat

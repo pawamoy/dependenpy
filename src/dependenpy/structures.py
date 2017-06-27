@@ -146,28 +146,28 @@ class TreeMap(PrintMixin):
         Arguments:
             *nodes (list of Node): the nodes from which to build the treemap.
         """
-        if nodes:
-            matrix_lower_level = Matrix(*nodes, depth=2)
-            matrix_current_level = Matrix(*nodes, depth=1)
-            if value == -1:
-                value = sum(c for row in matrix_current_level.data for c in row)
-            splits = [0]
-            key_comp = matrix_lower_level.keys[0].split('.')[0]
-            i = 1
-            for key in matrix_lower_level.keys[1:]:
-                key = key.split('.')[0]
-                if key != key_comp:
-                    splits.append(i)
-                    key_comp = key
-                i += 1
-            splits.append(i)
-
-            self.data = []
-            for i in range(len(splits) - 1):
-                self.data.append([])
-                rows = matrix_lower_level.data[splits[i]:splits[i+1]]
-                for j in range(len(splits) - 1):
-                    self.data[i].append([row[splits[j]:splits[j+1]] for row in rows])
+        # if nodes:
+        #     matrix_lower_level = Matrix(*nodes, depth=2)
+        #     matrix_current_level = Matrix(*nodes, depth=1)
+        #     if value == -1:
+        #         value = sum(c for row in matrix_current_level.data for c in row)
+        #     splits = [0]
+        #     key_comp = matrix_lower_level.keys[0].split('.')[0]
+        #     i = 1
+        #     for key in matrix_lower_level.keys[1:]:
+        #         key = key.split('.')[0]
+        #         if key != key_comp:
+        #             splits.append(i)
+        #             key_comp = key
+        #         i += 1
+        #     splits.append(i)
+        #
+        #     self.data = []
+        #     for i in range(len(splits) - 1):
+        #         self.data.append([])
+        #         rows = matrix_lower_level.data[splits[i]:splits[i+1]]
+        #         for j in range(len(splits) - 1):
+        #             self.data[i].append([row[splits[j]:splits[j+1]] for row in rows])
 
         self.value = value
 

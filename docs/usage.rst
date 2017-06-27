@@ -10,6 +10,7 @@ Usage
   - :ref:`CreateDependency`
   - :ref:`CreateMatrix`
   - :ref:`CreateTreeMap`
+  - :ref:`CreateGraph`
 
 - :ref:`AccessingElements`
 - :ref:`PrintContents`
@@ -171,10 +172,65 @@ A dependency is a simple object that require:
 Create a Matrix
 '''''''''''''''
 
+From an instance of ``DSM`` or ``Package`` called ``node``:
+
+.. code:: python
+
+    matrix = node.as_matrix(depth=2)
+
+From a list of nodes (DSMs, packages or modules):
+
+.. code:: python
+
+    matrix = Matrix(*node_list, depth=2)
+
+An instance of ``Matrix`` has a ``data`` attribute, which is a two-dimensions
+array of integers, and a ``keys`` attribute which is the list of names,
+in the same order as rows in data.
+
 .. _CreateTreeMap:
 
 Create a TreeMap
 ''''''''''''''''
+
+From an instance of ``DSM`` or ``Package`` called ``node``:
+
+.. code:: python
+
+    treemap = node.as_treemap(depth=2)
+
+From a list of nodes (DSMs, packages or modules):
+
+.. code:: python
+
+    matrix = TreeMap(*node_list, depth=2)
+
+An instance of ``TreeMap`` has a ``data`` attribute, which is a two-dimensions
+array of integers or treemaps, a ``keys`` attribute which is the list of names
+in the same order as rows in data, and a ``value`` attribute which is the
+total number of dependencies in the treemap.
+
+.. _CreateGraph:
+
+Create a Graph
+''''''''''''''
+
+From an instance of ``DSM`` or ``Package`` called ``node``:
+
+.. code:: python
+
+    graph = node.as_graph(depth=2)
+
+From a list of nodes (DSMs, packages or modules):
+
+.. code:: python
+
+    graph = Graph(*node_list, depth=2)
+
+An instance of ``Graph`` has a ``vertices`` attribute, which is a list of
+``Vertex`` instances, and a ``edges`` attribute which is list of ``Edge``
+instances. See the documentation of ``Vertex`` and ``Edge`` for more
+information.
 
 .. _AccessingElements:
 
@@ -214,28 +270,31 @@ Of course, accesses can be chained:
 Print contents
 --------------
 
-Contents of DSMs, packages, modules, matrices and treemaps can be printed
+Contents of DSMs, packages, modules, matrices, treemaps and graphs can be printed
 with their ``print`` method. The contents printed are the dependencies.
-Each one of them can output contents in three different formats:
+With some exception, each one of them can output contents in three different formats:
 
 - text (by default)
 - CSV
 - JSON
 
+(Currently, treemaps are not implemented, and graphs can only be printed in
+JSON or CSV.)
+
 To choose one of these format, just pass the ``format`` argument, which accepts
 values ``'text'``, ``'csv'`` and ``'json'``. Please note that these values
-should not be used, but instead constants imported from ``dependenpy.printer``
+can be replaced by constants imported from ``dependenpy.helpers``
 module:
 
 .. code:: python
 
     from dependenpy import DSM
-    from dependenpy.printer import TEXT, CSV, JSON
+    from dependenpy.helpers import TEXT, CSV, JSON
 
     dsm = DSM('django')
     dsm.print(format=JSON)
 
-Depending on the format chosen, additional keyword arguments can be passed
+Depending on the chosen format, additional keyword arguments can be passed
 to the print method:
 
 - text format: ``indent``, indentation value (integer)
@@ -244,7 +303,8 @@ to the print method:
   of a ``Module`` instance, ``absolute`` Boolean to switch between output
   of absolute and relative paths.
 
-For ``DSM`` and ``Package`` instances, shortcuts to print a matrix and a
-treemap are available with ``print_matrix`` and ``print_treemap`` methods.
-These two methods will first create a matrix or a treemap and then call
+For ``DSM`` and ``Package`` instances, shortcuts to print a matrix, a treemap
+or a graph are available with ``print_matrix``, ``print_treemap`` and
+``print_graph`` methods.
+These methods will first create the related object and then call
 the object's own ``print`` method.

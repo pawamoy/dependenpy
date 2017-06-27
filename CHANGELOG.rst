@@ -2,6 +2,14 @@
 Changelog
 =========
 
+3.2.0 (2017-06-27)
+==================
+
+- Change ``-g`` short option for ``--greedy`` to ``-G``.
+- Add ``-g, --show-graph`` option with related graph class and capabilities.
+- Add a provider for Archan (``dependenpy.plugins.InternalDependencies``).
+- Update documentation accordingly.
+
 3.1.0 (2017-06-02)
 ==================
 
