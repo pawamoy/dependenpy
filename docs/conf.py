@@ -40,8 +40,8 @@ version = release = u'3.2.0'
 pygments_style = 'trac'
 templates_path = ['.']
 extlinks = {
-    'issue': ('https://github.com/Pawamoy/dependenpy/issues/%s', '#'),
-    'pr': ('https://github.com/Pawamoy/dependenpy/pull/%s', 'PR #'),
+    'issue': ('https://github.com/Genida/dependenpy/issues/%s', '#'),
+    'pr': ('https://github.com/Genida/dependenpy/pull/%s', 'PR #'),
 }
 
 # on_rtd is whether we are on readthedocs.org
