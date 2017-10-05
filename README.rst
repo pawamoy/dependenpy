@@ -31,11 +31,11 @@ Dependenpy
     :alt: Updates
 
 .. |version| image:: https://img.shields.io/pypi/v/dependenpy.svg?style=flat
-    :target: https://pypi.python.org/pypi/dependenpy/
+    :target: https://pypi.org/project/dependenpy/
     :alt: PyPI Package latest release
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/dependenpy.svg?style=flat
-    :target: https://pypi.python.org/pypi/dependenpy/
+    :target: https://pypi.org/project/dependenpy/
     :alt: PyPI Wheel
 
 .. |gitter| image:: https://badges.gitter.im/Genida/dependenpy.svg

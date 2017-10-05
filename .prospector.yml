@@ -47,3 +47,4 @@ pyroma:
 vulture:
   run: true
   disable: [unused-function, unused-property, unused-variable]
+
