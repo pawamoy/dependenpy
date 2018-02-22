@@ -3,7 +3,7 @@
 """dependenpy plugins module."""
 
 try:
-    from archan import Provider, Argument, DSM as ArchanDSM
+    from archan import Provider, Argument, DesignStructureMatrix as ArchanDSM
     from .dsm import DSM as DependenpyDSM
     from .helpers import guess_depth
 
@@ -14,7 +14,7 @@ try:
         name = 'Internal Dependencies'
         description = 'Provide matrix data about internal dependencies ' \
                       'in a set of packages.'
-        arguments = (
+        argument_list = (
             Argument('packages', list, 'The list of packages to check for.'),
             Argument('enforce_init', bool, default=True,
                      description='Whether to assert presence of '
@@ -22,7 +22,7 @@ try:
             Argument('depth', int, 'The depth of the matrix to generate.'),
         )
 
-        def get_dsm(self, packages, enforce_init=True, depth=None):
+        def get_data(self, packages, enforce_init=True, depth=None):
             """
             Provide matrix data for internal dependencies in a set of packages.
 
