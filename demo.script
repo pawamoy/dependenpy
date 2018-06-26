@@ -1,0 +1,17 @@
+workon py36
+asciinema rec dependenpy.cast --overwrite  # demo: sleep 2
+dependenpy django  # demo: sleep 3
+clear
+dependenpy --depth=4 django.contrib.auth  # demo: sleep 3
+clear
+dependenpy -d4 --format=csv django.contrib.auth  # demo: sleep 3
+clear
+dependenpy -l dependenpy | head -n30  # demo: sleep 5
+clear
+dependenpy -l dependenpy | grep -v '!' | head -n30  # demo: sleep 5
+clear
+dependenpy -l --format json --indent 2 asciinema | head -n30  # demo: sleep 3
+clear
+dependenpy -lfjson asciinema | \
+jq '.packages[0].modules[] | .name, (.dependencies | length)'  # demo: sleep 4
+exit
