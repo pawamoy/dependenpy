@@ -1,5 +1,5 @@
 workon py36
-asciinema rec dependenpy.cast --overwrite  # demo: sleep 2
+termtosvg -g 130x80  # demo: sleep 2
 dependenpy django  # demo: sleep 3
 clear
 dependenpy --depth=4 django.contrib.auth  # demo: sleep 3
