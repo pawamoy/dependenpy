@@ -1,73 +1,47 @@
-# -*- coding: utf-8 -*-
-
-"""Sphinx configuration file."""
-
-from __future__ import unicode_literals
-
 import os
+from pathlib import Path
 
-extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.coverage',
-    'sphinx.ext.doctest',
-    'sphinx.ext.extlinks',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.todo',
-    'sphinx.ext.viewcode',
-]
+import toml
+from recommonmark.transform import AutoStructify
 
-autodoc_default_flags = [
-    'members',
-    'special-members',
-    'show-inheritance'
-]
+metadata = toml.load(Path(__file__).parent.parent / "pyproject.toml")["tool"]["poetry"]
+project = metadata["name"]
+repository = metadata["repository"].rstrip("/")
+year = "2015"
+author = metadata["authors"][0]
+copyright = "{0}, {1}".format(year, author)
+version = release = metadata["version"]
+master_doc = "index"
 
-if os.getenv('SPELLCHECK'):
-    extensions += 'sphinxcontrib.spelling',
-    spelling_show_suggestions = True
-    spelling_lang = 'en_US'
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx.ext.viewcode", "recommonmark"]
 
-source_suffix = '.rst'
-master_doc = 'index'
-project = u'Dependenpy'
-year = '2017'
-author = u'Timothee Mazzucotelli'
-copyright = '{0}, {1}'.format(year, author)
-version = release = u'3.2.0'
+# Auto-documentation directives in RST files
+autodoc_default_options = {"members": None, "special-members": "__init__", "exclude-members": "__weakref__"}
 
-pygments_style = 'trac'
-templates_path = ['.']
-extlinks = {
-    'issue': ('https://github.com/Genida/dependenpy/issues/%s', '#'),
-    'pr': ('https://github.com/Genida/dependenpy/pull/%s', 'PR #'),
-}
+# ReadTheDocs theme for local builds
+on_rtd = os.environ.get("READTHEDOCS", None) == "True"
+if not on_rtd:
+    html_theme = "sphinx_rtd_theme"
 
-# on_rtd is whether we are on readthedocs.org
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+# Some rendering options
+html_last_updated_fmt = "%b %d, %Y"
+html_context = {"extra_css_files": ["_static/extra.css"]}
+html_static_path = ["extra.css"]
 
-if not on_rtd:  # only set the theme if we're building docs locally
-    html_theme = 'sphinx_rtd_theme'
-
-html_last_updated_fmt = '%b %d, %Y'
-html_split_index = False
-html_sidebars = {
-   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
-}
-html_short_title = '%s-%s' % (project, version)
-
-html_context = {
-    'extra_css_files': [
-        '_static/extra.css',
-    ],
-}
-
-html_static_path = [
-    "extra.css",
-]
-
+# Google Style docstrings
 napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
-suppress_warnings = ["image.nonlocal_uri"]
+
+
+# Documentation in Markdown
+def setup(app):
+    app.add_config_value(
+        "recommonmark_config",
+        {
+            # "url_resolver": lambda url: repository + "/tree/master/docs/" + url,
+            "auto_toc_tree_section": "Welcome to {}'s documentation!".format(metadata["name"])
+        },
+        True,
+    )
+    app.add_transform(AutoStructify)

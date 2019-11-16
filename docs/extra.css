@@ -1,6 +1,5 @@
 .wy-side-nav-search {
-    /* TODO: add the color as a cookiecutter variable, default to classic RTD blue #2980B9 */
-    background-color: #2980B9;
+    background-color: #1FA87D;
 }
 
 .wy-side-nav-search input[type="text"] {
@@ -11,10 +10,9 @@
     margin: initial;
 }
 
-/*.wy-nav-side {*/
-    /* TODO: add the color as a cookiecutter variable, default to none */
-    /*background-color: #2980B9;*/
-/*}*/
+// .wy-nav-side {
+//     background-color: #1FA87D;
+// }
 
 .rst-content div[role=navigation], footer {
    font-size: 0.85em;
