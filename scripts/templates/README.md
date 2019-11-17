@@ -15,8 +15,7 @@ Build a dependency matrix for a set of Python packages.
 `dependenpy` allows you to build a dependency matrix for a set of Python packages.
 To do this, it reads and searches the source code for import statements.
 
-.. image:: demo.svg
-    :alt: Demo
+![demo](demo.svg)
 
 ## Requirements
 dependenpy requires Python 3.6 or above.
