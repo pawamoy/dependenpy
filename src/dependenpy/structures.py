@@ -45,9 +45,7 @@ class Matrix(PrintMixin):
                     keys.append(m)
                     continue
                 package = m.package
-                while (package.depth > depth and
-                       package.package and
-                       package not in nodes):
+                while package.depth > depth and package.package and package not in nodes:
                     package = package.package
                 if package not in keys:
                     keys.append(package)
@@ -66,7 +64,7 @@ class Matrix(PrintMixin):
                     if d.target.ismodule and d.target in keys:
                         data[i][d.target.index] += 1
                     elif d.target.ispackage:
-                        m = d.target.get('__init__')
+                        m = d.target.get("__init__")
                         if m is not None and m in keys:
                             data[i][m.index] += 1
         else:
@@ -92,17 +90,17 @@ class Matrix(PrintMixin):
         return sum(j for i in self.data for j in i)
 
     def _to_csv(self, **kwargs):
-        text = ['module,', ','.join(self.keys), '\n']
+        text = ["module,", ",".join(self.keys), "\n"]
         for i, k in enumerate(self.keys):
-            text.append('%s,%s\n' % (k, ','.join(map(str, self.data[i]))))
-        return ''.join(text)
+            text.append("%s,%s\n" % (k, ",".join(map(str, self.data[i]))))
+        return "".join(text)
 
     def _to_json(self, **kwargs):
-        return json.dumps({'keys': self.keys, 'data': self.data}, **kwargs)
+        return json.dumps({"keys": self.keys, "data": self.data}, **kwargs)
 
     def _to_text(self, **kwargs):
         if not self.keys or not self.data:
-            return ''
+            return ""
         max_key_length = max(len(k) for k in self.keys)
         max_dep_length = len(str(max(j for i in self.data for j in i)))
         key_col_length = len(str(len(self.keys)))
@@ -110,30 +108,25 @@ class Matrix(PrintMixin):
         column_length = max(key_col_length, max_dep_length)
 
         # first line left headers
-        text = [('\n {:>%s} | {:>%s} ||' % (
-            max_key_length, key_line_length
-        )).format('Module', 'Id')]
+        text = [("\n {:>%s} | {:>%s} ||" % (max_key_length, key_line_length)).format("Module", "Id")]
         # first line column headers
         for i, _ in enumerate(self.keys):
-            text.append(('{:^%s}|' % column_length).format(i))
-        text.append('\n')
+            text.append(("{:^%s}|" % column_length).format(i))
+        text.append("\n")
         # line of dashes
-        text.append((' %s-+-%s-++' % (
-            '-' * max_key_length, '-' * key_line_length)))
+        text.append((" %s-+-%s-++" % ("-" * max_key_length, "-" * key_line_length)))
         for i, _ in enumerate(self.keys):
-            text.append('%s+' % ('-' * column_length))
-        text.append('\n')
+            text.append("%s+" % ("-" * column_length))
+        text.append("\n")
         # lines
         for i, k in enumerate(self.keys):
-            text.append((' {:>%s} | {:>%s} ||' % (
-                max_key_length, key_line_length
-            )).format(k, i))
+            text.append((" {:>%s} | {:>%s} ||" % (max_key_length, key_line_length)).format(k, i))
             for v in self.data[i]:
-                text.append(('{:>%s}|' % column_length).format(v))
-            text.append('\n')
-        text.append('\n')
+                text.append(("{:>%s}|" % column_length).format(v))
+            text.append("\n")
+        text.append("\n")
 
-        return ''.join(text)
+        return "".join(text)
 
 
 class TreeMap(PrintMixin):
@@ -172,13 +165,13 @@ class TreeMap(PrintMixin):
         self.value = value
 
     def _to_csv(self, **kwargs):
-        return ''
+        return ""
 
     def _to_json(self, **kwargs):
-        return ''
+        return ""
 
     def _to_text(self, **kwargs):
-        return ''
+        return ""
 
 
 class Vertex(object):
@@ -250,8 +243,7 @@ class Edge(object):
         self.go_in(vertex_in)
 
     def __str__(self):
-        return '%s --%d--> %s' % (
-            self.vertex_out.name, self.weight, self.vertex_in.name)
+        return "%s --%d--> %s" % (self.vertex_out.name, self.weight, self.vertex_in.name)
 
     def go_from(self, vertex):
         """
@@ -311,36 +303,37 @@ class Graph(PrintMixin):
         self.vertices = set(vertices)
 
     def _to_csv(self, **kwargs):
-        header = kwargs.pop('header', True)
-        text = ['vertex_out,edge_weight,vertex_in\n' if header else '']
+        header = kwargs.pop("header", True)
+        text = ["vertex_out,edge_weight,vertex_in\n" if header else ""]
         for edge in self.edges:
-            text.append('%s,%s,%s\n' % (
-                edge.vertex_out.name, edge.weight, edge.vertex_in.name))
+            text.append("%s,%s,%s\n" % (edge.vertex_out.name, edge.weight, edge.vertex_in.name))
         for vertex in self.vertices:
             if not (vertex.edges_out or vertex.edges_in):
-                text.append('%s,,\n' % vertex.name)
-        return ''.join(text)
+                text.append("%s,,\n" % vertex.name)
+        return "".join(text)
 
     def _to_json(self, **kwargs):
-        return json.dumps({
-            'vertices': [vertex.name for vertex in self.vertices],
-            'edges': [{
-                'out': edge.vertex_out.name,
-                'weight': edge.weight,
-                'in': edge.vertex_in.name
-            } for edge in self.edges]
-        }, **kwargs)
+        return json.dumps(
+            {
+                "vertices": [vertex.name for vertex in self.vertices],
+                "edges": [
+                    {"out": edge.vertex_out.name, "weight": edge.weight, "in": edge.vertex_in.name}
+                    for edge in self.edges
+                ],
+            },
+            **kwargs
+        )
 
     def _to_text(self, **kwargs):
-        return ''
+        return ""
 
 
 def split_array(mdata, splits):
     data = []
     for i in range(len(splits) - 1):
         data.append([])
-        rows = mdata[splits[i]:splits[i + 1]]
+        rows = mdata[splits[i] : splits[i + 1]]
         for j in range(len(splits) - 1):
-            data[i].append([row[splits[j]:splits[j + 1]] for row in rows])
-        data[i].append([row[splits[-1]:] for row in rows])
+            data[i].append([row[splits[j] : splits[j + 1]] for row in rows])
+        data[i].append([row[splits[-1] :] for row in rows])
     return data

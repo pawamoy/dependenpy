@@ -4,9 +4,9 @@
 
 import sys
 
-CSV = 'csv'
-JSON = 'json'
-TEXT = 'text'
+CSV = "csv"
+JSON = "json"
+TEXT = "text"
 FORMAT = (CSV, JSON, TEXT)
 
 
@@ -53,5 +53,5 @@ def guess_depth(packages):
         int: guessed depth to use.
     """
     if len(packages) == 1:
-        return packages[0].count('.') + 2
-    return min(p.count('.') for p in packages) + 1
+        return packages[0].count(".") + 2
+    return min(p.count(".") for p in packages) + 1

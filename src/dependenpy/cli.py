@@ -44,8 +44,8 @@ def main(args=None):
     # split comma-separated args
     packages = []
     for arg in args.packages:
-        if ',' in arg:
-            for package in arg.split(','):
+        if "," in arg:
+            for package in arg.split(","):
                 if package not in packages:
                     packages.append(package)
         elif arg not in packages:
@@ -59,10 +59,9 @@ def main(args=None):
     # open file if not stdout
     output = args.output
     if isinstance(output, str):
-        output = open(output, 'w')
+        output = open(output, "w")
 
-    dsm = DSM(*packages, build_tree=True, build_dependencies=True,
-              enforce_init=not args.greedy)
+    dsm = DSM(*packages, build_tree=True, build_dependencies=True, enforce_init=not args.greedy)
 
     if dsm.empty:
         return 1
@@ -81,13 +80,11 @@ def main(args=None):
         if args.dependencies:
             dsm.print(format=args.format, output=output, indent=indent)
         elif args.matrix:
-            dsm.print_matrix(format=args.format, output=output,
-                             depth=depth, indent=indent)
+            dsm.print_matrix(format=args.format, output=output, depth=depth, indent=indent)
         elif args.treemap:
             dsm.print_treemap(format=args.format, output=output)
         elif args.graph:
-            dsm.print_graph(format=args.format, output=output,
-                            depth=depth, indent=indent)
+            dsm.print_graph(format=args.format, output=output, depth=depth, indent=indent)
     except BrokenPipeError:
         # avoid traceback
         return 2
@@ -97,54 +94,94 @@ def main(args=None):
 
 def get_parser():
     """Return a parser for the command-line arguments."""
-    parser = argparse.ArgumentParser(
-        add_help=False,
-        description='Command line tool for dependenpy Python package.')
+    parser = argparse.ArgumentParser(add_help=False, description="Command line tool for dependenpy Python package.")
     mxg = parser.add_mutually_exclusive_group(required=False)
 
     parser.add_argument(
-        'packages', metavar='PACKAGES', nargs=argparse.ONE_OR_MORE,
-        help='The package list. Can be a comma-separated list. Each package '
-             'must be either a valid path or a package in PYTHONPATH.')
+        "packages",
+        metavar="PACKAGES",
+        nargs=argparse.ONE_OR_MORE,
+        help="The package list. Can be a comma-separated list. Each package "
+        "must be either a valid path or a package in PYTHONPATH.",
+    )
     parser.add_argument(
-        '-d', '--depth', default=None, type=int, dest='depth',
-        help='Specify matrix or graph depth. Default: best guess.')
+        "-d",
+        "--depth",
+        default=None,
+        type=int,
+        dest="depth",
+        help="Specify matrix or graph depth. Default: best guess.",
+    )
     parser.add_argument(
-        '-f', '--format', choices=FORMAT, default='text',
-        dest='format', help='Output format. Default: text.')
+        "-f", "--format", choices=FORMAT, default="text", dest="format", help="Output format. Default: text."
+    )
     mxg.add_argument(
-        '-g', '--show-graph', action='store_true', dest='graph', default=False,
-        help='Show the graph (no text format). Default: false.')
+        "-g",
+        "--show-graph",
+        action="store_true",
+        dest="graph",
+        default=False,
+        help="Show the graph (no text format). Default: false.",
+    )
     parser.add_argument(
-        '-G', '--greedy', action='store_true', dest='greedy', default=False,
-        help='Explore subdirectories even if they do not contain an '
-             '__init__.py file. Can make execution slower. Default: false.')
+        "-G",
+        "--greedy",
+        action="store_true",
+        dest="greedy",
+        default=False,
+        help="Explore subdirectories even if they do not contain an "
+        "__init__.py file. Can make execution slower. Default: false.",
+    )
     parser.add_argument(
-        '-h', '--help', action='help', default=argparse.SUPPRESS,
-        help='Show this help message and exit.')
+        "-h", "--help", action="help", default=argparse.SUPPRESS, help="Show this help message and exit."
+    )
     parser.add_argument(
-        '-i', '--indent', default=None, type=int, dest='indent',
-        help='Specify output indentation. CSV will never be indented. '
-             'Text will always have new-lines. JSON can be minified with '
-             'a negative value. Default: best guess.')
+        "-i",
+        "--indent",
+        default=None,
+        type=int,
+        dest="indent",
+        help="Specify output indentation. CSV will never be indented. "
+        "Text will always have new-lines. JSON can be minified with "
+        "a negative value. Default: best guess.",
+    )
     mxg.add_argument(
-        '-l', '--show-dependencies-list', action='store_true',
-        dest='dependencies', default=False,
-        help='Show the dependencies list. Default: false.')
+        "-l",
+        "--show-dependencies-list",
+        action="store_true",
+        dest="dependencies",
+        default=False,
+        help="Show the dependencies list. Default: false.",
+    )
     mxg.add_argument(
-        '-m', '--show-matrix', action='store_true',
-        dest='matrix', default=False,
-        help='Show the matrix. Default: true unless -g, -l or -t.')
+        "-m",
+        "--show-matrix",
+        action="store_true",
+        dest="matrix",
+        default=False,
+        help="Show the matrix. Default: true unless -g, -l or -t.",
+    )
     parser.add_argument(
-        '-o', '--output', action='store', dest='output', default=sys.stdout,
-        help='Output to given file. Default: stdout.')
+        "-o",
+        "--output",
+        action="store",
+        dest="output",
+        default=sys.stdout,
+        help="Output to given file. Default: stdout.",
+    )
     mxg.add_argument(
-        '-t', '--show-treemap', action='store_true',
-        dest='treemap', default=False,
-        help='Show the treemap (work in progress). Default: false.')
+        "-t",
+        "--show-treemap",
+        action="store_true",
+        dest="treemap",
+        default=False,
+        help="Show the treemap (work in progress). Default: false.",
+    )
     parser.add_argument(
-        '-v', '--version', action='version',
-        version='dependenpy %s' % __version__,
-        help='Show the current version of the program and exit.')
+        "-v",
+        "--version",
+        action="version",
+        version="dependenpy %s" % __version__,
+        help="Show the current version of the program and exit.",
+    )
     return parser
-

@@ -73,8 +73,8 @@ class RootNode(object):
         Returns:
             Package/Module: corresponding object.
         """
-        depth = item.count('.') + 1
-        parts = item.split('.', 1)
+        depth = item.count(".") + 1
+        parts = item.split(".", 1)
         for m in self.modules:
             if parts[0] == m.name:
                 if depth == 1:
@@ -188,8 +188,8 @@ class RootNode(object):
         Returns:
             Package/Module: package containing target or corresponding module.
         """
-        depth = target.count('.') + 1
-        parts = target.split('.', 1)
+        depth = target.count(".") + 1
+        parts = target.split(".", 1)
         for m in self.modules:
             if parts[0] == m.name:
                 if depth < 3:
@@ -260,26 +260,26 @@ class RootNode(object):
         treemap.print(format=format, output=output, **kwargs)
 
     def _to_text(self, **kwargs):
-        indent = kwargs.pop('indent', 2)
-        base_indent = kwargs.pop('base_indent', None)
+        indent = kwargs.pop("indent", 2)
+        base_indent = kwargs.pop("base_indent", None)
         if base_indent is None:
             base_indent = indent
             indent = 0
-        text = [' ' * indent + str(self) + '\n']
+        text = [" " * indent + str(self) + "\n"]
         new_indent = indent + base_indent
         for m in self.modules:
             text.append(m._to_text(indent=new_indent, base_indent=base_indent))
         for p in self.packages:
             text.append(p._to_text(indent=new_indent, base_indent=base_indent))
-        return ''.join(text)
+        return "".join(text)
 
     def _to_csv(self, **kwargs):
-        header = kwargs.pop('header', True)
+        header = kwargs.pop("header", True)
         modules = sorted(self.submodules, key=lambda x: x.absolute_name())
-        text = ['module,path,target,lineno,what,external\n' if header else '']
+        text = ["module,path,target,lineno,what,external\n" if header else ""]
         for m in modules:
             text.append(m._to_csv(header=False))
-        return ''.join(text)
+        return "".join(text)
 
     def _to_json(self, **kwargs):
         return json.dumps(self.as_dict(), **kwargs)
@@ -292,9 +292,9 @@ class RootNode(object):
             dict: dictionary of dependencies.
         """
         return {
-            'name': str(self),
-            'modules': [m.as_dict() for m in self.modules],
-            'packages': [p.as_dict() for p in self.packages]
+            "name": str(self),
+            "modules": [m.as_dict() for m in self.modules],
+            "packages": [p.as_dict() for p in self.packages],
         }
 
     def as_graph(self, depth=0):
@@ -403,4 +403,4 @@ class LeafNode(object):
         while node is not None:
             names.append(node.name)
             node = node.package
-        return '.'.join(reversed(names))
+        return ".".join(reversed(names))

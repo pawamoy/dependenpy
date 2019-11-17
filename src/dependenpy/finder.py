@@ -28,7 +28,7 @@ class PackageSpec(object):
     @property
     def ismodule(self):
         """Property to tell if the package is in fact a module (a file)."""
-        return self.path.endswith('.py')
+        return self.path.endswith(".py")
 
     def add(self, spec):
         """
@@ -95,11 +95,11 @@ class LocalPackageFinder(PackageFinder):
         if not exists(package):
             return None
         name, path = None, None
-        enforce_init = kwargs.pop('enforce_init', True)
+        enforce_init = kwargs.pop("enforce_init", True)
         if isdir(package):
-            if isfile(join(package, '__init__.py')) or not enforce_init:
+            if isfile(join(package, "__init__.py")) or not enforce_init:
                 name, path = basename(package), package
-        elif isfile(package) and package.endswith('.py'):
+        elif isfile(package) and package.endswith(".py"):
             name, path = splitext(basename(package))[0], package
         if name and path:
             return PackageSpec(name, path)
@@ -124,14 +124,14 @@ class InstalledPackageFinder(PackageFinder):
         if spec is None:
             return None
         limit = []
-        if '.' in package:
-            package, limit = package.split('.', 1)
+        if "." in package:
+            package, limit = package.split(".", 1)
             limit = [limit]
             spec = find_spec(package)
         if spec is not None:
             if spec.submodule_search_locations:
                 path = spec.submodule_search_locations[0]
-            elif spec.origin and spec.origin != 'built-in':
+            elif spec.origin and spec.origin != "built-in":
                 path = spec.origin
             else:
                 return None

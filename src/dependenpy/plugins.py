@@ -10,16 +10,18 @@ try:
     class InternalDependencies(Provider):
         """Dependenpy provider for Archan."""
 
-        identifier = 'dependenpy.InternalDependencies'
-        name = 'Internal Dependencies'
-        description = 'Provide matrix data about internal dependencies ' \
-                      'in a set of packages.'
+        identifier = "dependenpy.InternalDependencies"
+        name = "Internal Dependencies"
+        description = "Provide matrix data about internal dependencies in a set of packages."
         argument_list = (
-            Argument('packages', list, 'The list of packages to check for.'),
-            Argument('enforce_init', bool, default=True,
-                     description='Whether to assert presence of '
-                     '__init__.py files in directories.'),
-            Argument('depth', int, 'The depth of the matrix to generate.'),
+            Argument("packages", list, "The list of packages to check for."),
+            Argument(
+                "enforce_init",
+                bool,
+                default=True,
+                description="Whether to assert presence of __init__.py files in directories.",
+            ),
+            Argument("depth", int, "The depth of the matrix to generate."),
         )
 
         def get_data(self, packages, enforce_init=True, depth=None):
@@ -42,6 +44,8 @@ try:
             matrix = dsm.as_matrix(depth=depth)
             return ArchanDSM(data=matrix.data, entities=matrix.keys)
 
+
 except ImportError:
+
     class InternalDependencies(object):
         """Empty dependenpy provider."""

@@ -32,11 +32,7 @@ class DSM(RootNode, NodeMixin, PrintMixin):
     a dictionary or a tree-map.
     """
 
-    def __init__(self,
-                 *packages,
-                 build_tree=True,
-                 build_dependencies=True,
-                 enforce_init=True):
+    def __init__(self, *packages, build_tree=True, build_dependencies=True, enforce_init=True):
         """
         Initialization method.
 
@@ -62,12 +58,12 @@ class DSM(RootNode, NodeMixin, PrintMixin):
                 self.not_found.append(package)
 
         if not specs:
-            print('** dependenpy: DSM empty.', file=sys.stderr)
+            print("** dependenpy: DSM empty.", file=sys.stderr)
 
         self.specs = PackageSpec.combine(specs)
 
         for m in self.not_found:
-            print('** dependenpy: Not found: %s.' % m, file=sys.stderr)
+            print("** dependenpy: Not found: %s." % m, file=sys.stderr)
 
         super().__init__(build_tree)
 
@@ -75,8 +71,7 @@ class DSM(RootNode, NodeMixin, PrintMixin):
             self.build_dependencies()
 
     def __str__(self):
-        return 'Dependency DSM for packages: [%s]' % ', '.join(
-            [p.name for p in self.packages])
+        return "Dependency DSM for packages: [%s]" % ", ".join([p.name for p in self.packages])
 
     @property
     def isdsm(self):
@@ -89,12 +84,17 @@ class DSM(RootNode, NodeMixin, PrintMixin):
             if spec.ismodule:
                 self.modules.append(Module(spec.name, spec.path, dsm=self))
             else:
-                self.packages.append(Package(
-                    spec.name, spec.path,
-                    dsm=self, limit_to=spec.limit_to,
-                    build_tree=True,
-                    build_dependencies=False,
-                    enforce_init=self.enforce_init))
+                self.packages.append(
+                    Package(
+                        spec.name,
+                        spec.path,
+                        dsm=self,
+                        limit_to=spec.limit_to,
+                        build_tree=True,
+                        build_dependencies=False,
+                        enforce_init=self.enforce_init,
+                    )
+                )
 
 
 class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
@@ -104,15 +104,17 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
     This class represent Python packages as nodes in a tree.
     """
 
-    def __init__(self,
-                 name,
-                 path,
-                 dsm=None,
-                 package=None,
-                 limit_to=None,
-                 build_tree=True,
-                 build_dependencies=True,
-                 enforce_init=True):
+    def __init__(
+        self,
+        name,
+        path,
+        dsm=None,
+        package=None,
+        limit_to=None,
+        build_tree=True,
+        build_dependencies=True,
+        enforce_init=True,
+    ):
         """
         Initialization method.
 
@@ -178,8 +180,8 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
         heads = []
         new_limit_to = []
         for limit in self.limit_to:
-            if '.' in limit:
-                name, limit = limit.split('.', 1)
+            if "." in limit:
+                name, limit = limit.split(".", 1)
                 heads.append(name)
                 new_limit_to.append(limit)
             else:
@@ -190,19 +192,26 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
         """Build the tree for this package."""
         for m in listdir(self.path):
             abs_m = join(self.path, m)
-            if isfile(abs_m) and m.endswith('.py'):
+            if isfile(abs_m) and m.endswith(".py"):
                 name = splitext(m)[0]
                 if not self.limit_to or name in self.limit_to:
                     self.modules.append(Module(name, abs_m, self.dsm, self))
             elif isdir(abs_m):
-                if isfile(join(abs_m, '__init__.py')) or not self.enforce_init:
+                if isfile(join(abs_m, "__init__.py")) or not self.enforce_init:
                     heads, new_limit_to = self.split_limits_heads()
                     if not heads or m in heads:
                         self.packages.append(
-                            Package(m, abs_m, self.dsm, self, new_limit_to,
-                                    build_tree=True,
-                                    build_dependencies=False,
-                                    enforce_init=self.enforce_init))
+                            Package(
+                                m,
+                                abs_m,
+                                self.dsm,
+                                self,
+                                new_limit_to,
+                                build_tree=True,
+                                build_dependencies=False,
+                                enforce_init=self.enforce_init,
+                            )
+                        )
 
     def cardinal(self, to):
         """
@@ -224,9 +233,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
     This class represents a Python module (a Python file).
     """
 
-    RECURSIVE_NODES = (
-        ast.ClassDef, ast.FunctionDef, ast.If, ast.IfExp, ast.Try,
-        ast.With, ast.ExceptHandler)
+    RECURSIVE_NODES = (ast.ClassDef, ast.FunctionDef, ast.If, ast.IfExp, ast.Try, ast.With, ast.ExceptHandler)
 
     def __init__(self, name, path, dsm=None, package=None):
         """
@@ -259,7 +266,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         """
         if self is item:
             return True
-        elif self.package is item and self.name == '__init__':
+        elif self.package is item and self.name == "__init__":
             return True
         return False
 
@@ -276,44 +283,53 @@ class Module(LeafNode, NodeMixin, PrintMixin):
             dict: dictionary of dependencies.
         """
         return {
-            'name': self.absolute_name() if absolute else self.name,
-            'path': self.path,
-            'dependencies': [{
-                # 'source': d.source.absolute_name(),  # redundant
-                'target': d.target if d.external else d.target.absolute_name(),
-                'lineno': d.lineno,
-                'what': d.what,
-                'external': d.external
-            } for d in self.dependencies]
+            "name": self.absolute_name() if absolute else self.name,
+            "path": self.path,
+            "dependencies": [
+                {
+                    # 'source': d.source.absolute_name(),  # redundant
+                    "target": d.target if d.external else d.target.absolute_name(),
+                    "lineno": d.lineno,
+                    "what": d.what,
+                    "external": d.external,
+                }
+                for d in self.dependencies
+            ],
         }
 
     def _to_text(self, **kwargs):
-        indent = kwargs.pop('indent', 2)
-        base_indent = kwargs.pop('base_indent', None)
+        indent = kwargs.pop("indent", 2)
+        base_indent = kwargs.pop("base_indent", None)
         if base_indent is None:
             base_indent = indent
             indent = 0
-        text = [' ' * indent + self.name + '\n']
+        text = [" " * indent + self.name + "\n"]
         new_indent = indent + base_indent
         for d in self.dependencies:
-            external = '! ' if d.external else ''
-            text.append(' ' * new_indent + external + str(d) + '\n')
-        return ''.join(text)
+            external = "! " if d.external else ""
+            text.append(" " * new_indent + external + str(d) + "\n")
+        return "".join(text)
 
     def _to_csv(self, **kwargs):
-        header = kwargs.pop('header', True)
-        text = ['module,path,target,lineno,what,external\n' if header else '']
+        header = kwargs.pop("header", True)
+        text = ["module,path,target,lineno,what,external\n" if header else ""]
         name = self.absolute_name()
         for d in self.dependencies:
-            text.append('%s,%s,%s,%s,%s,%s\n' % (
-                name, self.path,
-                d.target if d.external else d.target.absolute_name(),
-                d.lineno, d.what if d.what else '', d.external
-            ))
-        return ''.join(text)
+            text.append(
+                "%s,%s,%s,%s,%s,%s\n"
+                % (
+                    name,
+                    self.path,
+                    d.target if d.external else d.target.absolute_name(),
+                    d.lineno,
+                    d.what if d.what else "",
+                    d.external,
+                )
+            )
+        return "".join(text)
 
     def _to_json(self, **kwargs):
-        absolute = kwargs.pop('absolute', False)
+        absolute = kwargs.pop("absolute", False)
         return json.dumps(self.as_dict(absolute=absolute), **kwargs)
 
     def build_dependencies(self):
@@ -327,12 +343,12 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         if self is highest:
             highest = LeafNode()
         for _import in self.parse_code():
-            target = highest.get_target(_import['target'])
+            target = highest.get_target(_import["target"])
             if target:
-                what = _import['target'].split('.')[-1]
+                what = _import["target"].split(".")[-1]
                 if what != target.name:
-                    _import['what'] = what
-                _import['target'] = target
+                    _import["what"] = what
+                _import["target"] = target
             self.dependencies.append(Dependency(source=self, **_import))
 
     def parse_code(self):
@@ -342,12 +358,12 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         Returns:
             list of dict: the import statements.
         """
-        code = open(self.path, encoding='utf-8').read()
+        code = open(self.path, encoding="utf-8").read()
         try:
             body = ast.parse(code).body
         except SyntaxError:
             try:
-                code = code.encode('utf-8')
+                code = code.encode("utf-8")
                 body = ast.parse(code).body
             except SyntaxError:
                 return []
@@ -366,17 +382,15 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         imports = []
         for node in ast_body:
             if isinstance(node, ast.Import):
-                imports.extend({'target': name.name, 'lineno': node.lineno}
-                               for name in node.names)
+                imports.extend({"target": name.name, "lineno": node.lineno} for name in node.names)
             elif isinstance(node, ast.ImportFrom):
                 for name in node.names:
                     name = (
-                        self.absolute_name(self.depth - node.level) + '.'
-                        if node.level > 0 else ''
-                    ) + (
-                        node.module + '.' if node.module else ''
-                    ) + name.name
-                    imports.append({'target': name, 'lineno': node.lineno})
+                        (self.absolute_name(self.depth - node.level) + "." if node.level > 0 else "")
+                        + (node.module + "." if node.module else "")
+                        + name.name
+                    )
+                    imports.append({"target": name, "lineno": node.lineno})
             elif isinstance(node, Module.RECURSIVE_NODES):
                 imports.extend(self.get_imports(node.body))
                 if isinstance(node, ast.Try):
@@ -393,8 +407,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         Returns:
             int: number of dependencies.
         """
-        return sum(1 for _ in filter(
-            lambda d: not d.external and d.target in to, self.dependencies))
+        return sum(1 for _ in filter(lambda d: not d.external and d.target in to, self.dependencies))
 
 
 class Dependency(object):
@@ -420,11 +433,12 @@ class Dependency(object):
         self.what = what
 
     def __str__(self):
-        return '%s imports %s%s (line %s)' % (
+        return "%s imports %s%s (line %s)" % (
             self.source.name,
-            '%s from ' % self.what if self.what else '',
+            "%s from " % self.what if self.what else "",
             self.target if self.external else self.target.absolute_name(),
-            self.lineno)
+            self.lineno,
+        )
 
     @property
     def external(self):

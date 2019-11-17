@@ -14,5 +14,5 @@ please refer to the README.md included in this package to get the link to the of
 from .dsm import DSM, Dependency, Module, Package
 from .structures import Matrix, TreeMap
 
-__all__ = ('DSM', 'Dependency', 'Matrix', 'Module', 'Package', 'TreeMap')
-__version__ = '3.2.0'
+__all__ = ("DSM", "Dependency", "Matrix", "Module", "Package", "TreeMap")
+__version__ = "3.2.0"
