@@ -1,5 +1,9 @@
+import pytest
+
 from dependenpy import cli
 
 
 def test_main():
-    assert cli.main([]) == 0
+    with pytest.raises(SystemExit) as exit:
+        cli.main([])
+        assert exit.code == 2
