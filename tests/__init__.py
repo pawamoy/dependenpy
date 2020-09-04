@@ -1,3 +1,5 @@
+"""Tests suite for `dependenpy`."""
+
 import sys
 from pathlib import Path
 

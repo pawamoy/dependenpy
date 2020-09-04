@@ -1,0 +1,42 @@
+site_name: "Dependenpy"
+site_description: "Show the inter-dependencies between modules of Python packages."
+site_url: "https://pawamoy.github.io/dependenpy"
+repo_url: "https://github.com/pawamoy/dependenpy"
+repo_name: "pawamoy/dependenpy"
+
+nav:
+  - Overview: index.md
+  - Usage: usage.md
+  - API Reference:
+    - cli.py: reference/cli.md
+    - dsm.py: reference/dsm.md
+    - finder.py: reference/finder.md
+    - helpers.py: reference/helpers.md
+    - node.py: reference/node.md
+    - plugins.py: reference/plugins.md
+    - structures.py: reference/structures.md
+  - Contributing: contributing.md
+  - Code of Conduct: code_of_conduct.md
+  - Changelog: changelog.md
+  - Credits: credits.md
+
+theme:
+  name: material
+
+extra_css:
+  - css/mkdocstrings.css
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - pymdownx.superfences
+  - pymdownx.emoji
+  - toc:
+      permalink: "¤"
+
+plugins:
+  - search
+  - mkdocstrings:
+      watch:
+        - src/dependenpy

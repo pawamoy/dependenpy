@@ -1,16 +1,10 @@
-<!--
-IMPORTANT:
-  This file is generated from the template at 'scripts/templates/README.md'.
-  Please update the template instead of this file.
--->
+# Dependenpy
 
-# dependenpy
-[![pipeline status](https://gitlab.com/pawamoy/dependenpy/badges/master/pipeline.svg)](https://gitlab.com/pawamoy/dependenpy/pipelines)
-[![coverage report](https://gitlab.com/pawamoy/dependenpy/badges/master/coverage.svg)](https://gitlab.com/pawamoy/dependenpy/commits/master)
-[![documentation](https://img.shields.io/readthedocs/dependenpy.svg?style=flat)](https://dependenpy.readthedocs.io/en/latest/index.html)
+[![ci](https://github.com/pawamoy/dependenpy/workflows/ci/badge.svg)](https://github.com/pawamoy/dependenpy/actions?query=workflow%3Aci)
+[![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://pawamoy.github.io/dependenpy/)
 [![pypi version](https://img.shields.io/pypi/v/dependenpy.svg)](https://pypi.org/project/dependenpy/)
 
-Build a dependency matrix for a set of Python packages.
+Show the inter-dependencies between modules of Python packages.
 
 `dependenpy` allows you to build a dependency matrix for a set of Python packages.
 To do this, it reads and searches the source code for import statements.
@@ -18,7 +12,8 @@ To do this, it reads and searches the source code for import statements.
 ![demo](demo.svg)
 
 ## Requirements
-dependenpy requires Python 3.6 or above.
+
+Dependenpy requires Python 3.6 or above.
 
 <details>
 <summary>To install Python 3.6, I recommend using <a href="https://github.com/pyenv/pyenv"><code>pyenv</code></a>.</summary>
@@ -41,12 +36,13 @@ pyenv global system 3.6.8
 </details>
 
 ## Installation
+
 With `pip`:
 ```bash
 python3.6 -m pip install dependenpy
 ```
 
-With [`pipx`](https://github.com/cs01/pipx):
+With [`pipx`](https://github.com/pipxproject/pipx):
 ```bash
 python3.6 -m pip install --user pipx
 
@@ -54,6 +50,7 @@ pipx install --python python3.6 dependenpy
 ```
 
 ## Usage (as a library)
+
 ```python
 from dependenpy import DSM
 
@@ -81,6 +78,7 @@ The Django package [django-meerkat](https://github.com/Genida/django-meerkat)
 uses it to display the matrices with Highcharts.
 
 ## Usage (command-line)
+
 ```
 usage: gen-readme-data.py [-d DEPTH] [-f {csv,json,text}] [-g] [-G] [-h]
                           [-i INDENT] [-l] [-m] [-o OUTPUT] [-t] [-v]
@@ -121,20 +119,18 @@ Example:
 
 ```console
 $ # running dependenpy on itself
-$ dependenpy dependenpy
+$ dependenpy dependenpy -z=
 
-                Module | Id ||0|1|2|3|4|5|6|7|8|
- ----------------------+----++-+-+-+-+-+-+-+-+-+
-   dependenpy.__init__ |  0 ||0|0|0|4|0|0|0|0|2|
-   dependenpy.__main__ |  1 ||0|0|1|0|0|0|0|0|0|
-        dependenpy.cli |  2 ||1|0|0|1|0|4|0|0|0|
-        dependenpy.dsm |  3 ||0|0|0|0|2|1|3|0|0|
-     dependenpy.finder |  4 ||0|0|0|0|0|0|0|0|0|
-    dependenpy.helpers |  5 ||0|0|0|0|0|0|0|0|0|
-       dependenpy.node |  6 ||0|0|0|0|0|0|0|0|3|
-    dependenpy.plugins |  7 ||0|0|0|1|0|1|0|0|0|
- dependenpy.structures |  8 ||0|0|0|0|0|1|0|0|0|
+                Module │ Id │0│1│2│3│4│5│6│7│8│
+ ──────────────────────┼────┼─┼─┼─┼─┼─┼─┼─┼─┼─┤
+   dependenpy.__init__ │  0 │ │ │ │4│ │ │ │ │2│
+   dependenpy.__main__ │  1 │ │ │1│ │ │ │ │ │ │
+        dependenpy.cli │  2 │1│ │ │1│ │4│ │ │ │
+        dependenpy.dsm │  3 │ │ │ │ │2│1│3│ │ │
+     dependenpy.finder │  4 │ │ │ │ │ │ │ │ │ │
+    dependenpy.helpers │  5 │ │ │ │ │ │ │ │ │ │
+       dependenpy.node │  6 │ │ │ │ │ │ │ │ │3│
+    dependenpy.plugins │  7 │ │ │ │1│ │1│ │ │ │
+ dependenpy.structures │  8 │ │ │ │ │ │1│ │ │ │
+
 ```
-
-
-

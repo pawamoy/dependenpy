@@ -4,8 +4,8 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "dependenpy"
-version = "3.2.0"
-description = "Build a dependency matrix for a set of Python packages."
+version = "0.3.2"
+description = "Show the inter-dependencies between modules of Python packages."
 authors = ["Timothée Mazzucotelli <pawamoy@pm.me>"]
 license = "ISC License"
 readme = "README.md"
@@ -21,24 +21,46 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.6"
 
+coverage = { version = "^5.0.4", optional = true }
+invoke = { version = "^1.4.1", optional = true }
+mypy = { version = "^0.770", optional = true }
+pytest = { version = "^4.3", optional = true }
+pytest-randomly = { version = "^3.4.1", optional = true }
+pytest-sugar = { version = "^0.9.2", optional = true }
+pytest-xdist = { version = "^1.26", optional = true }
+colorama = "^0.4.3"
+
+[tool.poetry.extras]
+tests = ["coverage", "invoke", "mypy", "pytest", "pytest-randomly", "pytest-sugar", "pytest-xdist"]
+
 [tool.poetry.dev-dependencies]
-bandit = "^1.5"
-black = { version = "*", allows-prereleases = true }
-coverage = { version = "=5.0a8", allows-prereleases = true }
-flake8 = "^3.6"
+autoflake = "^1.3.1"
+black = "^20.8b1"
+coverage = "^5.0.4"
+failprint = "^0.3.0"
+flakehell = "^0.6.0"
+flake8-black = "^0.2.1"
+flake8-builtins = "^1.5.3"
+flake8-tidy-imports = "^4.1.0"
+flake8-variables-names = "^0.0.3"
+flake8-pytest-style = "^1.3.0"
+git-changelog = "^0.4.0"
+httpx = "^0.13.3"
+invoke = "^1.4.1"
 ipython = "^7.2"
 isort = { version = "^4.3", extras = ["pyproject"] }
 jinja2-cli = "^0.7.0"
-pylint = { git = "https://github.com/PyCQA/pylint" }
+mkdocs = "^1.1"
+mkdocs-material = ">=4.5, <6.0"
+mkdocstrings = "^0.11.2"
+mypy = "^0.770"
 pytest = "^4.3"
-pytest-cov = "^2.8"
+pytest-randomly = "^3.4.1"
 pytest-sugar = "^0.9.2"
 pytest-xdist = "^1.26"
-recommonmark = "^0.6.0"
-safety = "^1.8"
-sphinx = "^1.8"
-sphinx-rtd-theme = "^0.4.2"
 toml = "^0.10.0"
+wemake-python-styleguide = "^0.14.1"
+wrapt = "^1.12.1"
 
 [tool.poetry.scripts]
 dependenpy = "dependenpy.cli:main"
@@ -59,17 +81,37 @@ default_section = "THIRDPARTY"
 known_first_party = "dependenpy"
 include_trailing_comma = true
 
-[tool.pylint.options]
-disable = """
-  bad-continuation,
-  too-many-lines,
-  too-many-public-methods,
-  too-many-locals,
-  too-many-statements,
-  too-many-arguments,
-  too-many-instance-attributes,
-  too-many-branches,
-  too-few-public-methods,
-  duplicate-code
-"""
-max-line-length = "120"
+[tool.flakehell]
+format = "colored"
+max_line_length = 132
+show_source = false
+
+[tool.flakehell.plugins]
+"*" = [
+    "+*",
+    "-RST*",  # we write docstrings in markdown, not rst
+    "-A001",  # redundant with W0622 (builtin override), which is more precise about line number
+    "-D105",  # missing docstring in magic method
+    "-D212",  # multi-line docstring summary should start at the first line
+    "-E203",  # whitespace before ‘:’ (incompatible with Black)
+    "-Q000",  # black already deals with quoting
+    "-S101",  # use of assert
+    "-W503",  # line break before binary operator (incompatible with Black)
+    "-C0116",  # redunant with D102 (missing docstring)
+    "-C0301",  # line too long
+    "-R0903",  # too few public methods
+    "-R0913",  # too many methods
+    "-R0914",  # too many local variables
+    "-W0611",  # redundant with F401 (unused import)
+    "-WPS305",  # f-strings
+    "-WPS125",  # redundant with W0622 (builtin override), which is more precise about line number
+    "-WPS202",  # too many module members
+    "-WPS210",  # too many local variables
+    "-WPS213",  # too many expressions
+    "-WPS220",  # too deep nesting
+    "-WPS226",  # string over-use: can't disable it per file?
+    "-WPS326",  # implicit string concatenation
+    "-WPS336",  # explicit string concatenation
+    "-WPS412",  # __init__ modules with logic
+    "-WPS433",  # redundant with C0415 (not top-level import)
+]

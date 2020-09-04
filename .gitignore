@@ -5,9 +5,10 @@ dist/
 *.egg-info/
 build/
 .coverage
-tests/tmp/*
-!tests/tmp/.gitkeep
 pip-wheel-metadata/
 .pytest_cache/
-.python-version
+.mypy_cache/
+site/
+poetry.lock
+.venv/
 .demo_env/

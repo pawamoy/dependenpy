@@ -1,17 +1,5 @@
 # Usage
 
-- [Importing classes](#importing-classes)
-- [Creation of objects]()
-  - [Create a DSM](#create-a-dsm)
-  - [Create a Package](#create-a-package)
-  - [Create a Module](#create-a-module)
-  - [Create a Dependency](#create-a-dependency)
-  - [Create a Matrix](#create-a-matrix)
-  - [Create a Treemap](#create-a-treemap)
-  - [Create a Graph](#create-a-graph)
-- [Accessing elements](#accessing-elements)
-- [Printing contents](#printing-contents)
-
 ## Importing classes
 
 You can directly import the following classes from `dependenpy`:
