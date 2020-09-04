@@ -89,19 +89,20 @@ Example:
 
 ```console
 $ # running dependenpy on itself
-$ dependenpy dependenpy
+$ dependenpy dependenpy -z=
 
-                Module | Id ||0|1|2|3|4|5|6|7|8|
- ----------------------+----++-+-+-+-+-+-+-+-+-+
-   dependenpy.__init__ |  0 ||0|0|0|4|0|0|0|0|2|
-   dependenpy.__main__ |  1 ||0|0|1|0|0|0|0|0|0|
-        dependenpy.cli |  2 ||1|0|0|1|0|4|0|0|0|
-        dependenpy.dsm |  3 ||0|0|0|0|2|1|3|0|0|
-     dependenpy.finder |  4 ||0|0|0|0|0|0|0|0|0|
-    dependenpy.helpers |  5 ||0|0|0|0|0|0|0|0|0|
-       dependenpy.node |  6 ||0|0|0|0|0|0|0|0|3|
-    dependenpy.plugins |  7 ||0|0|0|1|0|1|0|0|0|
- dependenpy.structures |  8 ||0|0|0|0|0|1|0|0|0|
+                Module │ Id │0│1│2│3│4│5│6│7│8│
+ ──────────────────────┼────┼─┼─┼─┼─┼─┼─┼─┼─┼─┤
+   dependenpy.__init__ │  0 │ │ │ │4│ │ │ │ │2│
+   dependenpy.__main__ │  1 │ │ │1│ │ │ │ │ │ │
+        dependenpy.cli │  2 │1│ │ │1│ │4│ │ │ │
+        dependenpy.dsm │  3 │ │ │ │ │2│1│3│ │ │
+     dependenpy.finder │  4 │ │ │ │ │ │ │ │ │ │
+    dependenpy.helpers │  5 │ │ │ │ │ │ │ │ │ │
+       dependenpy.node │  6 │ │ │ │ │ │ │ │ │3│
+    dependenpy.plugins │  7 │ │ │ │1│ │1│ │ │ │
+ dependenpy.structures │  8 │ │ │ │ │ │1│ │ │ │
+
 ```
 
 {% if commands %}Commands:
