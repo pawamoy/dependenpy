@@ -5,10 +5,10 @@ dependenpy dsm module.
 
 This is the core module of dependenpy. It contains the following classes:
 
-- :class:`DSM`: to create a DSM-capable object for a list of packages,
-- :class:`Package`: which represents a Python package,
-- :class:`Module`: which represents a Python module,
-- :class:`Dependency`: which represents a dependency between two modules.
+- [`DSM`][dependenpy.dsm.DSM]: to create a DSM-capable object for a list of packages,
+- [`Package`][dependenpy.dsm.Package]: which represents a Python package,
+- [`Module`][dependenpy.dsm.Module]: which represents a Python module,
+- [`Dependency`][dependenpy.dsm.Dependency]: which represents a dependency between two modules.
 """
 
 import ast

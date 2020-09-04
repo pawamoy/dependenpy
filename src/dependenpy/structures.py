@@ -4,7 +4,7 @@
 
 import json
 
-from colorama import Back, Fore, Style
+from colorama import Style
 
 from .helpers import PrintMixin
 

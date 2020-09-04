@@ -29,7 +29,9 @@ def get_parser() -> argparse.ArgumentParser:
     Returns:
         An argparse parser.
     """
-    parser = argparse.ArgumentParser(prog="dependenpy", add_help=False, description="Command line tool for dependenpy Python package.")
+    parser = argparse.ArgumentParser(
+        prog="dependenpy", add_help=False, description="Command line tool for dependenpy Python package."
+    )
     mxg = parser.add_mutually_exclusive_group(required=False)
 
     parser.add_argument(
