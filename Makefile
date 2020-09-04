@@ -53,6 +53,10 @@ credits:  ## Regenerate CREDITS.md.
 	poetry run ./scripts/gen-credits-data.py | \
 		poetry run jinja2 --strict -o CREDITS.md --format=json scripts/templates/CREDITS.md -
 
+.PHONY: demo
+demo:  ## Run the demo and generate the SVG file.
+	shelldemo demo.script
+
 .PHONY: docs
 docs:  ## Build the documentation locally.
 	poetry run sphinx-build -E -b html docs build/docs

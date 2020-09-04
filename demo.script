@@ -1,4 +1,11 @@
-workon py36
+# demo: charinterval=0.1
+if [ ! -d .demo_env ]; then
+  poetry run python -m venv .demo_env
+  .demo_env/bin/python -m pip install -U pip
+  .demo_env/bin/python -m pip install . django asciinema
+fi
+. .demo_env/bin/activate
+clear # demo: charinterval=0.05
 termtosvg -g 130x80  # demo: sleep 2
 dependenpy django  # demo: sleep 3
 clear
