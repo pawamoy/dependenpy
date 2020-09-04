@@ -5,13 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
-
-## [v3.3.0](https://github.com/pawamoy/dependenpy/releases/tag/v3.3.0) - ???
+## [v3.3.0](https://github.com/pawamoy/dependenpy/releases/tag/v3.3.0) - 2020-09-04
 
 <small>[Compare with v3.2.0](https://github.com/pawamoy/dependenpy/compare/v3.2.0...v3.3.0)</small>
 
-### Misc
-- Update archan provider for archan 3.0 ([9249dc1](https://github.com/pawamoy/dependenpy/commit/9249dc161e9fdd64e15a42f644232c43cb6875b2)).
+### Code Refactoring
+- Poetrize the project ([811c3fb](https://github.com/pawamoy/dependenpy/commit/811c3fb7271d6474a58f5b800bef5c220be3b8f6) by Timothée Mazzucotelli).
+
+### Features
+- Add 'zero' argument to change character for 0 ([1c13c00](https://github.com/pawamoy/dependenpy/commit/1c13c000685466f46ad8c6f7ac30534a6efe9373) by Timothée Mazzucotelli).
+- Update archan provider for archan 3.0 ([9249dc1](https://github.com/pawamoy/dependenpy/commit/9249dc161e9fdd64e15a42f644232c43cb6875b2) by Timothée Mazzucotelli).
 
 
 ## [v3.2.0](https://github.com/pawamoy/dependenpy/releases/tag/v3.2.0) - 2017-06-27

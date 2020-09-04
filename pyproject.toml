@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "dependenpy"
-version = "0.3.2"
+version = "3.3.0"
 description = "Show the inter-dependencies between modules of Python packages."
 authors = ["Timothée Mazzucotelli <pawamoy@pm.me>"]
 license = "ISC License"
