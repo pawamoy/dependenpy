@@ -25,6 +25,10 @@ class PrintMixin(object):
         """
         if format is None:
             format = TEXT
+
+        if format != TEXT:
+            kwargs.pop("zero", "")
+
         if format == TEXT:
             print(self._to_text(**kwargs), file=output)
         elif format == CSV:

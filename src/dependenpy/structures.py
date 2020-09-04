@@ -4,6 +4,8 @@
 
 import json
 
+from colorama import Back, Fore, Style
+
 from .helpers import PrintMixin
 
 
@@ -101,28 +103,32 @@ class Matrix(PrintMixin):
     def _to_text(self, **kwargs):
         if not self.keys or not self.data:
             return ""
+        zero = kwargs.pop("zero", "0")
         max_key_length = max(len(k) for k in self.keys)
-        max_dep_length = len(str(max(j for i in self.data for j in i)))
+        max_dep_length = max([len(str(c)) for l in self.data for c in l] + [len(zero)])
         key_col_length = len(str(len(self.keys)))
         key_line_length = max(key_col_length, 2)
         column_length = max(key_col_length, max_dep_length)
+        bold = Style.BRIGHT
+        reset = Style.RESET_ALL
 
         # first line left headers
-        text = [("\n {:>%s} | {:>%s} ||" % (max_key_length, key_line_length)).format("Module", "Id")]
+        text = [f"\n {bold}{'Module':>{max_key_length}}{reset} │ {bold}{'Id':>{key_line_length}}{reset} │"]
         # first line column headers
         for i, _ in enumerate(self.keys):
-            text.append(("{:^%s}|" % column_length).format(i))
+            text.append(f"{bold}{i:^{column_length}}{reset}│")
         text.append("\n")
         # line of dashes
-        text.append((" %s-+-%s-++" % ("-" * max_key_length, "-" * key_line_length)))
-        for i, _ in enumerate(self.keys):
-            text.append("%s+" % ("-" * column_length))
+        text.append(f" {'─' * max_key_length}─┼─{'─' * key_line_length}─┼")
+        for _ in range(len(self.keys) - 1):
+            text.append(f"{'─' * column_length}┼")
+        text.append(f"{'─' * column_length}┤")
         text.append("\n")
         # lines
         for i, k in enumerate(self.keys):
-            text.append((" {:>%s} | {:>%s} ||" % (max_key_length, key_line_length)).format(k, i))
+            text.append(f" {k:>{max_key_length}} │ {bold}{i:>{key_line_length}}{reset} │")
             for v in self.data[i]:
-                text.append(("{:>%s}|" % column_length).format(v))
+                text.append(("{:>%s}│" % column_length).format(v if v else zero))
             text.append("\n")
         text.append("\n")
 
@@ -321,7 +327,7 @@ class Graph(PrintMixin):
                     for edge in self.edges
                 ],
             },
-            **kwargs
+            **kwargs,
         )
 
     def _to_text(self, **kwargs):

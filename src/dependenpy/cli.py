@@ -18,6 +18,8 @@ Also see http://click.pocoo.org/5/setuptools/#setuptools-integration.
 import argparse
 import sys
 
+from colorama import init
+
 from . import __version__
 from .dsm import DSM
 from .helpers import CSV, FORMAT, JSON, guess_depth
@@ -76,11 +78,14 @@ def main(args=None):
         # special case for json.dumps indent argument
         indent = None
 
+    # init colorama
+    init()
+
     try:
         if args.dependencies:
             dsm.print(format=args.format, output=output, indent=indent)
         elif args.matrix:
-            dsm.print_matrix(format=args.format, output=output, depth=depth, indent=indent)
+            dsm.print_matrix(format=args.format, output=output, depth=depth, indent=indent, zero=args.zero)
         elif args.treemap:
             dsm.print_treemap(format=args.format, output=output)
         elif args.graph:
@@ -183,5 +188,12 @@ def get_parser():
         action="version",
         version="dependenpy %s" % __version__,
         help="Show the current version of the program and exit.",
+    )
+    parser.add_argument(
+        "-z",
+        "--zero",
+        dest="zero",
+        default="0",
+        help="Character to use for cells with value=0 (text matrix display only).",
     )
     return parser
