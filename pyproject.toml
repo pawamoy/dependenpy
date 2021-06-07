@@ -1,65 +1,79 @@
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
 
-[tool.poetry]
+[project]
 name = "dependenpy"
-version = "3.3.0"
+version = {use_scm = true}
 description = "Show the inter-dependencies between modules of Python packages."
-authors = ["Timothée Mazzucotelli <pawamoy@pm.me>"]
-license = "ISC License"
+authors = [{name = "Timothée Mazzucotelli", email = "pawamoy@pm.me"}]
+license = {file = "LICENSE"}
 readme = "README.md"
-repository = "https://github.com/pawamoy/dependenpy"
-homepage = "https://github.com/pawamoy/dependenpy"
+requires-python = ">=3.6"
 keywords = ["dependency", "analysis", "matrix", "dsm"]
-packages = [ { include = "dependenpy", from = "src" } ]
+dynamic = ["version", "classifiers"]
+classifiers = ["Development Status :: 4 - Beta"]
+dependencies = []
 
-[tool.poetry.dependencies]
-python = "^3.6"
+[project.urls]
+Homepage = "https://pawamoy.github.io/dependenpy"
+Documentation = "https://pawamoy.github.io/dependenpy"
+Changelog = "https://pawamoy.github.io/dependenpy/changelog"
+Repository = "https://github.com/pawamoy/dependenpy"
+Issues = "https://github.com/pawamoy/dependenpy/issues"
+Discussions = "https://github.com/pawamoy/dependenpy/discussions"
+Gitter = "https://gitter.im/dependenpy/community"
+Funding = "https://github.com/sponsors/pawamoy"
 
-[tool.poetry.dev-dependencies]
-# formatting, quality, tests
-autoflake = "^1.4"
-black = "^20.8b1"
-isort = "^5.7.0"
-mypy = "^0.812"
-pytest = "^6.2.2"
-pytest-cov = "^2.11.1"
-pytest-randomly = "^3.5.0"
-pytest-sugar = "^0.9.4"
-pytest-xdist = "^2.2.0"
-
-# tasks
-duty = "^0.6.0"
-git-changelog = "^0.4.2"
-httpx = "^0.16.1"
-jinja2-cli = "^0.7.0"
-toml = "^0.10.2"
-
-# flake8 plugins
-darglint = "^1.5.8"
-flake8-bandit = "^2.1.2"
-flake8-black = "^0.2.1"
-flake8-bugbear = "^20.11.1"
-flake8-builtins = "^1.5.3"
-flake8-comprehensions = "^3.3.1"
-flake8-docstrings = "^1.5.0"
-flake8-pytest-style = "^1.3.0"
-flake8-string-format = "^0.3.0"
-flake8-tidy-imports = "^4.2.1"
-flake8-variables-names = "^0.0.4"
-pep8-naming = "^0.11.1"
-wps-light = "^0.15.2"
-
-# docs
-mkdocs = "^1.1.2"
-mkdocs-coverage = "^0.2.1"
-mkdocs-macros-plugin = "^0.5.0"
-mkdocs-material = "^6.2.7"
-mkdocstrings = "^0.15.0"
-
-[tool.poetry.scripts]
+[project.scripts]
 dependenpy = "dependenpy.cli:main"
+
+[tool.pdm]
+package-dir = "src"
+
+[tool.pdm.dev-dependencies]
+duty = ["duty~=0.6"]
+docs = [
+    "mkdocs~=1.1; python_version >= '3.7'",
+    "mkdocs-coverage~=0.2; python_version >= '3.7'",
+    "mkdocs-gen-files~=0.3; python_version >= '3.7'",
+    "mkdocs-literate-nav~=0.4; python_version >= '3.7'",
+    "mkdocs-material~=7.1; python_version >= '3.7'",
+    "mkdocstrings~=0.15; python_version >= '3.7'",
+    "toml~=0.10; python_version >= '3.7'",
+]
+format = [
+    "autoflake~=1.4",
+    "black~=20.8b1",
+    "isort~=5.8",
+]
+maintain = [
+    # TODO: remove this section when git-changelog is more powerful
+    "git-changelog~=0.4",
+]
+quality = [
+    "darglint~=1.7",
+    "flake8-bandit~=2.1",
+    "flake8-black~=0.2",
+    "flake8-bugbear~=21.3",
+    "flake8-builtins~=1.5",
+    "flake8-comprehensions~=3.4",
+    "flake8-docstrings~=1.6",
+    "flake8-pytest-style~=1.4",
+    "flake8-string-format~=0.3",
+    "flake8-tidy-imports~=4.2",
+    "flake8-variables-names~=0.0",
+    "pep8-naming~=0.11",
+    "wps-light~=0.15",
+]
+tests = [
+    "pytest~=6.2",
+    "pytest-cov~=2.11",
+    "pytest-randomly~=3.6",
+    "pytest-sugar~=0.9",
+    "pytest-xdist~=2.2",
+]
+typing = ["mypy~=0.812"]
 
 [tool.poetry.plugins.archan]
 "dependenpy.InternalDependencies" = "dependenpy.plugins:InternalDependencies"
