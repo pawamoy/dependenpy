@@ -3,46 +3,51 @@ site_description: "Show the inter-dependencies between modules of Python package
 site_url: "https://pawamoy.github.io/dependenpy"
 repo_url: "https://github.com/pawamoy/dependenpy"
 repo_name: "pawamoy/dependenpy"
+site_dir: "site"
 
 nav:
+- Home:
   - Overview: index.md
-  - Usage: usage.md
-  - API Reference:
-    - cli.py: reference/cli.md
-    - dsm.py: reference/dsm.md
-    - finder.py: reference/finder.md
-    - helpers.py: reference/helpers.md
-    - node.py: reference/node.md
-    - plugins.py: reference/plugins.md
-    - structures.py: reference/structures.md
-  - Contributing: contributing.md
-  - Code of Conduct: code_of_conduct.md
   - Changelog: changelog.md
   - Credits: credits.md
+  - License: license.md
+- Code Reference:
+  - cli.py: reference/cli.md
+- Development:
+  - Contributing: contributing.md
+  - Code of Conduct: code_of_conduct.md
+  - Coverage report: coverage.md
 
 theme:
   name: material
+  features:
+  - navigation.tabs
   palette:
     scheme: slate
     primary: teal
     accent: purple
 
 extra_css:
-  - css/mkdocstrings.css
+- css/mkdocstrings.css
 
 markdown_extensions:
-  - admonition
-  - markdown_include.include
-  - pymdownx.emoji
-  - pymdownx.magiclink
-  - pymdownx.superfences
-  - pymdownx.tabbed
-  - pymdownx.tasklist
-  - toc:
-      permalink: "¤"
+- admonition
+- pymdownx.emoji
+- pymdownx.magiclink
+- pymdownx.snippets:
+    check_paths: true
+- pymdownx.superfences
+- pymdownx.tabbed
+- pymdownx.tasklist
+- toc:
+    permalink: "¤"
 
 plugins:
-  - search
-  - mkdocstrings:
-      watch:
-        - src/dependenpy
+- search
+- coverage:
+    html_report_dir: build/coverage
+- mkdocstrings:
+    watch:
+    - src/dependenpy
+- macros:
+    module_name: docs/macros

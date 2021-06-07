@@ -3,6 +3,7 @@
 [![ci](https://github.com/pawamoy/dependenpy/workflows/ci/badge.svg)](https://github.com/pawamoy/dependenpy/actions?query=workflow%3Aci)
 [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://pawamoy.github.io/dependenpy/)
 [![pypi version](https://img.shields.io/pypi/v/dependenpy.svg)](https://pypi.org/project/dependenpy/)
+[![gitter](https://badges.gitter.im/join%20chat.svg)](https://gitter.im/dependenpy/community)
 
 Show the inter-dependencies between modules of Python packages.
 
