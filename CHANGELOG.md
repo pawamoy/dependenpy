@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [3.3.1](https://github.com/pawamoy/dependenpy/releases/tag/3.3.1) - 2022-06-13
+
+<small>[Compare with 3.3.0](https://github.com/pawamoy/dependenpy/compare/3.3.0...3.3.1)</small>
+
+### Bug Fixes
+- Handle the case where all modules names are shorter than the header when printing a matrix ([1d83b17](https://github.com/pawamoy/dependenpy/commit/1d83b17612cdf5ab16c27668bd241d64dd872e5c) by Vlad Dumitrescu). [PR #48](https://github.com/pawamoy/dependenpy/pull/48)
+
+
 ## [3.3.0](https://github.com/pawamoy/dependenpy/releases/tag/3.3.0) - 2020-09-04
 
 <small>[Compare with 3.2.0](https://github.com/pawamoy/dependenpy/compare/3.2.0...3.3.0)</small>
