@@ -16,10 +16,12 @@ import json
 import sys
 from os import listdir
 from os.path import isdir, isfile, join, splitext
+from pathlib import Path
+from typing import List
 
-from .finder import Finder, PackageSpec
-from .helpers import PrintMixin
-from .node import LeafNode, NodeMixin, RootNode
+from dependenpy.finder import Finder, PackageSpec
+from dependenpy.helpers import PrintMixin
+from dependenpy.node import LeafNode, NodeMixin, RootNode
 
 
 class DSM(RootNode, NodeMixin, PrintMixin):
@@ -32,18 +34,17 @@ class DSM(RootNode, NodeMixin, PrintMixin):
     a dictionary or a tree-map.
     """
 
-    def __init__(self, *packages, build_tree=True, build_dependencies=True, enforce_init=True):
+    def __init__(self, *packages, build_tree: bool = True, build_dependencies: bool = True, enforce_init: bool = True):
         """
         Initialization method.
 
         Args:
-            *packages (args): list of packages to search for.
-            build_tree (bool): auto-build the tree or not.
-            build_dependencies (bool): auto-build the dependencies or not.
-            enforce_init (bool):
-                if True, only treat directories if they contain an
-                ``__init__.py`` file.
+            *packages: list of packages to search for.
+            build_tree: auto-build the tree or not.
+            build_dependencies: auto-build the dependencies or not.
+            enforce_init: if True, only treat directories if they contain an `__init__.py` file.
         """
+        self.base_packages = packages
         self.finder = Finder()
         self.specs = []
         self.not_found = []
@@ -62,8 +63,8 @@ class DSM(RootNode, NodeMixin, PrintMixin):
 
         self.specs = PackageSpec.combine(specs)
 
-        for m in self.not_found:
-            print("** dependenpy: Not found: %s." % m, file=sys.stderr)
+        for module in self.not_found:
+            print(f"** dependenpy: Not found: {module}.", file=sys.stderr)
 
         super().__init__(build_tree)
 
@@ -71,11 +72,17 @@ class DSM(RootNode, NodeMixin, PrintMixin):
             self.build_dependencies()
 
     def __str__(self):
-        return "Dependency DSM for packages: [%s]" % ", ".join([p.name for p in self.packages])
+        packages_names = ", ".join([package.name for package in self.packages])
+        return f"Dependency DSM for packages: [{packages_names}]"
 
     @property
     def isdsm(self):
-        """Inherited from NodeMixin. Always True."""
+        """
+        Inherited from NodeMixin. Always True.
+
+        Returns:
+            Whether this object is a DSM.
+        """
         return True
 
     def build_tree(self):
@@ -97,7 +104,7 @@ class DSM(RootNode, NodeMixin, PrintMixin):
                 )
 
 
-class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
+class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
     """
     Package class.
 
@@ -106,31 +113,27 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
 
     def __init__(
         self,
-        name,
-        path,
-        dsm=None,
-        package=None,
-        limit_to=None,
-        build_tree=True,
-        build_dependencies=True,
-        enforce_init=True,
+        name: str,
+        path: str,
+        dsm: DSM = None,
+        package: "Package" = None,
+        limit_to: List[str] = None,
+        build_tree: bool = True,
+        build_dependencies: bool = True,
+        enforce_init: bool = True,
     ):
         """
         Initialization method.
 
         Args:
-            name (str): name of the package.
-            path (str): path to the package.
-            dsm (DSM): parent DSM.
-            package (Package): parent package.
-            limit_to (list of str):
-                list of string to limit the recursive tree-building to
-                what is specified.
-            build_tree (bool): auto-build the tree or not.
-            build_dependencies (bool): auto-build the dependencies or not.
-            enforce_init (bool):
-                if True, only treat directories if they contain an
-                ``__init__.py`` file.
+            name: name of the package.
+            path: path to the package.
+            dsm: parent DSM.
+            package: parent package.
+            limit_to: list of string to limit the recursive tree-building to what is specified.
+            build_tree: auto-build the tree or not.
+            build_dependencies: auto-build the dependencies or not.
+            enforce_init: if True, only treat directories if they contain an `__init__.py` file.
         """
         self.name = name
         self.path = path
@@ -139,15 +142,20 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
         self.limit_to = limit_to or []
         self.enforce_init = enforce_init
 
-        RootNode.__init__(self, build_tree)
-        LeafNode.__init__(self)
+        RootNode.__init__(self, build_tree)  # noqa: WPS609
+        LeafNode.__init__(self)  # noqa: WPS609
 
         if build_tree and build_dependencies:
             self.build_dependencies()
 
     @property
     def ispackage(self):
-        """Inherited from NodeMixin. Always True."""
+        """
+        Inherited from NodeMixin. Always True.
+
+        Returns:
+            Whether this object is a package.
+        """
         return True
 
     @property
@@ -181,28 +189,28 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
         new_limit_to = []
         for limit in self.limit_to:
             if "." in limit:
-                name, limit = limit.split(".", 1)
+                name, limit = limit.split(".", 1)  # noqa: WPS440
                 heads.append(name)
                 new_limit_to.append(limit)
             else:
                 heads.append(limit)
         return heads, new_limit_to
 
-    def build_tree(self):
+    def build_tree(self):  # noqa: WPS231
         """Build the tree for this package."""
-        for m in listdir(self.path):
-            abs_m = join(self.path, m)
-            if isfile(abs_m) and m.endswith(".py"):
-                name = splitext(m)[0]
+        for module in listdir(self.path):
+            abs_m = join(self.path, module)
+            if isfile(abs_m) and module.endswith(".py"):
+                name = splitext(module)[0]
                 if not self.limit_to or name in self.limit_to:
                     self.modules.append(Module(name, abs_m, self.dsm, self))
             elif isdir(abs_m):
                 if isfile(join(abs_m, "__init__.py")) or not self.enforce_init:
                     heads, new_limit_to = self.split_limits_heads()
-                    if not heads or m in heads:
+                    if not heads or module in heads:
                         self.packages.append(
                             Package(
-                                m,
+                                module,
                                 abs_m,
                                 self.dsm,
                                 self,
@@ -223,10 +231,10 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
         Returns:
             int: number of dependencies.
         """
-        return sum(m.cardinal(to) for m in self.submodules)
+        return sum(module.cardinal(to) for module in self.submodules)
 
 
-class Module(LeafNode, NodeMixin, PrintMixin):
+class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
     """
     Module class.
 
@@ -272,12 +280,20 @@ class Module(LeafNode, NodeMixin, PrintMixin):
 
     @property
     def ismodule(self):
-        """Inherited from NodeMixin. Always True."""
+        """
+        Inherited from NodeMixin. Always True.
+
+        Returns:
+            Whether this object is a module.
+        """
         return True
 
-    def as_dict(self, absolute=False):
+    def as_dict(self, absolute: bool = False):
         """
         Return the dependencies as a dictionary.
+
+        Arguments:
+            absolute: Whether to use the absolute name.
 
         Returns:
             dict: dictionary of dependencies.
@@ -288,12 +304,12 @@ class Module(LeafNode, NodeMixin, PrintMixin):
             "dependencies": [
                 {
                     # 'source': d.source.absolute_name(),  # redundant
-                    "target": d.target if d.external else d.target.absolute_name(),
-                    "lineno": d.lineno,
-                    "what": d.what,
-                    "external": d.external,
+                    "target": dep.target if dep.external else dep.target.absolute_name(),
+                    "lineno": dep.lineno,
+                    "what": dep.what,
+                    "external": dep.external,
                 }
-                for d in self.dependencies
+                for dep in self.dependencies
             ],
         }
 
@@ -305,27 +321,18 @@ class Module(LeafNode, NodeMixin, PrintMixin):
             indent = 0
         text = [" " * indent + self.name + "\n"]
         new_indent = indent + base_indent
-        for d in self.dependencies:
-            external = "! " if d.external else ""
-            text.append(" " * new_indent + external + str(d) + "\n")
+        for dep in self.dependencies:
+            external = "! " if dep.external else ""
+            text.append(" " * new_indent + external + str(dep) + "\n")
         return "".join(text)
 
     def _to_csv(self, **kwargs):
         header = kwargs.pop("header", True)
         text = ["module,path,target,lineno,what,external\n" if header else ""]
         name = self.absolute_name()
-        for d in self.dependencies:
-            text.append(
-                "%s,%s,%s,%s,%s,%s\n"
-                % (
-                    name,
-                    self.path,
-                    d.target if d.external else d.target.absolute_name(),
-                    d.lineno,
-                    d.what if d.what else "",
-                    d.external,
-                )
-            )
+        for dep in self.dependencies:
+            target = dep.target if dep.external else dep.target.absolute_name()
+            text.append(f"{name},{self.path},{target},{dep.lineno},{dep.what or ''},{dep.external}\n")
         return "".join(text)
 
     def _to_json(self, **kwargs):
@@ -342,14 +349,14 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         highest = self.dsm or self.root
         if self is highest:
             highest = LeafNode()
-        for _import in self.parse_code():
-            target = highest.get_target(_import["target"])
+        for import_ in self.parse_code():
+            target = highest.get_target(import_["target"])
             if target:
-                what = _import["target"].split(".")[-1]
+                what = import_["target"].split(".")[-1]
                 if what != target.name:
-                    _import["what"] = what
-                _import["target"] = target
-            self.dependencies.append(Dependency(source=self, **_import))
+                    import_["what"] = what
+                import_["target"] = target
+            self.dependencies.append(Dependency(source=self, **import_))
 
     def parse_code(self):
         """
@@ -358,18 +365,18 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         Returns:
             list of dict: the import statements.
         """
-        code = open(self.path, encoding="utf-8").read()
+        code = Path(self.path).read_text(encoding="utf-8")
         try:
             body = ast.parse(code).body
         except SyntaxError:
-            try:
-                code = code.encode("utf-8")
+            code = code.encode("utf-8")
+            try:  # noqa: WPS505
                 body = ast.parse(code).body
             except SyntaxError:
                 return []
         return self.get_imports(body)
 
-    def get_imports(self, ast_body):
+    def get_imports(self, ast_body):  # noqa: WPS231
         """
         Return all the import statements given an AST body (AST nodes).
 
@@ -385,11 +392,9 @@ class Module(LeafNode, NodeMixin, PrintMixin):
                 imports.extend({"target": name.name, "lineno": node.lineno} for name in node.names)
             elif isinstance(node, ast.ImportFrom):
                 for name in node.names:
-                    name = (
-                        (self.absolute_name(self.depth - node.level) + "." if node.level > 0 else "")
-                        + (node.module + "." if node.module else "")
-                        + name.name
-                    )
+                    abs_name = self.absolute_name(self.depth - node.level) + "." if node.level > 0 else ""
+                    node_module = node.module + "." if node.module else ""
+                    name = abs_name + node_module + name.name
                     imports.append({"target": name, "lineno": node.lineno})
             elif isinstance(node, Module.RECURSIVE_NODES):
                 imports.extend(self.get_imports(node.body))
@@ -407,7 +412,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         Returns:
             int: number of dependencies.
         """
-        return sum(1 for _ in filter(lambda d: not d.external and d.target in to, self.dependencies))
+        return len([dep for dep in self.dependencies if not dep.external and dep.target in to])
 
 
 class Dependency(object):
@@ -433,14 +438,16 @@ class Dependency(object):
         self.what = what
 
     def __str__(self):
-        return "%s imports %s%s (line %s)" % (
-            self.source.name,
-            "%s from " % self.what if self.what else "",
-            self.target if self.external else self.target.absolute_name(),
-            self.lineno,
-        )
+        what = f"{self.what or ''} from "
+        target = self.target if self.external else self.target.absolute_name()
+        return f"{self.source.name} imports {what}{target} (line {self.lineno})"
 
     @property
     def external(self):
-        """Property to tell if the dependency's target is a valid node."""
+        """
+        Property to tell if the dependency's target is a valid node.
+
+        Returns:
+            Whether the dependency's target is a valid node.
+        """
         return isinstance(self.target, str)

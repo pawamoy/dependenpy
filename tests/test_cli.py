@@ -7,7 +7,7 @@ from dependenpy import cli
 
 def test_main():
     """Basic CLI test."""
-    with pytest.raises(SystemExit) as exit:
+    with pytest.raises(SystemExit) as exit:  # noqa: PT012
         cli.main([])
         assert exit.code == 2
 

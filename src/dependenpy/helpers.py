@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """dependenpy printer module."""
 
 import sys
@@ -13,15 +11,14 @@ FORMAT = (CSV, JSON, TEXT)
 class PrintMixin(object):
     """Print mixin class."""
 
-    def print(self, format=TEXT, output=sys.stdout, **kwargs):
+    def print(self, format: str = TEXT, output=sys.stdout, **kwargs):  # noqa: A002,A003
         """
         Print the object in a file or on standard output by default.
 
         Args:
-            format (str): output format (csv, json or text).
-            output (file):
-                descriptor to an opened file (default to standard output).
-            **kwargs (): additional arguments.
+            format: output format (csv, json or text).
+            output: descriptor to an opened file (default to standard output).
+            **kwargs: additional arguments.
         """
         if format is None:
             format = TEXT
@@ -58,4 +55,4 @@ def guess_depth(packages):
     """
     if len(packages) == 1:
         return packages[0].count(".") + 2
-    return min(p.count(".") for p in packages) + 1
+    return min(package.count(".") for package in packages) + 1

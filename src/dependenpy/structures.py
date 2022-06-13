@@ -6,7 +6,7 @@ import json
 
 from colorama import Style
 
-from .helpers import PrintMixin
+from dependenpy.helpers import PrintMixin
 
 
 class Matrix(PrintMixin):
@@ -18,7 +18,7 @@ class Matrix(PrintMixin):
     of the entities in the corresponding order.
     """
 
-    def __init__(self, *nodes, depth=0):
+    def __init__(self, *nodes, depth=0):  # noqa: WPS231
         """
         Initialization method.
 
@@ -42,45 +42,54 @@ class Matrix(PrintMixin):
             keys = modules
         else:
             keys = []
-            for m in modules:
-                if m.depth <= depth:
-                    keys.append(m)
+            for module in modules:
+                if module.depth <= depth:
+                    keys.append(module)
                     continue
-                package = m.package
+                package = module.package
                 while package.depth > depth and package.package and package not in nodes:
                     package = package.package
                 if package not in keys:
                     keys.append(package)
 
         size = len(keys)
-        data = [[0 for _ in range(size)] for __ in range(size)]
-        keys = sorted(keys, key=lambda k: k.absolute_name())
+        data = [[0] * size for _ in range(size)]  # noqa: WPS435
+        keys = sorted(keys, key=lambda key: key.absolute_name())
 
         if depth < 1:
-            for i, k in enumerate(keys):
-                k.index = i
-            for i, k in enumerate(keys):
-                for d in k.dependencies:
-                    if d.external:
+            for index, key in enumerate(keys):  # noqa: WPS440
+                key.index = index
+            for index, key in enumerate(keys):  # noqa: WPS440
+                for dep in key.dependencies:
+                    if dep.external:
                         continue
-                    if d.target.ismodule and d.target in keys:
-                        data[i][d.target.index] += 1
-                    elif d.target.ispackage:
-                        m = d.target.get("__init__")
-                        if m is not None and m in keys:
-                            data[i][m.index] += 1
+                    if dep.target.ismodule and dep.target in keys:
+                        data[index][dep.target.index] += 1
+                    elif dep.target.ispackage:
+                        init = dep.target.get("__init__")
+                        if init is not None and init in keys:
+                            data[index][init.index] += 1
         else:
-            for i, k in enumerate(keys):
-                for j, l in enumerate(keys):
-                    data[i][j] = k.cardinal(to=l)
+            for row, row_key in enumerate(keys):
+                for col, col_key in enumerate(keys):
+                    data[row][col] = row_key.cardinal(to=col_key)
 
         self.size = size
-        self.keys = [k.absolute_name() for k in keys]
+        self.keys = [key.absolute_name() for key in keys]  # noqa: WPS441
         self.data = data
 
-    @staticmethod
-    def cast(keys, data):
-        """Cast a set of keys and an array to a Matrix object."""
+    @staticmethod  # noqa: WPS602
+    def cast(keys, data):  # noqa: WPS602
+        """
+        Cast a set of keys and an array to a Matrix object.
+
+        Arguments:
+            keys: The matrix keys.
+            data: The matrix data.
+
+        Returns:
+            A new matrix.
+        """
         matrix = Matrix()
         matrix.keys = keys
         matrix.data = data
@@ -88,14 +97,20 @@ class Matrix(PrintMixin):
 
     @property
     def total(self):
-        """Return the total number of dependencies within this matrix."""
-        return sum(j for i in self.data for j in i)
+        """
+        Return the total number of dependencies within this matrix.
+
+        Returns:
+            The total number of dependencies.
+        """
+        return sum(cell for line in self.data for cell in line)
 
     def _to_csv(self, **kwargs):
-        text = ["module,", ",".join(self.keys), "\n"]
-        for i, k in enumerate(self.keys):
-            text.append("%s,%s\n" % (k, ",".join(map(str, self.data[i]))))
-        return "".join(text)
+        text = ["module,", ",".join(self.keys)]
+        for index, key in enumerate(self.keys):
+            line = ",".join(map(str, self.data[index]))
+            text.append(f"{key},{line}")
+        return "\n".join(text)
 
     def _to_json(self, **kwargs):
         return json.dumps({"keys": self.keys, "data": self.data}, **kwargs)
@@ -104,8 +119,8 @@ class Matrix(PrintMixin):
         if not self.keys or not self.data:
             return ""
         zero = kwargs.pop("zero", "0")
-        max_key_length = max(len(k) for k in self.keys)
-        max_dep_length = max([len(str(c)) for l in self.data for c in l] + [len(zero)])
+        max_key_length = max(len(key) for key in self.keys)
+        max_dep_length = max([len(str(col)) for line in self.data for col in line] + [len(zero)])
         key_col_length = len(str(len(self.keys)))
         key_line_length = max(key_col_length, 2)
         column_length = max(key_col_length, max_dep_length)
@@ -115,8 +130,8 @@ class Matrix(PrintMixin):
         # first line left headers
         text = [f"\n {bold}{'Module':>{max_key_length}}{reset} │ {bold}{'Id':>{key_line_length}}{reset} │"]
         # first line column headers
-        for i, _ in enumerate(self.keys):
-            text.append(f"{bold}{i:^{column_length}}{reset}│")
+        for index, _ in enumerate(self.keys):
+            text.append(f"{bold}{index:^{column_length}}{reset}│")
         text.append("\n")
         # line of dashes
         text.append(f" {'─' * max_key_length}─┼─{'─' * key_line_length}─┼")
@@ -125,10 +140,10 @@ class Matrix(PrintMixin):
         text.append(f"{'─' * column_length}┤")
         text.append("\n")
         # lines
-        for i, k in enumerate(self.keys):
-            text.append(f" {k:>{max_key_length}} │ {bold}{i:>{key_line_length}}{reset} │")
-            for v in self.data[i]:
-                text.append(("{:>%s}│" % column_length).format(v if v else zero))
+        for index, key in enumerate(self.keys):  # noqa: WPS440
+            text.append(f" {key:>{max_key_length}} │ {bold}{index:>{key_line_length}}{reset} │")
+            for value in self.data[index]:
+                text.append((f"{value if value else zero:>{column_length}}│"))
             text.append("\n")
         text.append("\n")
 
@@ -138,12 +153,13 @@ class Matrix(PrintMixin):
 class TreeMap(PrintMixin):
     """TreeMap class."""
 
-    def __init__(self, *nodes, value=-1, data=None, keys=None):
+    def __init__(self, *nodes, value=-1):
         """
         Initialization method.
 
         Arguments:
-            *nodes (list of Node): the nodes from which to build the treemap.
+            *nodes: the nodes from which to build the treemap.
+            value: the value of the current area.
         """
         # if nodes:
         #     matrix_lower_level = Matrix(*nodes, depth=2)
@@ -249,7 +265,7 @@ class Edge(object):
         self.go_in(vertex_in)
 
     def __str__(self):
-        return "%s --%d--> %s" % (self.vertex_out.name, self.weight, self.vertex_in.name)
+        return f"{self.vertex_out.name} --{self.weight}--> {self.vertex_in.name}"
 
     def go_from(self, vertex):
         """
@@ -302,20 +318,20 @@ class Graph(PrintMixin):
         matrix = Matrix(*nodes, depth=depth)
         for key in matrix.keys:
             vertices.append(Vertex(key))
-        for l, line in enumerate(matrix.data):
-            for c, cell in enumerate(line):
+        for line_index, line in enumerate(matrix.data):
+            for col_index, cell in enumerate(line):
                 if cell > 0:
-                    self.edges.add(Edge(vertices[l], vertices[c], weight=cell))
+                    self.edges.add(Edge(vertices[line_index], vertices[col_index], weight=cell))
         self.vertices = set(vertices)
 
     def _to_csv(self, **kwargs):
         header = kwargs.pop("header", True)
         text = ["vertex_out,edge_weight,vertex_in\n" if header else ""]
         for edge in self.edges:
-            text.append("%s,%s,%s\n" % (edge.vertex_out.name, edge.weight, edge.vertex_in.name))
+            text.append(f"{edge.vertex_out.name},{edge.weight},{edge.vertex_in.name}\n")
         for vertex in self.vertices:
             if not (vertex.edges_out or vertex.edges_in):
-                text.append("%s,,\n" % vertex.name)
+                text.append("{vertex.name},,\n")
         return "".join(text)
 
     def _to_json(self, **kwargs):
@@ -332,14 +348,3 @@ class Graph(PrintMixin):
 
     def _to_text(self, **kwargs):
         return ""
-
-
-def split_array(mdata, splits):
-    data = []
-    for i in range(len(splits) - 1):
-        data.append([])
-        rows = mdata[splits[i] : splits[i + 1]]
-        for j in range(len(splits) - 1):
-            data[i].append([row[splits[j] : splits[j + 1]] for row in rows])
-        data[i].append([row[splits[-1] :] for row in rows])
-    return data

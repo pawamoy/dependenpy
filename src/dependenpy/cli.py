@@ -13,6 +13,7 @@
 
 import argparse
 import sys
+from contextlib import contextmanager
 from typing import List, Optional
 
 from colorama import init
@@ -118,7 +119,7 @@ def get_parser() -> argparse.ArgumentParser:
         "-v",
         "--version",
         action="version",
-        version="dependenpy %s" % __version__,
+        version=f"dependenpy {__version__}",
         help="Show the current version of the program and exit.",
     )
     parser.add_argument(
@@ -132,7 +133,57 @@ def get_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(args: Optional[List[str]] = None) -> int:
+@contextmanager
+def _open_if_str(output):
+    if isinstance(output, str):
+        with open(output, "w") as fd:
+            yield fd
+    else:
+        yield output
+
+
+def _get_indent(opts):
+    if opts.indent is None:
+        if opts.format == CSV:
+            return 0
+        return 2
+    elif opts.indent < 0 and opts.format == JSON:
+        # special case for json.dumps indent argument
+        return None
+    return opts.indent
+
+
+def _get_depth(opts, packages):
+    return opts.depth or guess_depth(packages)
+
+
+def _get_packages(opts):  # noqa: WPS231
+    packages = []
+    for arg in opts.packages:
+        if "," in arg:
+            for package in arg.split(","):
+                if package not in packages:
+                    packages.append(package)
+        elif arg not in packages:
+            packages.append(arg)
+    return packages
+
+
+def _run(opts, dsm):
+    indent = _get_indent(opts)
+    depth = _get_depth(opts, packages=dsm.base_packages)
+    with _open_if_str(opts.output) as output:
+        if opts.dependencies:
+            dsm.print(format=opts.format, output=output, indent=indent)
+        elif opts.matrix:
+            dsm.print_matrix(format=opts.format, output=output, depth=depth, indent=indent, zero=opts.zero)
+        elif opts.treemap:
+            dsm.print_treemap(format=opts.format, output=output)
+        elif opts.graph:
+            dsm.print_graph(format=opts.format, output=output, depth=depth, indent=indent)
+
+
+def main(args: Optional[List[str]] = None) -> int:  # noqa: WPS231
     """
     Run the main program.
 
@@ -142,61 +193,22 @@ def main(args: Optional[List[str]] = None) -> int:
         args: Arguments passed from the command line.
 
     Returns:
-        An exit code: 0 (OK), 1 (dsm empty) or 2 (error).
+        An exit code. 0 (OK), 1 (dsm empty) or 2 (error).
     """
     parser = get_parser()
-    args = parser.parse_args(args=args)
+    opts = parser.parse_args(args=args)
+    if not (opts.matrix or opts.dependencies or opts.treemap or opts.graph):
+        opts.matrix = True
 
-    if not (args.matrix or args.dependencies or args.treemap or args.graph):
-        args.matrix = True
-
-    # split comma-separated args
-    packages = []
-    for arg in args.packages:
-        if "," in arg:
-            for package in arg.split(","):
-                if package not in packages:
-                    packages.append(package)
-        elif arg not in packages:
-            packages.append(arg)
-
-    # guess convenient depth
-    depth = args.depth
-    if depth is None:
-        depth = guess_depth(packages)
-
-    # open file if not stdout
-    output = args.output
-    if isinstance(output, str):
-        output = open(output, "w")
-
-    dsm = DSM(*packages, build_tree=True, build_dependencies=True, enforce_init=not args.greedy)
-
+    dsm = DSM(*_get_packages(opts), build_tree=True, build_dependencies=True, enforce_init=not opts.greedy)
     if dsm.empty:
         return 1
-
-    indent = args.indent
-    if indent is None:
-        if args.format == CSV:
-            indent = 0
-        else:
-            indent = 2
-    elif indent < 0 and args.format == JSON:
-        # special case for json.dumps indent argument
-        indent = None
 
     # init colorama
     init()
 
     try:
-        if args.dependencies:
-            dsm.print(format=args.format, output=output, indent=indent)
-        elif args.matrix:
-            dsm.print_matrix(format=args.format, output=output, depth=depth, indent=indent, zero=args.zero)
-        elif args.treemap:
-            dsm.print_treemap(format=args.format, output=output)
-        elif args.graph:
-            dsm.print_graph(format=args.format, output=output, depth=depth, indent=indent)
+        _run(opts, dsm)
     except BrokenPipeError:
         # avoid traceback
         return 2

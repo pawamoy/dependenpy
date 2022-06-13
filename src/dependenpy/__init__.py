@@ -13,8 +13,8 @@ please refer to the README.md included in this package to get the link to the of
 
 from typing import List
 
-from .dsm import DSM, Dependency, Module, Package
-from .structures import Matrix, TreeMap
+from dependenpy.dsm import DSM, Dependency, Module, Package
+from dependenpy.structures import Matrix, TreeMap
 
 __all__: List[str] = ["DSM", "Dependency", "Matrix", "Module", "Package", "TreeMap"]  # noqa: WPS410
-__version__ = "3.2.0"  # noqa: WPS410 (the only two __variables__ we use)
+__version__ = "3.2.0"  # noqa: WPS410
