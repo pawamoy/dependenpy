@@ -119,7 +119,7 @@ class Matrix(PrintMixin):
         if not self.keys or not self.data:
             return ""
         zero = kwargs.pop("zero", "0")
-        max_key_length = max(len(key) for key in self.keys)
+        max_key_length = max(len(key) for key in self.keys + ["Module"])
         max_dep_length = max([len(str(col)) for line in self.data for col in line] + [len(zero)])
         key_col_length = len(str(len(self.keys)))
         key_line_length = max(key_col_length, 2)
