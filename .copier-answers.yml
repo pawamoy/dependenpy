@@ -1,11 +1,11 @@
 # Changes here will be overwritten by Copier
-_commit: 0.9.7
+_commit: 0.9.8
 _src_path: gh:pawamoy/copier-pdm.git
 author_email: pawamoy@pm.me
-author_fullname: "Timoth\xE9e Mazzucotelli"
+author_fullname: Timothée Mazzucotelli
 author_username: pawamoy
 copyright_date: '2020'
-copyright_holder: "Timoth\xE9e Mazzucotelli"
+copyright_holder: Timothée Mazzucotelli
 copyright_holder_email: pawamoy@pm.me
 copyright_license: ISC License
 project_description: Show the inter-dependencies between modules of Python packages.
@@ -17,3 +17,4 @@ repository_name: dependenpy
 repository_namespace: pawamoy
 repository_provider: github.com
 use_precommit: false
+
