@@ -12,6 +12,7 @@ nav:
   - Changelog: changelog.md
   - Credits: credits.md
   - License: license.md
+- Usage: usage.md
 # defer to gen-files + literate-nav
 - Code Reference: reference/
 - Development:

@@ -11,6 +11,8 @@
 
 """Module that contains the command line application."""
 
+from __future__ import annotations
+
 import argparse
 import sys
 from contextlib import contextmanager

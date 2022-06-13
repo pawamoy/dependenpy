@@ -1,18 +1,22 @@
-# -*- coding: utf-8 -*-
-
 """dependenpy node module."""
+
+from __future__ import annotations
 
 import json
 import sys
+from typing import IO, TYPE_CHECKING, Any
 
 from dependenpy.structures import Graph, Matrix, TreeMap
+
+if TYPE_CHECKING:
+    from dependenpy.dsm import Module, Package
 
 
 class NodeMixin(object):
     """Shared code between DSM, Package and Module."""
 
     @property
-    def ismodule(self):
+    def ismodule(self) -> bool:
         """
         Property to check if object is instance of Module.
 
@@ -22,7 +26,7 @@ class NodeMixin(object):
         return False
 
     @property
-    def ispackage(self):
+    def ispackage(self) -> bool:
         """
         Property to check if object is instance of Package.
 
@@ -32,7 +36,7 @@ class NodeMixin(object):
         return False
 
     @property
-    def isdsm(self):
+    def isdsm(self) -> bool:
         """
         Property to check if object is instance of DSM.
 
@@ -64,32 +68,32 @@ class RootNode(object):
         if build_tree:
             self.build_tree()
 
-    def __contains__(self, item):
+    def __contains__(self, item: Package | Module) -> bool:
         """
         Get result of _contains, cache it and return it.
 
         Args:
-            item (Package/Module): a package or module.
+            item: A package or module.
 
         Returns:
-            bool: True if self contains item, False otherwise.
+            True if self contains item, False otherwise.
         """
         if item not in self._contains_cache:
             self._contains_cache[item] = self._contains(item)
         return self._contains_cache[item]
 
-    def __getitem__(self, item):  # noqa: WPS231
+    def __getitem__(self, item: str) -> Package | Module:  # noqa: WPS231
         """
         Return the corresponding Package or Module object.
 
         Args:
-            item (str): name of the package/module, dot-separated.
+            item: Name of the package/module, dot-separated.
 
         Raises:
             KeyError: When the package or module cannot be found.
 
         Returns:
-            Package/Module: corresponding object.
+            The corresponding object.
         """
         depth = item.count(".") + 1
         parts = item.split(".", 1)
@@ -101,38 +105,38 @@ class RootNode(object):
             if parts[0] == package.name:
                 if depth == 1:
                     return package
-                item = package.get(parts[1])
-                if item:
-                    return item
+                obj = package.get(parts[1])
+                if obj:
+                    return obj
         raise KeyError(item)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """
         Node as Boolean.
 
         Returns:
-            bool: result of node.empty.
+            Result of node.empty.
 
         """
         return bool(self.modules or self.packages)
 
     @property
-    def empty(self):
+    def empty(self) -> bool:
         """
         Whether the node has neither modules nor packages.
 
         Returns:
-            bool: True if empty, False otherwise.
+            True if empty, False otherwise.
         """
         return not bool(self)
 
     @property
-    def submodules(self):
+    def submodules(self) -> list[Module]:
         """
         Property to return all sub-modules of the node, recursively.
 
         Returns:
-            list of Module: the sub-modules.
+            The sub-modules.
         """
         submodules = []
         submodules.extend(self.modules)
@@ -164,33 +168,33 @@ class RootNode(object):
                 return True
         return False
 
-    def get(self, item):
+    def get(self, item: str) -> Package | Module:
         """
-        Get item through ``__getitem__`` and cache the result.
+        Get item through `__getitem__` and cache the result.
 
         Args:
-            item (str): name of package or module.
+            item: Name of package or module.
 
         Returns:
-            Package/Module: the corresponding object.
+            The corresponding object.
         """
         if item not in self._item_cache:
             try:
-                item = self.__getitem__(item)
+                obj = self.__getitem__(item)
             except KeyError:
-                item = None
-            self._item_cache[item] = item
+                obj = None
+            self._item_cache[item] = obj
         return self._item_cache[item]
 
-    def get_target(self, target):
+    def get_target(self, target: str) -> Package | Module:
         """
         Get the result of _get_target, cache it and return it.
 
         Args:
-            target (str): target to find.
+            target: Target to find.
 
         Returns:
-            Package/Module: package containing target or corresponding module.
+            Package containing target or corresponding module.
         """
         if target not in self._target_cache:
             self._target_cache[target] = self._get_target(target)
@@ -241,39 +245,43 @@ class RootNode(object):
         for package in self.packages:
             package.build_dependencies()
 
-    def print_graph(self, format=None, output=sys.stdout, depth=0, **kwargs):  # noqa: A002
+    def print_graph(
+        self, format: str | None = None, output: IO = sys.stdout, depth: int = 0, **kwargs: Any  # noqa: A002
+    ):
         """
         Print the graph for self's nodes.
 
         Args:
-            format (str): output format (csv, json or text).
-            output (file): file descriptor on which to write.
-            depth (int): depth of the graph.
+            format: Output format (csv, json or text).
+            output: File descriptor on which to write.
+            depth: Depth of the graph.
             **kwargs: Additional keyword arguments passed to `graph.print`.
         """
         graph = self.as_graph(depth=depth)
         graph.print(format=format, output=output, **kwargs)
 
-    def print_matrix(self, format=None, output=sys.stdout, depth=0, **kwargs):  # noqa: A002
+    def print_matrix(
+        self, format: str | None = None, output: IO = sys.stdout, depth: int = 0, **kwargs: Any  # noqa: A002
+    ):
         """
         Print the matrix for self's nodes.
 
         Args:
-            format (str): output format (csv, json or text).
-            output (file): file descriptor on which to write.
-            depth (int): depth of the matrix.
+            format: Output format (csv, json or text).
+            output: File descriptor on which to write.
+            depth: Depth of the matrix.
             **kwargs: Additional keyword arguments passed to `matrix.print`.
         """
         matrix = self.as_matrix(depth=depth)
         matrix.print(format=format, output=output, **kwargs)
 
-    def print_treemap(self, format=None, output=sys.stdout, **kwargs):  # noqa: A002
+    def print_treemap(self, format: str | None = None, output: IO = sys.stdout, **kwargs: Any):  # noqa: A002
         """
         Print the matrix for self's nodes.
 
         Args:
-            format (str): output format (csv, json or text).
-            output (file): file descriptor on which to write.
+            format: Output format (csv, json or text).
+            output: File descriptor on which to write.
             **kwargs: Additional keyword arguments passed to `treemap.print`.
         """
         treemap = self.as_treemap()
@@ -304,12 +312,12 @@ class RootNode(object):
     def _to_json(self, **kwargs):
         return json.dumps(self.as_dict(), **kwargs)
 
-    def as_dict(self):
+    def as_dict(self) -> dict:
         """
         Return the dependencies as a dictionary.
 
         Returns:
-            dict: dictionary of dependencies.
+            Dictionary of dependencies.
         """
         return {
             "name": str(self),
@@ -317,40 +325,40 @@ class RootNode(object):
             "packages": [package.as_dict() for package in self.packages],
         }
 
-    def as_graph(self, depth=0):
+    def as_graph(self, depth: int = 0) -> Graph:
         """
         Create a graph with self as node, cache it, return it.
 
         Args:
-            depth (int): depth of the graph.
+            depth: Depth of the graph.
 
         Returns:
-            Graph: an instance of Graph.
+            An instance of Graph.
         """
         if depth not in self._graph_cache:
             self._graph_cache[depth] = Graph(self, depth=depth)
         return self._graph_cache[depth]
 
-    def as_matrix(self, depth=0):
+    def as_matrix(self, depth: int = 0) -> Matrix:
         """
         Create a matrix with self as node, cache it, return it.
 
         Args:
-            depth (int): depth of the matrix.
+            depth: Depth of the matrix.
 
         Returns:
-            Matrix: an instance of Matrix.
+            An instance of Matrix.
         """
         if depth not in self._matrix_cache:
-            self._matrix_cache[depth] = Matrix(self, depth=depth)
+            self._matrix_cache[depth] = Matrix(self, depth=depth)  # type: ignore[arg-type]
         return self._matrix_cache[depth]
 
-    def as_treemap(self):
+    def as_treemap(self) -> TreeMap:
         """
         Return the dependencies as a TreeMap.
 
         Returns:
-            TreeMap: instance of TreeMap.
+            An instance of TreeMap.
         """
         if not self._treemap_cache:
             self._treemap_cache = TreeMap(self)
@@ -368,48 +376,50 @@ class LeafNode(object):
         return self.absolute_name()
 
     @property
-    def root(self):
+    def root(self) -> Package:
         """
         Property to return the root of this node.
 
         Returns:
             Package: this node's root package.
         """
-        node = self
+        node: Package = self  # type: ignore[assignment]
         while node.package is not None:
             node = node.package
         return node
 
     @property
-    def depth(self):
+    def depth(self) -> int:
         """
         Property to tell the depth of the node in the tree.
 
         Returns:
-            int: the node's depth in the tree.
+            The node's depth in the tree.
         """
         if self._depth_cache is not None:
             return self._depth_cache
-        depth, node = 1, self
+        node: Package
+        depth, node = 1, self  # type: ignore[assignment]
         while node.package is not None:
             depth += 1
             node = node.package
         self._depth_cache = depth
         return depth
 
-    def absolute_name(self, depth=0):
+    def absolute_name(self, depth: int = 0) -> str:
         """
         Return the absolute name of the node.
 
         Concatenate names from root to self within depth.
 
         Args:
-            depth (int): maximum depth to go to.
+            depth: Maximum depth to go to.
 
         Returns:
-            str: absolute name of the node (until given depth is reached).
+            Absolute name of the node (until given depth is reached).
         """
-        node, node_depth = self, self.depth
+        node: Package
+        node, node_depth = self, self.depth  # type: ignore[assignment]
         if depth < 1:
             depth = node_depth
         while node_depth > depth and node.package is not None:
@@ -418,5 +428,5 @@ class LeafNode(object):
         names = []
         while node is not None:
             names.append(node.name)
-            node = node.package
+            node = node.package  # type: ignore[assignment]
         return ".".join(reversed(names))

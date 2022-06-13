@@ -1,6 +1,9 @@
 """dependenpy printer module."""
 
+from __future__ import annotations
+
 import sys
+from typing import IO, Any
 
 CSV = "csv"
 JSON = "json"
@@ -11,7 +14,7 @@ FORMAT = (CSV, JSON, TEXT)
 class PrintMixin(object):
     """Print mixin class."""
 
-    def print(self, format: str = TEXT, output=sys.stdout, **kwargs):  # noqa: A002,A003
+    def print(self, format: str | None = TEXT, output: IO = sys.stdout, **kwargs: Any):  # noqa: A002,A003
         """
         Print the object in a file or on standard output by default.
 
@@ -43,15 +46,15 @@ class PrintMixin(object):
         raise NotImplementedError
 
 
-def guess_depth(packages):
+def guess_depth(packages: list[str]) -> int:
     """
     Guess the optimal depth to use for the given list of arguments.
 
     Args:
-        packages (list of str): list of packages.
+        packages: List of packages.
 
     Returns:
-        int: guessed depth to use.
+        Guessed depth to use.
     """
     if len(packages) == 1:
         return packages[0].count(".") + 2

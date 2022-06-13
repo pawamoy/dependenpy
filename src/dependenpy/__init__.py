@@ -11,10 +11,10 @@ If you read this message, you probably want to learn about the library and not t
 please refer to the README.md included in this package to get the link to the official documentation.
 """
 
-from typing import List
+from __future__ import annotations
 
 from dependenpy.dsm import DSM, Dependency, Module, Package
 from dependenpy.structures import Matrix, TreeMap
 
-__all__: List[str] = ["DSM", "Dependency", "Matrix", "Module", "Package", "TreeMap"]  # noqa: WPS410
-__version__ = "3.2.0"  # noqa: WPS410
+__all__: list[str] = ["DSM", "Dependency", "Matrix", "Module", "Package", "TreeMap"]  # noqa: WPS410
+__version__ = "3.3.0"  # noqa: WPS410

@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """dependenpy finder module."""
+
+from __future__ import annotations
 
 from importlib.util import find_spec
 from os.path import basename, exists, isdir, isfile, join, splitext
-from typing import List, Type
+from typing import Any, List, Type
 
 
 class PackageSpec(object):
@@ -27,7 +27,7 @@ class PackageSpec(object):
         return hash((self.name, self.path))
 
     @property
-    def ismodule(self):
+    def ismodule(self) -> bool:
         """
         Property to tell if the package is in fact a module (a file).
 
@@ -36,29 +36,29 @@ class PackageSpec(object):
         """
         return self.path.endswith(".py")
 
-    def add(self, spec):
+    def add(self, spec: PackageSpec) -> None:
         """
         Add limitations of given spec to self's.
 
         Args:
-            spec (PackageSpec): another spec.
+            spec: Another spec.
         """
         for limit in spec.limit_to:
             if limit not in self.limit_to:
                 self.limit_to.append(limit)
 
     @staticmethod  # noqa: WPS602
-    def combine(specs):  # noqa: WPS602
+    def combine(specs: list[PackageSpec]) -> list[PackageSpec]:  # noqa: WPS602
         """
         Combine package specifications' limitations.
 
         Args:
-            specs (list of PackageSpec): the package specifications.
+            specs: The package specifications.
 
         Returns:
-            list of PackageSpec: the new, merged list of PackageSpec.
+            The new, merged list of PackageSpec.
         """
-        new_specs = {}
+        new_specs: dict[PackageSpec, PackageSpec] = {}
         for spec in specs:
             if new_specs.get(spec, None) is None:
                 new_specs[spec] = spec
@@ -70,7 +70,7 @@ class PackageSpec(object):
 class PackageFinder(object):
     """Abstract package finder class."""
 
-    def find(self, package: str, **kwargs):
+    def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
         """
         Find method.
 
@@ -79,7 +79,7 @@ class PackageFinder(object):
             **kwargs: additional keyword arguments.
 
         Returns:
-            PackageSpec: the PackageSpec corresponding to the package, or None.
+            Package spec or None.
         """  # noqa: DAR202,DAR401
         raise NotImplementedError
 
@@ -87,7 +87,7 @@ class PackageFinder(object):
 class LocalPackageFinder(PackageFinder):
     """Finder to find local packages (directories on the disk)."""
 
-    def find(self, package: str, **kwargs):
+    def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
         """
         Find method.
 
@@ -96,7 +96,7 @@ class LocalPackageFinder(PackageFinder):
             **kwargs: additional keyword arguments.
 
         Returns:
-            PackageSpec: the PackageSpec corresponding to the package, or None.
+            Package spec or None.
         """
         if not exists(package):
             return None
@@ -115,7 +115,7 @@ class LocalPackageFinder(PackageFinder):
 class InstalledPackageFinder(PackageFinder):
     """Finder to find installed Python packages using importlib."""
 
-    def find(self, package: str, **kwargs):
+    def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
         """
         Find method.
 
@@ -124,13 +124,13 @@ class InstalledPackageFinder(PackageFinder):
             **kwargs: additional keyword arguments.
 
         Returns:
-            PackageSpec: the PackageSpec corresponding to the package, or None.
+            Package spec or None.
         """
         spec = find_spec(package)
         if spec is None:
             return None
         if "." in package:
-            package, rest = package.split(".", 1)  # type: ignore
+            package, rest = package.split(".", 1)
             limit = [rest]
             spec = find_spec(package)
         else:
@@ -166,7 +166,7 @@ class Finder(object):
         else:
             self.finders = [finder() for finder in finders]
 
-    def find(self, package: str, **kwargs):
+    def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
         """
         Find a package using package finders.
 
@@ -177,7 +177,7 @@ class Finder(object):
             **kwargs: additional keyword arguments used by finders.
 
         Returns:
-            PackageSpec: if package found, else None
+            Package spec or None.
         """
         for finder in self.finders:
             package_spec = finder.find(package, **kwargs)

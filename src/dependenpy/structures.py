@@ -1,12 +1,16 @@
-# -*- coding: utf-8 -*-
-
 """dependenpy structures module."""
 
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING, Any
 
 from colorama import Style
 
 from dependenpy.helpers import PrintMixin
+
+if TYPE_CHECKING:
+    from dependenpy.dsm import DSM, Module, Package
 
 
 class Matrix(PrintMixin):
@@ -18,25 +22,24 @@ class Matrix(PrintMixin):
     of the entities in the corresponding order.
     """
 
-    def __init__(self, *nodes, depth=0):  # noqa: WPS231
+    def __init__(self, *nodes: DSM | Package | Module, depth: int = 0):  # noqa: WPS231
         """
         Initialization method.
 
         Args:
-            *nodes (list of DSM/Package/Module):
-                the nodes on which to build the matrix.
-            depth (int): the depth of the matrix. This depth is always
+            *nodes: The nodes on which to build the matrix.
+            depth: The depth of the matrix. This depth is always
                 absolute, meaning that building a matrix with a sub-package
                 "A.B.C" and a depth of 1 will return a matrix of size 1,
                 containing A only. To see the matrix for the sub-modules and
                 sub-packages in C, you will have to give depth=4.
         """
-        modules = []
+        modules: list[Module] = []
         for node in nodes:
             if node.ismodule:
-                modules.append(node)
+                modules.append(node)  # type: ignore[arg-type]
             elif node.ispackage or node.isdsm:
-                modules.extend(node.submodules)
+                modules.extend(node.submodules)  # type: ignore[union-attr]
 
         if depth < 1:
             keys = modules
@@ -58,7 +61,7 @@ class Matrix(PrintMixin):
 
         if depth < 1:
             for index, key in enumerate(keys):  # noqa: WPS440
-                key.index = index
+                key.index = index  # type: ignore[attr-defined]
             for index, key in enumerate(keys):  # noqa: WPS440
                 for dep in key.dependencies:
                     if dep.external:
@@ -79,7 +82,7 @@ class Matrix(PrintMixin):
         self.data = data
 
     @staticmethod  # noqa: WPS602
-    def cast(keys, data):  # noqa: WPS602
+    def cast(keys: list[str], data: list[list[int]]) -> Matrix:  # noqa: WPS602
         """
         Cast a set of keys and an array to a Matrix object.
 
@@ -96,7 +99,7 @@ class Matrix(PrintMixin):
         return matrix
 
     @property
-    def total(self):
+    def total(self) -> int:
         """
         Return the total number of dependencies within this matrix.
 
@@ -153,7 +156,7 @@ class Matrix(PrintMixin):
 class TreeMap(PrintMixin):
     """TreeMap class."""
 
-    def __init__(self, *nodes, value=-1):
+    def __init__(self, *nodes: Any, value: int = -1):
         """
         Initialization method.
 
@@ -213,32 +216,32 @@ class Vertex(object):
     def __str__(self):
         return self.name
 
-    def connect_to(self, vertex, weight=1):
+    def connect_to(self, vertex: Vertex, weight: int = 1) -> Edge:
         """
         Connect this vertex to another one.
 
         Args:
-            vertex (Vertex): vertex to connect to.
-            weight (int): weight of the edge.
+            vertex: Vertex to connect to.
+            weight: Weight of the edge.
 
         Returns:
-            Edge: the newly created edge.
+            The newly created edge.
         """
         for edge in self.edges_out:
             if vertex == edge.vertex_in:
                 return edge
         return Edge(self, vertex, weight)
 
-    def connect_from(self, vertex, weight=1):
+    def connect_from(self, vertex: Vertex, weight: int = 1) -> Edge:
         """
         Connect another vertex to this one.
 
         Args:
-            vertex (Vertex): vertex to connect from.
-            weight (int): weight of the edge.
+            vertex: Vertex to connect from.
+            weight: Weight of the edge.
 
         Returns:
-            Edge: the newly created edge.
+            The newly created edge.
         """
         for edge in self.edges_in:
             if vertex == edge.vertex_out:

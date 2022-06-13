@@ -31,11 +31,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 <small>[Compare with 3.0.0](https://github.com/pawamoy/dependenpy/compare/3.0.0...3.1.0)</small>
 
 ### Features
-- Add ``-i, --indent`` option to specify indentation level.
+- Add `-i, --indent` option to specify indentation level.
 
 ### Changes
-- Change ``-i, --enforce-init`` option to its contrary ``-g, --greedy``.
-- Options ``-l``, ``-m`` and ``-t`` are now mutually exclusive.
+- Change `-i, --enforce-init` option to its contrary `-g, --greedy`.
+- Options `-l`, `-m` and `-t` are now mutually exclusive.
 
 ### Bug fixes
 - Fix imports order ([9a9fcc3](https://github.com/pawamoy/dependenpy/commit/9a9fcc33c258a89eafcbf6995bebc64fccb85d54)).

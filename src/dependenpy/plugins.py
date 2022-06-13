@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """dependenpy plugins module."""
+
+from __future__ import annotations
 
 from dependenpy.dsm import DSM as DependenpyDSM  # noqa: N811
 from dependenpy.helpers import guess_depth
@@ -9,7 +9,7 @@ try:
     import archan
 except ImportError:
 
-    class InternalDependencies(object):  # type: ignore
+    class InternalDependencies(object):
         """Empty dependenpy provider."""
 
 else:
@@ -31,7 +31,7 @@ else:
             archan.Argument("depth", int, "The depth of the matrix to generate."),
         )
 
-        def get_data(self, packages, enforce_init: bool = True, depth: int = None):
+        def get_data(self, packages: list[str], enforce_init: bool = True, depth: int = None) -> archan.DSM:
             """
             Provide matrix data for internal dependencies in a set of packages.
 
@@ -41,7 +41,7 @@ else:
                 depth: the depth of the matrix to generate.
 
             Returns:
-                archan.DSM: instance of archan DSM.
+                Instance of archan DSM.
             """
             dsm = DependenpyDSM(*packages, enforce_init=enforce_init)
             if depth is None:
