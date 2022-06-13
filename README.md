@@ -57,9 +57,9 @@ uses it to display the matrices with Highcharts.
 ## Usage (command-line)
 
 ```
-usage: gen-readme-data.py [-d DEPTH] [-f {csv,json,text}] [-g] [-G] [-h]
-                          [-i INDENT] [-l] [-m] [-o OUTPUT] [-t] [-v]
-                          PACKAGES [PACKAGES ...]
+usage: dependenpy [-d DEPTH] [-f {csv,json,text}] [-g] [-G] [-h]
+                  [-i INDENT] [-l] [-m] [-o OUTPUT] [-t] [-v] 
+                  [-z STRING] PACKAGES [PACKAGES ...]
 
 Command line tool for dependenpy Python package.
 
@@ -89,6 +89,8 @@ optional arguments:
                         Output to given file. Default: stdout.
   -t, --show-treemap    Show the treemap (work in progress). Default: false.
   -v, --version         Show the current version of the program and exit.
+  -z ZERO, --zero ZERO  Character to use for cells with value=0 (text matrix 
+                        display only). Default: "0".
 
 ```
 
