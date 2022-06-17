@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from colorama import Style
@@ -12,6 +13,11 @@ from dependenpy.helpers import PrintMixin
 
 if TYPE_CHECKING:
     from dependenpy.dsm import DSM, Module, Package
+
+
+@dataclass
+class KeyInfo:
+    level: int = 0
 
 
 class Matrix(PrintMixin):
@@ -80,6 +86,7 @@ class Matrix(PrintMixin):
 
         self.size = size
         self.keys = [key.absolute_name() for key in keys]  # noqa: WPS441
+        self.key_info = {k: KeyInfo() for k in self.keys}
         self.data = data
 
     @staticmethod  # noqa: WPS602
@@ -97,6 +104,7 @@ class Matrix(PrintMixin):
         matrix = Matrix()
         matrix.keys = copy.deepcopy(keys)
         matrix.data = copy.deepcopy(data)
+        matrix.key_info = {k: KeyInfo() for k in keys}
         return matrix
 
     @property
@@ -123,7 +131,7 @@ class Matrix(PrintMixin):
         if not self.keys or not self.data:
             return ""
         zero = kwargs.pop("zero", "0")
-        max_key_length = max(len(key) for key in self.keys + ["Module"])
+        max_key_length = max(len(key) for key in self.keys + ["Module"]) + 3  # TODO: for levels
         max_dep_length = max([len(str(col)) for line in self.data for col in line] + [len(zero)])
         key_col_length = len(str(len(self.keys)))
         key_line_length = max(key_col_length, 2)
@@ -145,9 +153,14 @@ class Matrix(PrintMixin):
         text.append("\n")
         # lines
         for index, key in enumerate(self.keys):  # noqa: WPS440
-            text.append(f" {key:>{max_key_length}} │ {bold}{index:>{key_line_length}}{reset} │")
-            for value in self.data[index]:
-                text.append((f"{value if value else zero:>{column_length}}│"))
+            text.append(
+                f" {key:>{max_key_length-3}}/{self.key_info[key].level:2} │ {bold}{index:>{key_line_length}}{reset} │"
+            )
+            for ix2, value in enumerate(self.data[index]):
+                if ix2 == index:
+                    text.append(f"{'x':>{column_length}}│")
+                else:
+                    text.append(f"{value if value else zero:>{column_length}}│")
             text.append("\n")
         text.append("\n")
 

@@ -20,7 +20,7 @@ from typing import List, Optional
 
 from colorama import init
 
-from dependenpy import __version__
+from dependenpy import __version__, algorithms
 from dependenpy.dsm import DSM
 from dependenpy.helpers import CSV, FORMAT, JSON, guess_depth
 
@@ -179,6 +179,9 @@ def _run(opts, dsm):
             dsm.print(format=opts.format, output=output, indent=indent)
         elif opts.matrix:
             dsm.print_matrix(format=opts.format, output=output, depth=depth, indent=indent, zero=opts.zero)
+            algorithms.DsmMatrix.create(dsm.as_matrix()).levelize().print(
+                format=opts.format, output=output, depth=depth, indent=indent, zero=opts.zero
+            )
         elif opts.treemap:
             dsm.print_treemap(format=opts.format, output=output)
         elif opts.graph:
