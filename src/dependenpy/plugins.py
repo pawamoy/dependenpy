@@ -31,7 +31,7 @@ else:
             archan.Argument("depth", int, "The depth of the matrix to generate."),
         )
 
-        def get_data(self, packages: list[str], enforce_init: bool = True, depth: int = None) -> archan.DSM:
+        def get_data(self, packages: list[str], enforce_init: bool = True, depth: int | None = None) -> archan.DSM:
             """
             Provide matrix data for internal dependencies in a set of packages.
 

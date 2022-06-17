@@ -6,6 +6,7 @@ import json
 import sys
 from typing import IO, TYPE_CHECKING, Any
 
+from dependenpy import helpers
 from dependenpy.structures import Graph, Matrix, TreeMap
 
 if TYPE_CHECKING:
@@ -246,7 +247,7 @@ class RootNode(object):
             package.build_dependencies()
 
     def print_graph(
-        self, format: str | None = None, output: IO = sys.stdout, depth: int = 0, **kwargs: Any  # noqa: A002
+        self, format: str = helpers.TEXT, output: IO = sys.stdout, depth: int = 0, **kwargs: Any  # noqa: A002
     ):
         """
         Print the graph for self's nodes.
@@ -261,7 +262,7 @@ class RootNode(object):
         graph.print(format=format, output=output, **kwargs)
 
     def print_matrix(
-        self, format: str | None = None, output: IO = sys.stdout, depth: int = 0, **kwargs: Any  # noqa: A002
+        self, format: str = helpers.TEXT, output: IO = sys.stdout, depth: int = 0, **kwargs: Any  # noqa: A002
     ):
         """
         Print the matrix for self's nodes.
@@ -275,7 +276,7 @@ class RootNode(object):
         matrix = self.as_matrix(depth=depth)
         matrix.print(format=format, output=output, **kwargs)
 
-    def print_treemap(self, format: str | None = None, output: IO = sys.stdout, **kwargs: Any):  # noqa: A002
+    def print_treemap(self, format: str = helpers.TEXT, output: IO = sys.stdout, **kwargs: Any):  # noqa: A002
         """
         Print the matrix for self's nodes.
 

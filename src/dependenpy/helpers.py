@@ -14,7 +14,7 @@ FORMAT = (CSV, JSON, TEXT)
 class PrintMixin(object):
     """Print mixin class."""
 
-    def print(self, format: str | None = TEXT, output: IO = sys.stdout, **kwargs: Any):  # noqa: A002,A003
+    def print(self, format: str = TEXT, output: IO = sys.stdout, **kwargs: Any):  # noqa: A002,A003
         """
         Print the object in a file or on standard output by default.
 

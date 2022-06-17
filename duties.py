@@ -1,5 +1,7 @@
 """Development tasks."""
 
+from __future__ import annotations
+
 import importlib
 import os
 import re
@@ -8,7 +10,7 @@ import tempfile
 from contextlib import suppress
 from io import StringIO
 from pathlib import Path
-from typing import List, Optional, Pattern
+from typing import List, Pattern
 from urllib.request import urlopen
 
 from duty import duty
@@ -22,7 +24,7 @@ WINDOWS = os.name == "nt"
 PTY = not WINDOWS and not CI
 
 
-def _latest(lines: List[str], regex: Pattern) -> Optional[str]:
+def _latest(lines: List[str], regex: Pattern) -> str | None:
     for line in lines:
         match = regex.search(line)
         if match:

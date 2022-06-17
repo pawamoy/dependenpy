@@ -3,7 +3,7 @@
 import pytest
 
 from dependenpy.cli import main
-from dependenpy.dsm import DSM
+from dependenpy.dsm import DSM, Module
 
 
 @pytest.mark.parametrize(
@@ -53,6 +53,7 @@ def test_inner_imports():
     """Test inner imports."""
     dsm = DSM("internal")
     module_i = dsm["internal.subpackage_a.subpackage_1.module_i"]
+    assert isinstance(module_i, Module)
     assert len(module_i.dependencies) == 4
     assert module_i.cardinal(to=dsm["internal"]) == 3
 
