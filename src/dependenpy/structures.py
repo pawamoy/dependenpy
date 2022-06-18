@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 from typing import TYPE_CHECKING, Any
 
@@ -94,8 +95,8 @@ class Matrix(PrintMixin):
             A new matrix.
         """
         matrix = Matrix()
-        matrix.keys = keys
-        matrix.data = data
+        matrix.keys = copy.deepcopy(keys)
+        matrix.data = copy.deepcopy(data)
         return matrix
 
     @property
