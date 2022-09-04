@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [3.3.2](https://github.com/pawamoy/dependenpy/releases/tag/3.3.2) - 2022-09-04
+
+<small>[Compare with 3.3.1](https://github.com/pawamoy/dependenpy/compare/3.3.1...3.3.2)</small>
+
+### Bug Fixes
+- Add back missing colorama runtime dependency ([f3e274c](https://github.com/pawamoy/dependenpy/commit/f3e274cfde24f5a3cc1a200fceb4f2d94f41ca11) by Vlad Dumitrescu). References: [#57](https://github.com/pawamoy/dependenpy/issues/57)
+- Copy data when casting a matrix ([13ec81a](https://github.com/pawamoy/dependenpy/commit/13ec81ae077fb6cd508a53317b83b31be278799f) by Vlad Dumitrescu). References: [#53](https://github.com/pawamoy/dependenpy/issues/53)
+
+
 ## [3.3.1](https://github.com/pawamoy/dependenpy/releases/tag/3.3.1) - 2022-06-13
 
 <small>[Compare with 3.3.0](https://github.com/pawamoy/dependenpy/compare/3.3.0...3.3.1)</small>
