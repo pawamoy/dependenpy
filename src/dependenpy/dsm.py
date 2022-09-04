@@ -48,13 +48,13 @@ class DSM(RootNode, NodeMixin, PrintMixin):
         """
         self.base_packages = packages
         self.finder = Finder()
-        self.specs = []
-        self.not_found = []
+        self.specs: List[PackageSpec] = []
+        self.not_found: List[str] = []
         self.enforce_init = enforce_init
 
-        specs = []
+        specs: List[PackageSpec] = []
         for package in packages:
-            spec = self.finder.find(package, enforce_init=enforce_init)
+            spec: PackageSpec | None = self.finder.find(package, enforce_init=enforce_init)
             if spec:
                 specs.append(spec)
             else:
@@ -117,9 +117,9 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
         self,
         name: str,
         path: str,
-        dsm: DSM = None,
-        package: "Package" = None,
-        limit_to: List[str] = None,
+        dsm: DSM | None = None,
+        package: "Package" | None = None,
+        limit_to: List[str] | None = None,
         build_tree: bool = True,
         build_dependencies: bool = True,
         enforce_init: bool = True,

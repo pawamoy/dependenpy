@@ -153,7 +153,7 @@ class Finder(object):
     Initialize it with a list of package finder classes (not instances).
     """
 
-    def __init__(self, finders: List[Type] = None):
+    def __init__(self, finders: List[Type] | None = None):
         """
         Initialization method.
 

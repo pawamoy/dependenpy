@@ -16,7 +16,7 @@ from __future__ import annotations
 import argparse
 import sys
 from contextlib import contextmanager
-from typing import List, Optional
+from typing import List
 
 from colorama import init
 
@@ -185,7 +185,7 @@ def _run(opts, dsm):
             dsm.print_graph(format=opts.format, output=output, depth=depth, indent=indent)
 
 
-def main(args: Optional[List[str]] = None) -> int:  # noqa: WPS231
+def main(args: List[str] | None = None) -> int:  # noqa: WPS231
     """
     Run the main program.
 
