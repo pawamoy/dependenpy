@@ -13,12 +13,9 @@
 
 from __future__ import annotations
 
-from __future__ import annotations
-
 import argparse
 import sys
 from contextlib import contextmanager
-from typing import List, Optional
 
 from colorama import init
 
@@ -34,7 +31,9 @@ def get_parser() -> argparse.ArgumentParser:
         An argparse parser.
     """
     parser = argparse.ArgumentParser(
-        prog="dependenpy", add_help=False, description="Command line tool for dependenpy Python package."
+        prog="dependenpy",
+        add_help=False,
+        description="Command line tool for dependenpy Python package.",
     )
     mxg = parser.add_mutually_exclusive_group(required=False)
 
@@ -54,7 +53,12 @@ def get_parser() -> argparse.ArgumentParser:
         help="Specify matrix or graph depth. Default: best guess.",
     )
     parser.add_argument(
-        "-f", "--format", choices=FORMAT, default="text", dest="format", help="Output format. Default: text."
+        "-f",
+        "--format",
+        choices=FORMAT,
+        default="text",
+        dest="format",
+        help="Output format. Default: text.",
     )
     mxg.add_argument(
         "-g",
@@ -74,7 +78,11 @@ def get_parser() -> argparse.ArgumentParser:
         "__init__.py file. Can make execution slower. Default: false.",
     )
     parser.add_argument(
-        "-h", "--help", action="help", default=argparse.SUPPRESS, help="Show this help message and exit."
+        "-h",
+        "--help",
+        action="help",
+        default=argparse.SUPPRESS,
+        help="Show this help message and exit.",
     )
     parser.add_argument(
         "-i",
@@ -160,7 +168,7 @@ def _get_depth(opts, packages):
     return opts.depth or guess_depth(packages)
 
 
-def _get_packages(opts):  # noqa: WPS231
+def _get_packages(opts):
     packages = []
     for arg in opts.packages:
         if "," in arg:

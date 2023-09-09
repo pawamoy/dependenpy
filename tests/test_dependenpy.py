@@ -17,8 +17,7 @@ from dependenpy.dsm import DSM
     ],
 )
 def test_main_ok(args):
-    """
-    Main test method.
+    """Main test method.
 
     Arguments:
         args: Command line arguments.

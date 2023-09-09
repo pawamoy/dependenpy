@@ -11,12 +11,11 @@ TEXT = "text"
 FORMAT = (CSV, JSON, TEXT)
 
 
-class PrintMixin(object):
+class PrintMixin:
     """Print mixin class."""
 
     def print(self, format: str | None = TEXT, output: IO = sys.stdout, **kwargs: Any):  # noqa: A002,A003
-        """
-        Print the object in a file or on standard output by default.
+        """Print the object in a file or on standard output by default.
 
         Args:
             format: output format (csv, json or text).
@@ -47,8 +46,7 @@ class PrintMixin(object):
 
 
 def guess_depth(packages: list[str]) -> int:
-    """
-    Guess the optimal depth to use for the given list of arguments.
+    """Guess the optimal depth to use for the given list of arguments.
 
     Args:
         packages: List of packages.

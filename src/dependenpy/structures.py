@@ -15,17 +15,15 @@ if TYPE_CHECKING:
 
 
 class Matrix(PrintMixin):
-    """
-    Matrix class.
+    """Matrix class.
 
     A class to build a matrix given a list of nodes. After instantiation,
     it has two attributes: data, a 2-dimensions array, and keys, the names
     of the entities in the corresponding order.
     """
 
-    def __init__(self, *nodes: DSM | Package | Module, depth: int = 0):  # noqa: WPS231
-        """
-        Initialization method.
+    def __init__(self, *nodes: DSM | Package | Module, depth: int = 0):
+        """Initialization method.
 
         Args:
             *nodes: The nodes on which to build the matrix.
@@ -57,13 +55,13 @@ class Matrix(PrintMixin):
                     keys.append(package)
 
         size = len(keys)
-        data = [[0] * size for _ in range(size)]  # noqa: WPS435
+        data = [[0] * size for _ in range(size)]
         keys = sorted(keys, key=lambda key: key.absolute_name())
 
         if depth < 1:
-            for index, key in enumerate(keys):  # noqa: WPS440
+            for index, key in enumerate(keys):
                 key.index = index  # type: ignore[attr-defined]
-            for index, key in enumerate(keys):  # noqa: WPS440
+            for index, key in enumerate(keys):
                 for dep in key.dependencies:
                     if dep.external:
                         continue
@@ -79,13 +77,12 @@ class Matrix(PrintMixin):
                     data[row][col] = row_key.cardinal(to=col_key)
 
         self.size = size
-        self.keys = [key.absolute_name() for key in keys]  # noqa: WPS441
+        self.keys = [key.absolute_name() for key in keys]
         self.data = data
 
-    @staticmethod  # noqa: WPS602
-    def cast(keys: list[str], data: list[list[int]]) -> Matrix:  # noqa: WPS602
-        """
-        Cast a set of keys and an array to a Matrix object.
+    @staticmethod
+    def cast(keys: list[str], data: list[list[int]]) -> Matrix:
+        """Cast a set of keys and an array to a Matrix object.
 
         Arguments:
             keys: The matrix keys.
@@ -101,8 +98,7 @@ class Matrix(PrintMixin):
 
     @property
     def total(self) -> int:
-        """
-        Return the total number of dependencies within this matrix.
+        """Return the total number of dependencies within this matrix.
 
         Returns:
             The total number of dependencies.
@@ -123,7 +119,7 @@ class Matrix(PrintMixin):
         if not self.keys or not self.data:
             return ""
         zero = kwargs.pop("zero", "0")
-        max_key_length = max(len(key) for key in self.keys + ["Module"])
+        max_key_length = max(len(key) for key in [*self.keys, "Module"])
         max_dep_length = max([len(str(col)) for line in self.data for col in line] + [len(zero)])
         key_col_length = len(str(len(self.keys)))
         key_line_length = max(key_col_length, 2)
@@ -144,10 +140,10 @@ class Matrix(PrintMixin):
         text.append(f"{'─' * column_length}┤")
         text.append("\n")
         # lines
-        for index, key in enumerate(self.keys):  # noqa: WPS440
+        for index, key in enumerate(self.keys):
             text.append(f" {key:>{max_key_length}} │ {bold}{index:>{key_line_length}}{reset} │")
             for value in self.data[index]:
-                text.append((f"{value if value else zero:>{column_length}}│"))
+                text.append(f"{value if value else zero:>{column_length}}│")
             text.append("\n")
         text.append("\n")
 
@@ -158,8 +154,7 @@ class TreeMap(PrintMixin):
     """TreeMap class."""
 
     def __init__(self, *nodes: Any, value: int = -1):
-        """
-        Initialization method.
+        """Initialization method.
 
         Arguments:
             *nodes: the nodes from which to build the treemap.
@@ -200,12 +195,11 @@ class TreeMap(PrintMixin):
         return ""
 
 
-class Vertex(object):
+class Vertex:
     """Vertex class. Used in Graph class."""
 
     def __init__(self, name):
-        """
-        Initialization method.
+        """Initialization method.
 
         Args:
             name (str): name of the vertex.
@@ -218,8 +212,7 @@ class Vertex(object):
         return self.name
 
     def connect_to(self, vertex: Vertex, weight: int = 1) -> Edge:
-        """
-        Connect this vertex to another one.
+        """Connect this vertex to another one.
 
         Args:
             vertex: Vertex to connect to.
@@ -234,8 +227,7 @@ class Vertex(object):
         return Edge(self, vertex, weight)
 
     def connect_from(self, vertex: Vertex, weight: int = 1) -> Edge:
-        """
-        Connect another vertex to this one.
+        """Connect another vertex to this one.
 
         Args:
             vertex: Vertex to connect from.
@@ -250,12 +242,11 @@ class Vertex(object):
         return Edge(vertex, self, weight)
 
 
-class Edge(object):
+class Edge:
     """Edge class. Used in Graph class."""
 
     def __init__(self, vertex_out, vertex_in, weight=1):
-        """
-        Initialization method.
+        """Initialization method.
 
         Args:
             vertex_out (Vertex): source vertex (edge going out).
@@ -272,8 +263,7 @@ class Edge(object):
         return f"{self.vertex_out.name} --{self.weight}--> {self.vertex_in.name}"
 
     def go_from(self, vertex):
-        """
-        Tell the edge to go out from this vertex.
+        """Tell the edge to go out from this vertex.
 
         Args:
             vertex (Vertex): vertex to go from.
@@ -284,8 +274,7 @@ class Edge(object):
         vertex.edges_out.add(self)
 
     def go_in(self, vertex):
-        """
-        Tell the edge to go into this vertex.
+        """Tell the edge to go into this vertex.
 
         Args:
             vertex (Vertex): vertex to go into.
@@ -297,8 +286,7 @@ class Edge(object):
 
 
 class Graph(PrintMixin):
-    """
-    Graph class.
+    """Graph class.
 
     A class to build a graph given a list of nodes. After instantiation,
     it has two attributes: vertices, the set of nodes,
@@ -306,8 +294,7 @@ class Graph(PrintMixin):
     """
 
     def __init__(self, *nodes, depth=0):
-        """
-        Initialization method.
+        """Initialization method.
 
         An intermediary matrix is built to ease the creation of the graph.
 

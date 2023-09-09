@@ -4,15 +4,14 @@ from __future__ import annotations
 
 from importlib.util import find_spec
 from os.path import basename, exists, isdir, isfile, join, splitext
-from typing import Any, List, Type
+from typing import Any
 
 
-class PackageSpec(object):
+class PackageSpec:
     """Holder for a package specification (given as argument to DSM)."""
 
     def __init__(self, name, path, limit_to=None):
-        """
-        Initialization method.
+        """Initialization method.
 
         Args:
             name (str): name of the package.
@@ -28,8 +27,7 @@ class PackageSpec(object):
 
     @property
     def ismodule(self) -> bool:
-        """
-        Property to tell if the package is in fact a module (a file).
+        """Property to tell if the package is in fact a module (a file).
 
         Returns:
             Whether this package is in fact a module.
@@ -37,8 +35,7 @@ class PackageSpec(object):
         return self.path.endswith(".py")
 
     def add(self, spec: PackageSpec) -> None:
-        """
-        Add limitations of given spec to self's.
+        """Add limitations of given spec to self's.
 
         Args:
             spec: Another spec.
@@ -47,10 +44,9 @@ class PackageSpec(object):
             if limit not in self.limit_to:
                 self.limit_to.append(limit)
 
-    @staticmethod  # noqa: WPS602
-    def combine(specs: list[PackageSpec]) -> list[PackageSpec]:  # noqa: WPS602
-        """
-        Combine package specifications' limitations.
+    @staticmethod
+    def combine(specs: list[PackageSpec]) -> list[PackageSpec]:
+        """Combine package specifications' limitations.
 
         Args:
             specs: The package specifications.
@@ -67,12 +63,11 @@ class PackageSpec(object):
         return list(new_specs.values())
 
 
-class PackageFinder(object):
+class PackageFinder:
     """Abstract package finder class."""
 
     def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
-        """
-        Find method.
+        """Find method.
 
         Args:
             package: package to find.
@@ -80,7 +75,7 @@ class PackageFinder(object):
 
         Returns:
             Package spec or None.
-        """  # noqa: DAR202,DAR401
+        """
         raise NotImplementedError
 
 
@@ -88,8 +83,7 @@ class LocalPackageFinder(PackageFinder):
     """Finder to find local packages (directories on the disk)."""
 
     def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
-        """
-        Find method.
+        """Find method.
 
         Args:
             package: package to find.
@@ -116,8 +110,7 @@ class InstalledPackageFinder(PackageFinder):
     """Finder to find installed Python packages using importlib."""
 
     def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
-        """
-        Find method.
+        """Find method.
 
         Args:
             package: package to find.
@@ -146,16 +139,14 @@ class InstalledPackageFinder(PackageFinder):
         return None
 
 
-class Finder(object):
-    """
-    Main package finder class.
+class Finder:
+    """Main package finder class.
 
     Initialize it with a list of package finder classes (not instances).
     """
 
-    def __init__(self, finders: List[Type] = None):
-        """
-        Initialization method.
+    def __init__(self, finders: list[type] | None = None):
+        """Initialization method.
 
         Args:
             finders: list of package finder classes (not instances) in a specific
@@ -167,8 +158,7 @@ class Finder(object):
             self.finders = [finder() for finder in finders]
 
     def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
-        """
-        Find a package using package finders.
+        """Find a package using package finders.
 
         Return the first package found.
 

@@ -1,5 +1,4 @@
-"""
-dependenpy dsm module.
+"""dependenpy dsm module.
 
 This is the core module of dependenpy. It contains the following classes:
 
@@ -17,7 +16,6 @@ import sys
 from os import listdir
 from os.path import isdir, isfile, join, splitext
 from pathlib import Path
-from typing import List
 
 from dependenpy.finder import Finder, PackageSpec
 from dependenpy.helpers import PrintMixin
@@ -25,8 +23,7 @@ from dependenpy.node import LeafNode, NodeMixin, RootNode
 
 
 class DSM(RootNode, NodeMixin, PrintMixin):
-    """
-    DSM-capable class.
+    """DSM-capable class.
 
     Technically speaking, a DSM instance is not a real DSM but more a tree
     representing the Python packages structure. However, it has the
@@ -35,10 +32,13 @@ class DSM(RootNode, NodeMixin, PrintMixin):
     """
 
     def __init__(
-        self, *packages: str, build_tree: bool = True, build_dependencies: bool = True, enforce_init: bool = True
+        self,
+        *packages: str,
+        build_tree: bool = True,
+        build_dependencies: bool = True,
+        enforce_init: bool = True,
     ):
-        """
-        Initialization method.
+        """Initialization method.
 
         Args:
             *packages: list of packages to search for.
@@ -79,8 +79,7 @@ class DSM(RootNode, NodeMixin, PrintMixin):
 
     @property
     def isdsm(self) -> bool:
-        """
-        Inherited from NodeMixin. Always True.
+        """Inherited from NodeMixin. Always True.
 
         Returns:
             Whether this object is a DSM.
@@ -102,13 +101,12 @@ class DSM(RootNode, NodeMixin, PrintMixin):
                         build_tree=True,
                         build_dependencies=False,
                         enforce_init=self.enforce_init,
-                    )
+                    ),
                 )
 
 
-class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
-    """
-    Package class.
+class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
+    """Package class.
 
     This class represent Python packages as nodes in a tree.
     """
@@ -118,14 +116,13 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
         name: str,
         path: str,
         dsm: DSM = None,
-        package: "Package" = None,
-        limit_to: List[str] = None,
+        package: Package = None,
+        limit_to: list[str] | None = None,
         build_tree: bool = True,
         build_dependencies: bool = True,
         enforce_init: bool = True,
     ):
-        """
-        Initialization method.
+        """Initialization method.
 
         Args:
             name: name of the package.
@@ -144,16 +141,15 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
         self.limit_to = limit_to or []
         self.enforce_init = enforce_init
 
-        RootNode.__init__(self, build_tree)  # noqa: WPS609
-        LeafNode.__init__(self)  # noqa: WPS609
+        RootNode.__init__(self, build_tree)
+        LeafNode.__init__(self)
 
         if build_tree and build_dependencies:
             self.build_dependencies()
 
     @property
     def ispackage(self) -> bool:
-        """
-        Inherited from NodeMixin. Always True.
+        """Inherited from NodeMixin. Always True.
 
         Returns:
             Whether this object is a package.
@@ -162,8 +158,7 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
 
     @property
     def issubpackage(self) -> bool:
-        """
-        Property to tell if this node is a sub-package.
+        """Property to tell if this node is a sub-package.
 
         Returns:
             This package has a parent.
@@ -172,8 +167,7 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
 
     @property
     def isroot(self) -> bool:
-        """
-        Property to tell if this node is a root node.
+        """Property to tell if this node is a root node.
 
         Returns:
             This package has no parent.
@@ -181,8 +175,7 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
         return self.package is None
 
     def split_limits_heads(self) -> tuple[list[str], list[str]]:
-        """
-        Return first parts of dot-separated strings, and rest of strings.
+        """Return first parts of dot-separated strings, and rest of strings.
 
         Returns:
             The heads and rest of the strings.
@@ -191,14 +184,14 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
         new_limit_to = []
         for limit in self.limit_to:
             if "." in limit:
-                name, limit = limit.split(".", 1)  # noqa: WPS440
+                name, limit = limit.split(".", 1)
                 heads.append(name)
                 new_limit_to.append(limit)
             else:
                 heads.append(limit)
         return heads, new_limit_to
 
-    def build_tree(self):  # noqa: WPS231
+    def build_tree(self):
         """Build the tree for this package."""
         for module in listdir(self.path):
             abs_m = join(self.path, module)
@@ -206,26 +199,24 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
                 name = splitext(module)[0]
                 if not self.limit_to or name in self.limit_to:
                     self.modules.append(Module(name, abs_m, self.dsm, self))
-            elif isdir(abs_m):
-                if isfile(join(abs_m, "__init__.py")) or not self.enforce_init:
-                    heads, new_limit_to = self.split_limits_heads()
-                    if not heads or module in heads:
-                        self.packages.append(
-                            Package(
-                                module,
-                                abs_m,
-                                self.dsm,
-                                self,
-                                new_limit_to,
-                                build_tree=True,
-                                build_dependencies=False,
-                                enforce_init=self.enforce_init,
-                            )
-                        )
+            elif isdir(abs_m) and (isfile(join(abs_m, "__init__.py")) or not self.enforce_init):
+                heads, new_limit_to = self.split_limits_heads()
+                if not heads or module in heads:
+                    self.packages.append(
+                        Package(
+                            module,
+                            abs_m,
+                            self.dsm,
+                            self,
+                            new_limit_to,
+                            build_tree=True,
+                            build_dependencies=False,
+                            enforce_init=self.enforce_init,
+                        ),
+                    )
 
     def cardinal(self, to) -> int:
-        """
-        Return the number of dependencies of this package to the given node.
+        """Return the number of dependencies of this package to the given node.
 
         Args:
             to (Package/Module): target node.
@@ -236,9 +227,8 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):  # noqa: WPS215
         return sum(module.cardinal(to) for module in self.submodules)
 
 
-class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
-    """
-    Module class.
+class Module(LeafNode, NodeMixin, PrintMixin):
+    """Module class.
 
     This class represents a Python module (a Python file).
     """
@@ -246,8 +236,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
     RECURSIVE_NODES = (ast.ClassDef, ast.FunctionDef, ast.If, ast.IfExp, ast.Try, ast.With, ast.ExceptHandler)
 
     def __init__(self, name, path, dsm=None, package=None):
-        """
-        Initialization method.
+        """Initialization method.
 
         Args:
             name (str): name of the module.
@@ -263,8 +252,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
         self.dependencies = []
 
     def __contains__(self, item) -> bool:
-        """
-        Whether given item is contained inside this module.
+        """Whether given item is contained inside this module.
 
         Args:
             item (Package/Module): a package or module.
@@ -281,8 +269,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
 
     @property
     def ismodule(self) -> bool:
-        """
-        Inherited from NodeMixin. Always True.
+        """Inherited from NodeMixin. Always True.
 
         Returns:
             Whether this object is a module.
@@ -290,8 +277,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
         return True
 
     def as_dict(self, absolute: bool = False) -> dict:
-        """
-        Return the dependencies as a dictionary.
+        """Return the dependencies as a dictionary.
 
         Arguments:
             absolute: Whether to use the absolute name.
@@ -341,8 +327,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
         return json.dumps(self.as_dict(absolute=absolute), **kwargs)
 
     def build_dependencies(self):
-        """
-        Build the dependencies for this module.
+        """Build the dependencies for this module.
 
         Parse the code with ast, find all the import statements, convert
         them into Dependency objects.
@@ -360,8 +345,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
             self.dependencies.append(Dependency(source=self, **import_))
 
     def parse_code(self) -> list[dict]:
-        """
-        Read the source code and return all the import statements.
+        """Read the source code and return all the import statements.
 
         Returns:
             list of dict: the import statements.
@@ -371,15 +355,14 @@ class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
             body = ast.parse(code).body
         except SyntaxError:
             code = code.encode("utf-8")  # type: ignore[assignment]
-            try:  # noqa: WPS505
+            try:
                 body = ast.parse(code).body
             except SyntaxError:
                 return []
         return self.get_imports(body)
 
-    def get_imports(self, ast_body) -> list[dict]:  # noqa: WPS231,WPS615
-        """
-        Return all the import statements given an AST body (AST nodes).
+    def get_imports(self, ast_body) -> list[dict]:
+        """Return all the import statements given an AST body (AST nodes).
 
         Args:
             ast_body (compiled code's body): the body to filter.
@@ -404,8 +387,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
         return imports
 
     def cardinal(self, to) -> int:
-        """
-        Return the number of dependencies of this module to the given node.
+        """Return the number of dependencies of this module to the given node.
 
         Args:
             to (Package/Module): the target node.
@@ -416,16 +398,14 @@ class Module(LeafNode, NodeMixin, PrintMixin):  # noqa: WPS338
         return len([dep for dep in self.dependencies if not dep.external and dep.target in to])
 
 
-class Dependency(object):
-    """
-    Dependency class.
+class Dependency:
+    """Dependency class.
 
     Represent a dependency from a module to another.
     """
 
     def __init__(self, source, lineno, target, what=None):
-        """
-        Initialization method.
+        """Initialization method.
 
         Args:
             source (Module): source Module.
@@ -445,8 +425,7 @@ class Dependency(object):
 
     @property
     def external(self) -> bool:
-        """
-        Property to tell if the dependency's target is a valid node.
+        """Property to tell if the dependency's target is a valid node.
 
         Returns:
             Whether the dependency's target is a valid node.

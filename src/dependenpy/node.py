@@ -12,13 +12,12 @@ if TYPE_CHECKING:
     from dependenpy.dsm import Module, Package
 
 
-class NodeMixin(object):
+class NodeMixin:
     """Shared code between DSM, Package and Module."""
 
     @property
     def ismodule(self) -> bool:
-        """
-        Property to check if object is instance of Module.
+        """Property to check if object is instance of Module.
 
         Returns:
             Whether this object is a module.
@@ -27,8 +26,7 @@ class NodeMixin(object):
 
     @property
     def ispackage(self) -> bool:
-        """
-        Property to check if object is instance of Package.
+        """Property to check if object is instance of Package.
 
         Returns:
             Whether this object is a package.
@@ -37,8 +35,7 @@ class NodeMixin(object):
 
     @property
     def isdsm(self) -> bool:
-        """
-        Property to check if object is instance of DSM.
+        """Property to check if object is instance of DSM.
 
         Returns:
             Whether this object is a DSM.
@@ -46,12 +43,11 @@ class NodeMixin(object):
         return False
 
 
-class RootNode(object):
+class RootNode:
     """Shared code between DSM and Package."""
 
     def __init__(self, build_tree=True):
-        """
-        Initialization method.
+        """Initialization method.
 
         Args:
             build_tree (bool): whether to immediately build the tree or not.
@@ -69,8 +65,7 @@ class RootNode(object):
             self.build_tree()
 
     def __contains__(self, item: Package | Module) -> bool:
-        """
-        Get result of _contains, cache it and return it.
+        """Get result of _contains, cache it and return it.
 
         Args:
             item: A package or module.
@@ -82,9 +77,8 @@ class RootNode(object):
             self._contains_cache[item] = self._contains(item)
         return self._contains_cache[item]
 
-    def __getitem__(self, item: str) -> Package | Module:  # noqa: WPS231
-        """
-        Return the corresponding Package or Module object.
+    def __getitem__(self, item: str) -> Package | Module:
+        """Return the corresponding Package or Module object.
 
         Args:
             item: Name of the package/module, dot-separated.
@@ -98,9 +92,8 @@ class RootNode(object):
         depth = item.count(".") + 1
         parts = item.split(".", 1)
         for module in self.modules:
-            if parts[0] == module.name:
-                if depth == 1:
-                    return module
+            if parts[0] == module.name and depth == 1:
+                return module
         for package in self.packages:
             if parts[0] == package.name:
                 if depth == 1:
@@ -111,8 +104,7 @@ class RootNode(object):
         raise KeyError(item)
 
     def __bool__(self) -> bool:
-        """
-        Node as Boolean.
+        """Node as Boolean.
 
         Returns:
             Result of node.empty.
@@ -122,8 +114,7 @@ class RootNode(object):
 
     @property
     def empty(self) -> bool:
-        """
-        Whether the node has neither modules nor packages.
+        """Whether the node has neither modules nor packages.
 
         Returns:
             True if empty, False otherwise.
@@ -132,8 +123,7 @@ class RootNode(object):
 
     @property
     def submodules(self) -> list[Module]:
-        """
-        Property to return all sub-modules of the node, recursively.
+        """Property to return all sub-modules of the node, recursively.
 
         Returns:
             The sub-modules.
@@ -145,12 +135,11 @@ class RootNode(object):
         return submodules
 
     def build_tree(self):
-        """To be overridden."""  # noqa: DAR401
+        """To be overridden."""
         raise NotImplementedError
 
     def _contains(self, item):
-        """
-        Whether given item is contained inside the node modules/packages.
+        """Whether given item is contained inside the node modules/packages.
 
         Args:
             item (Package/Module): a package or module.
@@ -163,14 +152,10 @@ class RootNode(object):
         for module in self.modules:
             if item in module:
                 return True
-        for package in self.packages:
-            if item in package:
-                return True
-        return False
+        return any(item in package for package in self.packages)
 
     def get(self, item: str) -> Package | Module:
-        """
-        Get item through `__getitem__` and cache the result.
+        """Get item through `__getitem__` and cache the result.
 
         Args:
             item: Name of package or module.
@@ -187,8 +172,7 @@ class RootNode(object):
         return self._item_cache[item]
 
     def get_target(self, target: str) -> Package | Module:
-        """
-        Get the result of _get_target, cache it and return it.
+        """Get the result of _get_target, cache it and return it.
 
         Args:
             target: Target to find.
@@ -200,9 +184,8 @@ class RootNode(object):
             self._target_cache[target] = self._get_target(target)
         return self._target_cache[target]
 
-    def _get_target(self, target):  # noqa: WPS231
-        """
-        Get the Package or Module related to given target.
+    def _get_target(self, target):
+        """Get the Package or Module related to given target.
 
         Args:
             target (str): target to find.
@@ -213,14 +196,13 @@ class RootNode(object):
         depth = target.count(".") + 1
         parts = target.split(".", 1)
         for module in self.modules:
-            if parts[0] == module.name:
-                if depth < 3:
-                    return module
+            if parts[0] == module.name and depth < 3:
+                return module
         for package in self.packages:
             if parts[0] == package.name:
                 if depth == 1:
                     return package
-                target = package._get_target(parts[1])  # noqa: WPS437
+                target = package._get_target(parts[1])
                 if target:
                     return target
                 # FIXME: can lead to internal dep instead of external
@@ -234,8 +216,7 @@ class RootNode(object):
         return None
 
     def build_dependencies(self):
-        """
-        Recursively build the dependencies for sub-modules and sub-packages.
+        """Recursively build the dependencies for sub-modules and sub-packages.
 
         Iterate on node's modules then packages and call their
         build_dependencies methods.
@@ -246,10 +227,13 @@ class RootNode(object):
             package.build_dependencies()
 
     def print_graph(
-        self, format: str | None = None, output: IO = sys.stdout, depth: int = 0, **kwargs: Any  # noqa: A002
+        self,
+        format: str | None = None,
+        output: IO = sys.stdout,
+        depth: int = 0,
+        **kwargs: Any,  # noqa: A002
     ):
-        """
-        Print the graph for self's nodes.
+        """Print the graph for self's nodes.
 
         Args:
             format: Output format (csv, json or text).
@@ -261,10 +245,13 @@ class RootNode(object):
         graph.print(format=format, output=output, **kwargs)
 
     def print_matrix(
-        self, format: str | None = None, output: IO = sys.stdout, depth: int = 0, **kwargs: Any  # noqa: A002
+        self,
+        format: str | None = None,
+        output: IO = sys.stdout,
+        depth: int = 0,
+        **kwargs: Any,  # noqa: A002
     ):
-        """
-        Print the matrix for self's nodes.
+        """Print the matrix for self's nodes.
 
         Args:
             format: Output format (csv, json or text).
@@ -276,8 +263,7 @@ class RootNode(object):
         matrix.print(format=format, output=output, **kwargs)
 
     def print_treemap(self, format: str | None = None, output: IO = sys.stdout, **kwargs: Any):  # noqa: A002
-        """
-        Print the matrix for self's nodes.
+        """Print the matrix for self's nodes.
 
         Args:
             format: Output format (csv, json or text).
@@ -296,9 +282,9 @@ class RootNode(object):
         text = [" " * indent + str(self) + "\n"]
         new_indent = indent + base_indent
         for module in self.modules:
-            text.append(module._to_text(indent=new_indent, base_indent=base_indent))  # noqa: WPS437
+            text.append(module._to_text(indent=new_indent, base_indent=base_indent))
         for package in self.packages:
-            text.append(package._to_text(indent=new_indent, base_indent=base_indent))  # noqa: WPS437
+            text.append(package._to_text(indent=new_indent, base_indent=base_indent))
         return "".join(text)
 
     def _to_csv(self, **kwargs):
@@ -306,15 +292,14 @@ class RootNode(object):
         modules = sorted(self.submodules, key=lambda mod: mod.absolute_name())
         text = ["module,path,target,lineno,what,external\n" if header else ""]
         for module in modules:
-            text.append(module._to_csv(header=False))  # noqa: WPS437
+            text.append(module._to_csv(header=False))
         return "".join(text)
 
     def _to_json(self, **kwargs):
         return json.dumps(self.as_dict(), **kwargs)
 
     def as_dict(self) -> dict:
-        """
-        Return the dependencies as a dictionary.
+        """Return the dependencies as a dictionary.
 
         Returns:
             Dictionary of dependencies.
@@ -326,8 +311,7 @@ class RootNode(object):
         }
 
     def as_graph(self, depth: int = 0) -> Graph:
-        """
-        Create a graph with self as node, cache it, return it.
+        """Create a graph with self as node, cache it, return it.
 
         Args:
             depth: Depth of the graph.
@@ -340,8 +324,7 @@ class RootNode(object):
         return self._graph_cache[depth]
 
     def as_matrix(self, depth: int = 0) -> Matrix:
-        """
-        Create a matrix with self as node, cache it, return it.
+        """Create a matrix with self as node, cache it, return it.
 
         Args:
             depth: Depth of the matrix.
@@ -354,8 +337,7 @@ class RootNode(object):
         return self._matrix_cache[depth]
 
     def as_treemap(self) -> TreeMap:
-        """
-        Return the dependencies as a TreeMap.
+        """Return the dependencies as a TreeMap.
 
         Returns:
             An instance of TreeMap.
@@ -365,7 +347,7 @@ class RootNode(object):
         return self._treemap_cache
 
 
-class LeafNode(object):
+class LeafNode:
     """Shared code between Package and Module."""
 
     def __init__(self):
@@ -377,8 +359,7 @@ class LeafNode(object):
 
     @property
     def root(self) -> Package:
-        """
-        Property to return the root of this node.
+        """Property to return the root of this node.
 
         Returns:
             Package: this node's root package.
@@ -390,8 +371,7 @@ class LeafNode(object):
 
     @property
     def depth(self) -> int:
-        """
-        Property to tell the depth of the node in the tree.
+        """Property to tell the depth of the node in the tree.
 
         Returns:
             The node's depth in the tree.
@@ -407,8 +387,7 @@ class LeafNode(object):
         return depth
 
     def absolute_name(self, depth: int = 0) -> str:
-        """
-        Return the absolute name of the node.
+        """Return the absolute name of the node.
 
         Concatenate names from root to self within depth.
 
