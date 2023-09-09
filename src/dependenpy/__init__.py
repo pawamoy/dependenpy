@@ -1,5 +1,4 @@
-"""
-Dependenpy package.
+"""Dependenpy package.
 
 Show the inter-dependencies between modules of Python packages.
 

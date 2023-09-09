@@ -1,3 +1,5 @@
+"""Module that contains the command line application."""
+
 # Why does this file exist, and why not put this in `__main__`?
 #
 # You might be tempted to import things from `__main__` later,
@@ -9,7 +11,7 @@
 # - When you import `__main__` it will get executed again (as a module) because
 #   there's no `dependenpy.__main__` in `sys.modules`.
 
-"""Module that contains the command line application."""
+from __future__ import annotations
 
 from __future__ import annotations
 
@@ -26,8 +28,7 @@ from dependenpy.helpers import CSV, FORMAT, JSON, guess_depth
 
 
 def get_parser() -> argparse.ArgumentParser:
-    """
-    Return the CLI argument parser.
+    """Return the CLI argument parser.
 
     Returns:
         An argparse parser.
@@ -185,13 +186,12 @@ def _run(opts, dsm):
             dsm.print_graph(format=opts.format, output=output, depth=depth, indent=indent)
 
 
-def main(args: Optional[List[str]] = None) -> int:  # noqa: WPS231
-    """
-    Run the main program.
+def main(args: list[str] | None = None) -> int:
+    """Run the main program.
 
     This function is executed when you type `dependenpy` or `python -m dependenpy`.
 
-    Arguments:
+    Parameters:
         args: Arguments passed from the command line.
 
     Returns:
