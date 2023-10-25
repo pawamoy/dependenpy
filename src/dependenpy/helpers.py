@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sys
-from typing import IO, Any
+from typing import IO, Any, Sequence
 
 CSV = "csv"
 JSON = "json"
@@ -14,7 +14,7 @@ FORMAT = (CSV, JSON, TEXT)
 class PrintMixin:
     """Print mixin class."""
 
-    def print(self, format: str | None = TEXT, output: IO = sys.stdout, **kwargs: Any):  # noqa: A002,A003
+    def print(self, format: str | None = TEXT, output: IO = sys.stdout, **kwargs: Any) -> None:  # noqa: A002,A003
         """Print the object in a file or on standard output by default.
 
         Args:
@@ -35,17 +35,17 @@ class PrintMixin:
         elif format == JSON:
             print(self._to_json(**kwargs), file=output)
 
-    def _to_text(self, **kwargs):
+    def _to_text(self, **kwargs: Any) -> str:
         raise NotImplementedError
 
-    def _to_csv(self, **kwargs):
+    def _to_csv(self, **kwargs: Any) -> str:
         raise NotImplementedError
 
-    def _to_json(self, **kwargs):
+    def _to_json(self, **kwargs: Any) -> str:
         raise NotImplementedError
 
 
-def guess_depth(packages: list[str]) -> int:
+def guess_depth(packages: Sequence[str]) -> int:
     """Guess the optimal depth to use for the given list of arguments.
 
     Args:

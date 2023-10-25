@@ -11,7 +11,7 @@ def test_main() -> None:
     """Basic CLI test."""
     with pytest.raises(SystemExit) as exit:  # noqa: PT012
         cli.main([])
-        assert exit.code == 2
+        assert exit.code == 2  # type: ignore[attr-defined]
 
 
 def test_show_help(capsys: pytest.CaptureFixture) -> None:

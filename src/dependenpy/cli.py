@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import sys
 from contextlib import contextmanager
+from typing import Iterator, Sequence, TextIO
 
 from colorama import init
 
@@ -145,7 +146,7 @@ def get_parser() -> argparse.ArgumentParser:
 
 
 @contextmanager
-def _open_if_str(output):
+def _open_if_str(output: str | TextIO) -> Iterator[TextIO]:
     if isinstance(output, str):
         with open(output, "w") as fd:
             yield fd
@@ -153,22 +154,22 @@ def _open_if_str(output):
         yield output
 
 
-def _get_indent(opts):
+def _get_indent(opts: argparse.Namespace) -> int | None:
     if opts.indent is None:
         if opts.format == CSV:
             return 0
         return 2
-    elif opts.indent < 0 and opts.format == JSON:
+    if opts.indent < 0 and opts.format == JSON:
         # special case for json.dumps indent argument
         return None
     return opts.indent
 
 
-def _get_depth(opts, packages):
+def _get_depth(opts: argparse.Namespace, packages: Sequence[str]) -> int:
     return opts.depth or guess_depth(packages)
 
 
-def _get_packages(opts):
+def _get_packages(opts: argparse.Namespace) -> list[str]:
     packages = []
     for arg in opts.packages:
         if "," in arg:
@@ -180,7 +181,7 @@ def _get_packages(opts):
     return packages
 
 
-def _run(opts, dsm):
+def _run(opts: argparse.Namespace, dsm: DSM) -> None:
     indent = _get_indent(opts)
     depth = _get_depth(opts, packages=dsm.base_packages)
     with _open_if_str(opts.output) as output:

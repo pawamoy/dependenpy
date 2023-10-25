@@ -16,6 +16,7 @@ import sys
 from os import listdir
 from os.path import isdir, isfile, join, splitext
 from pathlib import Path
+from typing import Any, Sequence
 
 from dependenpy.finder import Finder, PackageSpec
 from dependenpy.helpers import PrintMixin
@@ -61,12 +62,12 @@ class DSM(RootNode, NodeMixin, PrintMixin):
                 self.not_found.append(package)
 
         if not specs:
-            print("** dependenpy: DSM empty.", file=sys.stderr)
+            print("** dependenpy: DSM empty.", file=sys.stderr)  # noqa: T201
 
         self.specs = PackageSpec.combine(specs)
 
         for module in self.not_found:
-            print(f"** dependenpy: Not found: {module}.", file=sys.stderr)
+            print(f"** dependenpy: Not found: {module}.", file=sys.stderr)  # noqa: T201
 
         super().__init__(build_tree)
 
@@ -86,7 +87,7 @@ class DSM(RootNode, NodeMixin, PrintMixin):
         """
         return True
 
-    def build_tree(self):
+    def build_tree(self) -> None:
         """Build the Python packages tree."""
         for spec in self.specs:
             if spec.ismodule:
@@ -115,12 +116,12 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
         self,
         name: str,
         path: str,
-        dsm: DSM = None,
-        package: Package = None,
+        dsm: DSM | None = None,
+        package: Package | None = None,
         limit_to: list[str] | None = None,
-        build_tree: bool = True,
-        build_dependencies: bool = True,
-        enforce_init: bool = True,
+        build_tree: bool = True,  # noqa: FBT001,FBT002
+        build_dependencies: bool = True,  # noqa: FBT001,FBT002
+        enforce_init: bool = True,  # noqa: FBT001,FBT002
     ):
         """Initialization method.
 
@@ -184,14 +185,14 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
         new_limit_to = []
         for limit in self.limit_to:
             if "." in limit:
-                name, limit = limit.split(".", 1)
+                name, limit = limit.split(".", 1)  # noqa: PLW2901
                 heads.append(name)
                 new_limit_to.append(limit)
             else:
                 heads.append(limit)
         return heads, new_limit_to
 
-    def build_tree(self):
+    def build_tree(self) -> None:
         """Build the tree for this package."""
         for module in listdir(self.path):
             abs_m = join(self.path, module)
@@ -215,7 +216,7 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
                         ),
                     )
 
-    def cardinal(self, to) -> int:
+    def cardinal(self, to: Package | Module) -> int:
         """Return the number of dependencies of this package to the given node.
 
         Args:
@@ -235,7 +236,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
 
     RECURSIVE_NODES = (ast.ClassDef, ast.FunctionDef, ast.If, ast.IfExp, ast.Try, ast.With, ast.ExceptHandler)
 
-    def __init__(self, name, path, dsm=None, package=None):
+    def __init__(self, name: str, path: str, dsm: DSM | None = None, package: Package | None = None) -> None:
         """Initialization method.
 
         Args:
@@ -249,9 +250,9 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         self.path = path
         self.package = package
         self.dsm = dsm
-        self.dependencies = []
+        self.dependencies: list[Dependency] = []
 
-    def __contains__(self, item) -> bool:
+    def __contains__(self, item: Package | Module) -> bool:
         """Whether given item is contained inside this module.
 
         Args:
@@ -263,7 +264,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         """
         if self is item:
             return True
-        elif self.package is item and self.name == "__init__":
+        if self.package is item and self.name == "__init__":
             return True
         return False
 
@@ -276,7 +277,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         """
         return True
 
-    def as_dict(self, absolute: bool = False) -> dict:
+    def as_dict(self, absolute: bool = False) -> dict:  # noqa: FBT001,FBT002
         """Return the dependencies as a dictionary.
 
         Arguments:
@@ -291,7 +292,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
             "dependencies": [
                 {
                     # 'source': d.source.absolute_name(),  # redundant
-                    "target": dep.target if dep.external else dep.target.absolute_name(),
+                    "target": dep.target if dep.external else dep.target.absolute_name(),  # type: ignore[union-attr]
                     "lineno": dep.lineno,
                     "what": dep.what,
                     "external": dep.external,
@@ -300,7 +301,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
             ],
         }
 
-    def _to_text(self, **kwargs):
+    def _to_text(self, **kwargs: Any) -> str:
         indent = kwargs.pop("indent", 2)
         base_indent = kwargs.pop("base_indent", None)
         if base_indent is None:
@@ -313,28 +314,26 @@ class Module(LeafNode, NodeMixin, PrintMixin):
             text.append(" " * new_indent + external + str(dep) + "\n")
         return "".join(text)
 
-    def _to_csv(self, **kwargs):
+    def _to_csv(self, **kwargs: Any) -> str:
         header = kwargs.pop("header", True)
         text = ["module,path,target,lineno,what,external\n" if header else ""]
         name = self.absolute_name()
         for dep in self.dependencies:
-            target = dep.target if dep.external else dep.target.absolute_name()
+            target = dep.target if dep.external else dep.target.absolute_name()  # type: ignore[union-attr]
             text.append(f"{name},{self.path},{target},{dep.lineno},{dep.what or ''},{dep.external}\n")
         return "".join(text)
 
-    def _to_json(self, **kwargs):
+    def _to_json(self, **kwargs: Any) -> str:
         absolute = kwargs.pop("absolute", False)
         return json.dumps(self.as_dict(absolute=absolute), **kwargs)
 
-    def build_dependencies(self):
+    def build_dependencies(self) -> None:
         """Build the dependencies for this module.
 
         Parse the code with ast, find all the import statements, convert
         them into Dependency objects.
         """
         highest = self.dsm or self.root
-        if self is highest:
-            highest = LeafNode()
         for import_ in self.parse_code():
             target = highest.get_target(import_["target"])
             if target:
@@ -361,7 +360,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
                 return []
         return self.get_imports(body)
 
-    def get_imports(self, ast_body) -> list[dict]:
+    def get_imports(self, ast_body: Sequence[ast.AST]) -> list[dict]:
         """Return all the import statements given an AST body (AST nodes).
 
         Args:
@@ -378,15 +377,15 @@ class Module(LeafNode, NodeMixin, PrintMixin):
                 for name in node.names:
                     abs_name = self.absolute_name(self.depth - node.level) + "." if node.level > 0 else ""
                     node_module = node.module + "." if node.module else ""
-                    name = abs_name + node_module + name.name  # type: ignore[assignment]
+                    name = abs_name + node_module + name.name  # type: ignore[assignment]  # noqa: PLW2901
                     imports.append({"target": name, "lineno": node.lineno})
             elif isinstance(node, Module.RECURSIVE_NODES):
-                imports.extend(self.get_imports(node.body))
+                imports.extend(self.get_imports(node.body))  # type: ignore[arg-type]
                 if isinstance(node, ast.Try):
                     imports.extend(self.get_imports(node.finalbody))
         return imports
 
-    def cardinal(self, to) -> int:
+    def cardinal(self, to: Package | Module) -> int:
         """Return the number of dependencies of this module to the given node.
 
         Args:
@@ -395,7 +394,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         Returns:
             Number of dependencies.
         """
-        return len([dep for dep in self.dependencies if not dep.external and dep.target in to])
+        return len([dep for dep in self.dependencies if not dep.external and dep.target in to])  # type: ignore[operator]
 
 
 class Dependency:
@@ -404,7 +403,7 @@ class Dependency:
     Represent a dependency from a module to another.
     """
 
-    def __init__(self, source, lineno, target, what=None):
+    def __init__(self, source: Module, lineno: int, target: str | Module | Package, what: str | None = None) -> None:
         """Initialization method.
 
         Args:

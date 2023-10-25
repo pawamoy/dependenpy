@@ -10,7 +10,7 @@ from typing import Any
 class PackageSpec:
     """Holder for a package specification (given as argument to DSM)."""
 
-    def __init__(self, name, path, limit_to=None):
+    def __init__(self, name: str, path: str, limit_to: list[str] | None = None) -> None:
         """Initialization method.
 
         Args:
@@ -109,7 +109,7 @@ class LocalPackageFinder(PackageFinder):
 class InstalledPackageFinder(PackageFinder):
     """Finder to find installed Python packages using importlib."""
 
-    def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
+    def find(self, package: str, **kwargs: Any) -> PackageSpec | None:  # noqa: ARG002
         """Find method.
 
         Args:
