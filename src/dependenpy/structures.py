@@ -254,7 +254,7 @@ class Edge:
             weight (int): weight of the edge.
         """
         self.vertex_out: Vertex | None = None
-        self.vertex_in: Vertex | None  = None
+        self.vertex_in: Vertex | None = None
         self.weight = weight
         self.go_from(vertex_out)
         self.go_in(vertex_in)

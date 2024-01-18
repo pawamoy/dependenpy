@@ -16,4 +16,3 @@ from dependenpy.dsm import DSM, Dependency, Module, Package
 from dependenpy.structures import Matrix, TreeMap
 
 __all__: list[str] = ["DSM", "Dependency", "Matrix", "Module", "Package", "TreeMap"]
-__version__ = "3.3.0"

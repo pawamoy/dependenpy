@@ -4,7 +4,7 @@
 [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://pawamoy.github.io/dependenpy/)
 [![pypi version](https://img.shields.io/pypi/v/dependenpy.svg)](https://pypi.org/project/dependenpy/)
 [![gitpod](https://img.shields.io/badge/gitpod-workspace-blue.svg?style=flat)](https://gitpod.io/#https://github.com/pawamoy/dependenpy)
-[![gitter](https://badges.gitter.im/join%20chat.svg)](https://gitter.im/dependenpy/community)
+[![gitter](https://badges.gitter.im/join%20chat.svg)](https://app.gitter.im/#/room/#dependenpy:gitter.im)
 
 Show the inter-dependencies between modules of Python packages.
 
@@ -16,11 +16,13 @@ To do this, it reads and searches the source code for import statements.
 ## Installation
 
 With `pip`:
+
 ```bash
 pip install dependenpy
 ```
 
 With [`pipx`](https://github.com/pipxproject/pipx):
+
 ```bash
 python3.8 -m pip install --user pipx
 pipx install dependenpy

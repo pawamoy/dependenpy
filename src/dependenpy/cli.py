@@ -16,13 +16,22 @@ from __future__ import annotations
 import argparse
 import sys
 from contextlib import contextmanager
-from typing import Iterator, Sequence, TextIO
+from typing import Any, Iterator, Sequence, TextIO
 
 from colorama import init
 
-from dependenpy import __version__
+from dependenpy import debug
 from dependenpy.dsm import DSM
 from dependenpy.helpers import CSV, FORMAT, JSON, guess_depth
+
+
+class _DebugInfo(argparse.Action):
+    def __init__(self, nargs: int | str | None = 0, **kwargs: Any) -> None:
+        super().__init__(nargs=nargs, **kwargs)
+
+    def __call__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ARG002
+        debug.print_debug_info()
+        sys.exit(0)
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -131,7 +140,7 @@ def get_parser() -> argparse.ArgumentParser:
         "-v",
         "--version",
         action="version",
-        version=f"dependenpy {__version__}",
+        version=f"dependenpy {debug.get_version()}",
         help="Show the current version of the program and exit.",
     )
     parser.add_argument(
@@ -142,6 +151,7 @@ def get_parser() -> argparse.ArgumentParser:
         help="Character to use for cells with value=0 (text matrix display only).",
     )
 
+    parser.add_argument("--debug-info", action=_DebugInfo, help="Print debug information.")
     return parser
 
 
