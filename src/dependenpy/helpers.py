@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import sys
-from typing import IO, Any, Sequence
+from typing import IO, TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
 
 CSV = "csv"
 JSON = "json"

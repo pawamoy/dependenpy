@@ -12,7 +12,8 @@ please refer to the README.md included in this package to get the link to the of
 
 from __future__ import annotations
 
+from dependenpy.cli import get_parser, main
 from dependenpy.dsm import DSM, Dependency, Module, Package
 from dependenpy.structures import Matrix, TreeMap
 
-__all__: list[str] = ["DSM", "Dependency", "Matrix", "Module", "Package", "TreeMap"]
+__all__: list[str] = ["DSM", "Dependency", "Matrix", "Module", "Package", "TreeMap", "get_parser", "main"]

@@ -56,7 +56,7 @@ class PackageSpec:
         """
         new_specs: dict[PackageSpec, PackageSpec] = {}
         for spec in specs:
-            if new_specs.get(spec, None) is None:
+            if new_specs.get(spec) is None:
                 new_specs[spec] = spec
             else:
                 new_specs[spec].add(spec)

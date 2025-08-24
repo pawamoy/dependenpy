@@ -16,13 +16,16 @@ from __future__ import annotations
 import argparse
 import sys
 from contextlib import contextmanager
-from typing import Any, Iterator, Sequence, TextIO
+from typing import TYPE_CHECKING, Any, TextIO
 
 from colorama import init
 
-from dependenpy import debug
+from dependenpy._internal import debug
 from dependenpy.dsm import DSM
 from dependenpy.helpers import CSV, FORMAT, JSON, guess_depth
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator, Sequence
 
 
 class _DebugInfo(argparse.Action):
@@ -30,7 +33,7 @@ class _DebugInfo(argparse.Action):
         super().__init__(nargs=nargs, **kwargs)
 
     def __call__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ARG002
-        debug.print_debug_info()
+        debug._print_debug_info()
         sys.exit(0)
 
 
@@ -140,7 +143,7 @@ def get_parser() -> argparse.ArgumentParser:
         "-v",
         "--version",
         action="version",
-        version=f"dependenpy {debug.get_version()}",
+        version=f"dependenpy {debug._get_version()}",
         help="Show the current version of the program and exit.",
     )
     parser.add_argument(

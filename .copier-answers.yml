@@ -1,13 +1,13 @@
-# Changes here will be overwritten by Copier
-_commit: 0.1.0
+# Changes here will be overwritten by Copier.
+_commit: 1.8.9
 _src_path: gh:pawamoy/copier-uv.git
-author_email: pawamoy@pm.me
+author_email: dev@pawamoy.fr
 author_fullname: Timothée Mazzucotelli
 author_username: pawamoy
 copyright_date: '2020'
 copyright_holder: Timothée Mazzucotelli
-copyright_holder_email: pawamoy@pm.me
-copyright_license: ISC License
+copyright_holder_email: dev@pawamoy.fr
+copyright_license: ISC
 insiders: false
 project_description: Show the inter-dependencies between modules of Python packages.
 project_name: Dependenpy

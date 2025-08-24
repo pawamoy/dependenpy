@@ -16,11 +16,14 @@ import sys
 from os import listdir
 from os.path import isdir, isfile, join, splitext
 from pathlib import Path
-from typing import Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 from dependenpy.finder import Finder, PackageSpec
 from dependenpy.helpers import PrintMixin
 from dependenpy.node import LeafNode, NodeMixin, RootNode
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class DSM(RootNode, NodeMixin, PrintMixin):
@@ -264,9 +267,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         """
         if self is item:
             return True
-        if self.package is item and self.name == "__init__":
-            return True
-        return False
+        return self.package is item and self.name == "__init__"
 
     @property
     def ismodule(self) -> bool:
