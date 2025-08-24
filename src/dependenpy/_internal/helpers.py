@@ -23,10 +23,10 @@ class PrintMixin:
     def print(self, format: str | None = TEXT, output: IO = sys.stdout, **kwargs: Any) -> None:  # noqa: A002
         """Print the object in a file or on standard output by default.
 
-        Args:
-            format: output format (csv, json or text).
-            output: descriptor to an opened file (default to standard output).
-            **kwargs: additional arguments.
+        Parameters:
+            format: Output format (csv, json or text).
+            output: Descriptor to an opened file (default to standard output).
+            **kwargs: Additional arguments.
         """
         if format is None:
             format = TEXT
@@ -54,7 +54,7 @@ class PrintMixin:
 def guess_depth(packages: Sequence[str]) -> int:
     """Guess the optimal depth to use for the given list of arguments.
 
-    Args:
+    Parameters:
         packages: List of packages.
 
     Returns:

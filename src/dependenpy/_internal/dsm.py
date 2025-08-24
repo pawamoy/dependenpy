@@ -43,11 +43,11 @@ class DSM(RootNode, NodeMixin, PrintMixin):
     ):
         """Initialization method.
 
-        Args:
-            *packages: list of packages to search for.
-            build_tree: auto-build the tree or not.
-            build_dependencies: auto-build the dependencies or not.
-            enforce_init: if True, only treat directories if they contain an `__init__.py` file.
+        Parameters:
+            *packages: List of packages to search for.
+            build_tree: Auto-build the tree or not.
+            build_dependencies: Auto-build the dependencies or not.
+            enforce_init: If True, only treat directories if they contain an `__init__.py` file.
         """
         self.base_packages: tuple[str, ...] = packages
         """Packages initially specified."""
@@ -132,15 +132,15 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
     ):
         """Initialization method.
 
-        Args:
-            name: name of the package.
-            path: path to the package.
-            dsm: parent DSM.
-            package: parent package.
-            limit_to: list of string to limit the recursive tree-building to what is specified.
-            build_tree: auto-build the tree or not.
-            build_dependencies: auto-build the dependencies or not.
-            enforce_init: if True, only treat directories if they contain an `__init__.py` file.
+        Parameters:
+            name: Name of the package.
+            path: Path to the package.
+            dsm: Parent DSM.
+            package: Parent package.
+            limit_to: List of string to limit the recursive tree-building to what is specified.
+            build_tree: Auto-build the tree or not.
+            build_dependencies: Auto-build the dependencies or not.
+            enforce_init: If True, only treat directories if they contain an `__init__.py` file.
         """
         self.name = name
         """Name of the package."""
@@ -232,8 +232,8 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
     def cardinal(self, to: Package | Module) -> int:
         """Return the number of dependencies of this package to the given node.
 
-        Args:
-            to (Package/Module): target node.
+        Parameters:
+            to: Target node.
 
         Returns:
             Number of dependencies.
@@ -253,11 +253,11 @@ class Module(LeafNode, NodeMixin, PrintMixin):
     def __init__(self, name: str, path: str, dsm: DSM | None = None, package: Package | None = None) -> None:
         """Initialization method.
 
-        Args:
-            name (str): name of the module.
-            path (str): path to the module.
-            dsm (DSM): parent DSM.
-            package (Package): parent Package.
+        Parameters:
+            name: Name of the module.
+            path: Path to the module.
+            dsm: Parent DSM.
+            package: Parent Package.
         """
         super().__init__()
         self.name = name
@@ -274,7 +274,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
     def __contains__(self, item: Package | Module) -> bool:
         """Whether given item is contained inside this module.
 
-        Args:
+        Parameters:
             item (Package/Module): a package or module.
 
         Returns:
@@ -301,7 +301,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
             absolute: Whether to use the absolute name.
 
         Returns:
-            dict: dictionary of dependencies.
+            Dictionary of dependencies.
         """
         return {
             "name": self.absolute_name() if absolute else self.name,
@@ -364,7 +364,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         """Read the source code and return all the import statements.
 
         Returns:
-            list of dict: the import statements.
+            The import statements.
         """
         code = Path(self.path).read_text(encoding="utf-8")
         try:
@@ -380,8 +380,8 @@ class Module(LeafNode, NodeMixin, PrintMixin):
     def get_imports(self, ast_body: Sequence[ast.AST]) -> list[dict]:
         """Return all the import statements given an AST body (AST nodes).
 
-        Args:
-            ast_body (compiled code's body): the body to filter.
+        Parameters:
+            The body to filter.
 
         Returns:
             The import statements.
@@ -405,8 +405,8 @@ class Module(LeafNode, NodeMixin, PrintMixin):
     def cardinal(self, to: Package | Module) -> int:
         """Return the number of dependencies of this module to the given node.
 
-        Args:
-            to (Package/Module): the target node.
+        Parameters:
+            to: The target node.
 
         Returns:
             Number of dependencies.
@@ -423,11 +423,11 @@ class Dependency:
     def __init__(self, source: Module, lineno: int, target: str | Module | Package, what: str | None = None) -> None:
         """Initialization method.
 
-        Args:
-            source (Module): source Module.
-            lineno (int): number of line at which import statement occurs.
-            target (str/Module/Package): the target node.
-            what (str): what is imported (optional).
+        Parameters:
+            source: Source Module.
+            lineno: Number of line at which import statement occurs.
+            target: The target node.
+            what: What is imported (optional).
         """
         self.source = source
         """Source module."""

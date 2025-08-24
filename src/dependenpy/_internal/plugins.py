@@ -41,10 +41,10 @@ else:
         ) -> archan.DSM:
             """Provide matrix data for internal dependencies in a set of packages.
 
-            Args:
-                packages: the list of packages to check for.
-                enforce_init: whether to assert presence of __init__.py files in directories.
-                depth: the depth of the matrix to generate.
+            Parameters:
+                packages: The list of packages to check for.
+                enforce_init: Whether to assert presence of __init__.py files in directories.
+                depth: The depth of the matrix to generate.
 
             Returns:
                 Instance of archan DSM.

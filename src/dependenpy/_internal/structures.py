@@ -23,7 +23,7 @@ class Matrix(PrintMixin):
     def __init__(self, *nodes: DSM | Package | Module, depth: int = 0):
         """Initialization method.
 
-        Args:
+        Parameters:
             *nodes: The nodes on which to build the matrix.
             depth: The depth of the matrix. This depth is always
                 absolute, meaning that building a matrix with a sub-package
@@ -203,7 +203,7 @@ class Vertex:
     def __init__(self, name: str) -> None:
         """Initialization method.
 
-        Args:
+        Parameters:
             name (str): name of the vertex.
         """
         self.name = name
@@ -219,7 +219,7 @@ class Vertex:
     def connect_to(self, vertex: Vertex, weight: int = 1) -> Edge:
         """Connect this vertex to another one.
 
-        Args:
+        Parameters:
             vertex: Vertex to connect to.
             weight: Weight of the edge.
 
@@ -234,7 +234,7 @@ class Vertex:
     def connect_from(self, vertex: Vertex, weight: int = 1) -> Edge:
         """Connect another vertex to this one.
 
-        Args:
+        Parameters:
             vertex: Vertex to connect from.
             weight: Weight of the edge.
 
@@ -253,7 +253,7 @@ class Edge:
     def __init__(self, vertex_out: Vertex, vertex_in: Vertex, weight: int = 1) -> None:
         """Initialization method.
 
-        Args:
+        Parameters:
             vertex_out (Vertex): source vertex (edge going out).
             vertex_in (Vertex): target vertex (edge going in).
             weight (int): weight of the edge.
@@ -273,7 +273,7 @@ class Edge:
     def go_from(self, vertex: Vertex) -> None:
         """Tell the edge to go out from this vertex.
 
-        Args:
+        Parameters:
             vertex (Vertex): vertex to go from.
         """
         if self.vertex_out:
@@ -284,7 +284,7 @@ class Edge:
     def go_in(self, vertex: Vertex) -> None:
         """Tell the edge to go into this vertex.
 
-        Args:
+        Parameters:
             vertex (Vertex): vertex to go into.
         """
         if self.vertex_in:
@@ -306,7 +306,7 @@ class Graph(PrintMixin):
 
         An intermediary matrix is built to ease the creation of the graph.
 
-        Args:
+        Parameters:
             *nodes (list of DSM/Package/Module):
                 the nodes on which to build the graph.
             depth (int): the depth of the intermediary matrix. See

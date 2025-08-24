@@ -11,10 +11,10 @@ class PackageSpec:
     def __init__(self, name: str, path: str, limit_to: list[str] | None = None) -> None:
         """Initialization method.
 
-        Args:
-            name (str): name of the package.
-            path (str): path to the package.
-            limit_to (list of str): limitations.
+        Parameters:
+            name: Name of the package.
+            path: Path to the package.
+            limit_to: Limitations.
         """
         self.name = name
         """Name of the package."""
@@ -42,7 +42,7 @@ class PackageSpec:
     def add(self, spec: PackageSpec) -> None:
         """Add limitations of given spec to self's.
 
-        Args:
+        Parameters:
             spec: Another spec.
         """
         for limit in spec.limit_to:
@@ -53,7 +53,7 @@ class PackageSpec:
     def combine(specs: list[PackageSpec]) -> list[PackageSpec]:
         """Combine package specifications' limitations.
 
-        Args:
+        Parameters:
             specs: The package specifications.
 
         Returns:
@@ -74,9 +74,9 @@ class PackageFinder:
     def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
         """Find method.
 
-        Args:
-            package: package to find.
-            **kwargs: additional keyword arguments.
+        Parameters:
+            package: Package to find.
+            **kwargs: Additional keyword arguments.
 
         Returns:
             Package spec or None.
@@ -90,9 +90,9 @@ class LocalPackageFinder(PackageFinder):
     def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
         """Find method.
 
-        Args:
-            package: package to find.
-            **kwargs: additional keyword arguments.
+        Parameters:
+            package: Package to find.
+            **kwargs: Additional keyword arguments.
 
         Returns:
             Package spec or None.
@@ -117,7 +117,7 @@ class InstalledPackageFinder(PackageFinder):
     def find(self, package: str, **kwargs: Any) -> PackageSpec | None:  # noqa: ARG002
         """Find method.
 
-        Args:
+        Parameters:
             package: package to find.
             **kwargs: additional keyword arguments.
 
@@ -153,7 +153,7 @@ class Finder:
     def __init__(self, finders: list[type] | None = None):
         """Initialization method.
 
-        Args:
+        Parameters:
             finders: list of package finder classes (not instances) in a specific
                 order. Default: [LocalPackageFinder, InstalledPackageFinder].
         """
@@ -170,7 +170,7 @@ class Finder:
 
         Return the first package found.
 
-        Args:
+        Parameters:
             package: package to find.
             **kwargs: additional keyword arguments used by finders.
 

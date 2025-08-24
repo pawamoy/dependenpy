@@ -47,8 +47,8 @@ class RootNode:
     def __init__(self, build_tree: bool = True):  # noqa: FBT001,FBT002
         """Initialization method.
 
-        Args:
-            build_tree (bool): whether to immediately build the tree or not.
+        Parameters:
+            build_tree: Whether to immediately build the tree or not.
         """
         self._target_cache: dict[str, Any] = {}
         self._item_cache: dict[str, Any] = {}
@@ -67,7 +67,7 @@ class RootNode:
     def __contains__(self, item: Package | Module) -> bool:
         """Get result of _contains, cache it and return it.
 
-        Args:
+        Parameters:
             item: A package or module.
 
         Returns:
@@ -80,7 +80,7 @@ class RootNode:
     def __getitem__(self, item: str) -> Package | Module:
         """Return the corresponding Package or Module object.
 
-        Args:
+        Parameters:
             item: Name of the package/module, dot-separated.
 
         Raises:
@@ -140,11 +140,11 @@ class RootNode:
     def _contains(self, item: Package | Module) -> bool:
         """Whether given item is contained inside the node modules/packages.
 
-        Args:
-            item (Package/Module): a package or module.
+        Parameters:
+            item: A package or module.
 
         Returns:
-            bool: True if self is item or item in self's packages/modules.
+            True if self is item or item in self's packages/modules.
         """
         if self is item:
             return True
@@ -156,7 +156,7 @@ class RootNode:
     def get(self, item: str) -> Package | Module:
         """Get item through `__getitem__` and cache the result.
 
-        Args:
+        Parameters:
             item: Name of package or module.
 
         Returns:
@@ -173,7 +173,7 @@ class RootNode:
     def get_target(self, target: str) -> Package | Module:
         """Get the result of _get_target, cache it and return it.
 
-        Args:
+        Parameters:
             target: Target to find.
 
         Returns:
@@ -186,11 +186,11 @@ class RootNode:
     def _get_target(self, target: str) -> Package | Module | None:
         """Get the Package or Module related to given target.
 
-        Args:
-            target (str): target to find.
+        Parameters:
+            target: Target to find.
 
         Returns:
-            Package/Module: package containing target or corresponding module.
+            Package containing target or corresponding module.
         """
         depth = target.count(".") + 1
         parts = target.split(".", 1)
@@ -234,7 +234,7 @@ class RootNode:
     ) -> None:
         """Print the graph for self's nodes.
 
-        Args:
+        Parameters:
             format: Output format (csv, json or text).
             output: File descriptor on which to write.
             depth: Depth of the graph.
@@ -252,7 +252,7 @@ class RootNode:
     ) -> None:
         """Print the matrix for self's nodes.
 
-        Args:
+        Parameters:
             format: Output format (csv, json or text).
             output: File descriptor on which to write.
             depth: Depth of the matrix.
@@ -264,7 +264,7 @@ class RootNode:
     def print_treemap(self, format: str | None = None, output: IO = sys.stdout, **kwargs: Any) -> None:  # noqa: A002
         """Print the matrix for self's nodes.
 
-        Args:
+        Parameters:
             format: Output format (csv, json or text).
             output: File descriptor on which to write.
             **kwargs: Additional keyword arguments passed to `treemap.print`.
@@ -312,7 +312,7 @@ class RootNode:
     def as_graph(self, depth: int = 0) -> Graph:
         """Create a graph with self as node, cache it, return it.
 
-        Args:
+        Parameters:
             depth: Depth of the graph.
 
         Returns:
@@ -325,7 +325,7 @@ class RootNode:
     def as_matrix(self, depth: int = 0) -> Matrix:
         """Create a matrix with self as node, cache it, return it.
 
-        Args:
+        Parameters:
             depth: Depth of the matrix.
 
         Returns:
@@ -390,7 +390,7 @@ class LeafNode:
 
         Concatenate names from root to self within depth.
 
-        Args:
+        Parameters:
             depth: Maximum depth to go to.
 
         Returns:
