@@ -9,12 +9,12 @@ try:
     import archan
 except ImportError:
 
-    class InternalDependencies(object):
+    class InternalDependencies:
         """Empty dependenpy provider."""
 
 else:
 
-    class InternalDependencies(archan.Provider):  # type: ignore  # noqa: WPS440
+    class InternalDependencies(archan.Provider):  # type: ignore[no-redef]
         """Dependenpy provider for Archan."""
 
         identifier = "dependenpy.InternalDependencies"
@@ -31,9 +31,13 @@ else:
             archan.Argument("depth", int, "The depth of the matrix to generate."),
         )
 
-        def get_data(self, packages: list[str], enforce_init: bool = True, depth: int | None = None) -> archan.DSM:
-            """
-            Provide matrix data for internal dependencies in a set of packages.
+        def get_data(
+            self,
+            packages: list[str],
+            enforce_init: bool = True,  # noqa: FBT001,FBT002
+            depth: int | None = None,
+        ) -> archan.DSM:
+            """Provide matrix data for internal dependencies in a set of packages.
 
             Args:
                 packages: the list of packages to check for.

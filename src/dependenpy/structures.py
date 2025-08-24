@@ -15,17 +15,15 @@ if TYPE_CHECKING:
 
 
 class Matrix(PrintMixin):
-    """
-    Matrix class.
+    """Matrix class.
 
     A class to build a matrix given a list of nodes. After instantiation,
     it has two attributes: data, a 2-dimensions array, and keys, the names
     of the entities in the corresponding order.
     """
 
-    def __init__(self, *nodes: DSM | Package | Module, depth: int = 0):  # noqa: WPS231
-        """
-        Initialization method.
+    def __init__(self, *nodes: DSM | Package | Module, depth: int = 0):
+        """Initialization method.
 
         Args:
             *nodes: The nodes on which to build the matrix.
@@ -51,41 +49,40 @@ class Matrix(PrintMixin):
                     keys.append(module)
                     continue
                 package = module.package
-                while package.depth > depth and package.package and package not in nodes:
-                    package = package.package
+                while package.depth > depth and package.package and package not in nodes:  # type: ignore[union-attr]
+                    package = package.package  # type: ignore[union-attr]
                 if package not in keys:
-                    keys.append(package)
+                    keys.append(package)  # type: ignore[arg-type]
 
         size = len(keys)
-        data = [[0] * size for _ in range(size)]  # noqa: WPS435
+        data = [[0] * size for _ in range(size)]
         keys = sorted(keys, key=lambda key: key.absolute_name())
 
         if depth < 1:
-            for index, key in enumerate(keys):  # noqa: WPS440
+            for index, key in enumerate(keys):
                 key.index = index  # type: ignore[attr-defined]
-            for index, key in enumerate(keys):  # noqa: WPS440
+            for index, key in enumerate(keys):
                 for dep in key.dependencies:
                     if dep.external:
                         continue
-                    if dep.target.ismodule and dep.target in keys:
-                        data[index][dep.target.index] += 1
-                    elif dep.target.ispackage:
-                        init = dep.target.get("__init__")
+                    if dep.target.ismodule and dep.target in keys:  # type: ignore[union-attr]
+                        data[index][dep.target.index] += 1  # type: ignore[index,union-attr]
+                    elif dep.target.ispackage:  # type: ignore[union-attr]
+                        init = dep.target.get("__init__")  # type: ignore[union-attr]
                         if init is not None and init in keys:
-                            data[index][init.index] += 1
+                            data[index][init.index] += 1  # type: ignore[union-attr]
         else:
             for row, row_key in enumerate(keys):
                 for col, col_key in enumerate(keys):
                     data[row][col] = row_key.cardinal(to=col_key)
 
         self.size = size
-        self.keys = [key.absolute_name() for key in keys]  # noqa: WPS441
+        self.keys = [key.absolute_name() for key in keys]
         self.data = data
 
-    @staticmethod  # noqa: WPS602
-    def cast(keys: list[str], data: list[list[int]]) -> Matrix:  # noqa: WPS602
-        """
-        Cast a set of keys and an array to a Matrix object.
+    @staticmethod
+    def cast(keys: list[str], data: list[list[int]]) -> Matrix:
+        """Cast a set of keys and an array to a Matrix object.
 
         Arguments:
             keys: The matrix keys.
@@ -101,29 +98,28 @@ class Matrix(PrintMixin):
 
     @property
     def total(self) -> int:
-        """
-        Return the total number of dependencies within this matrix.
+        """Return the total number of dependencies within this matrix.
 
         Returns:
             The total number of dependencies.
         """
         return sum(cell for line in self.data for cell in line)
 
-    def _to_csv(self, **kwargs):
+    def _to_csv(self, **kwargs: Any) -> str:  # noqa: ARG002
         text = ["module,", ",".join(self.keys)]
         for index, key in enumerate(self.keys):
             line = ",".join(map(str, self.data[index]))
             text.append(f"{key},{line}")
         return "\n".join(text)
 
-    def _to_json(self, **kwargs):
+    def _to_json(self, **kwargs: Any) -> str:
         return json.dumps({"keys": self.keys, "data": self.data}, **kwargs)
 
-    def _to_text(self, **kwargs):
+    def _to_text(self, **kwargs: Any) -> str:
         if not self.keys or not self.data:
             return ""
         zero = kwargs.pop("zero", "0")
-        max_key_length = max(len(key) for key in self.keys + ["Module"])
+        max_key_length = max(len(key) for key in [*self.keys, "Module"])
         max_dep_length = max([len(str(col)) for line in self.data for col in line] + [len(zero)])
         key_col_length = len(str(len(self.keys)))
         key_line_length = max(key_col_length, 2)
@@ -144,10 +140,10 @@ class Matrix(PrintMixin):
         text.append(f"{'─' * column_length}┤")
         text.append("\n")
         # lines
-        for index, key in enumerate(self.keys):  # noqa: WPS440
+        for index, key in enumerate(self.keys):
             text.append(f" {key:>{max_key_length}} │ {bold}{index:>{key_line_length}}{reset} │")
             for value in self.data[index]:
-                text.append((f"{value if value else zero:>{column_length}}│"))
+                text.append(f"{value if value else zero:>{column_length}}│")
             text.append("\n")
         text.append("\n")
 
@@ -157,9 +153,8 @@ class Matrix(PrintMixin):
 class TreeMap(PrintMixin):
     """TreeMap class."""
 
-    def __init__(self, *nodes: Any, value: int = -1):
-        """
-        Initialization method.
+    def __init__(self, *nodes: Any, value: int = -1):  # noqa: ARG002
+        """Initialization method.
 
         Arguments:
             *nodes: the nodes from which to build the treemap.
@@ -190,36 +185,34 @@ class TreeMap(PrintMixin):
 
         self.value = value
 
-    def _to_csv(self, **kwargs):
+    def _to_csv(self, **kwargs: Any) -> str:  # noqa: ARG002
         return ""
 
-    def _to_json(self, **kwargs):
+    def _to_json(self, **kwargs: Any) -> str:  # noqa: ARG002
         return ""
 
-    def _to_text(self, **kwargs):
+    def _to_text(self, **kwargs: Any) -> str:  # noqa: ARG002
         return ""
 
 
-class Vertex(object):
+class Vertex:
     """Vertex class. Used in Graph class."""
 
-    def __init__(self, name):
-        """
-        Initialization method.
+    def __init__(self, name: str) -> None:
+        """Initialization method.
 
         Args:
             name (str): name of the vertex.
         """
         self.name = name
-        self.edges_in = set()
-        self.edges_out = set()
+        self.edges_in: set[Edge] = set()
+        self.edges_out: set[Edge] = set()
 
     def __str__(self):
         return self.name
 
     def connect_to(self, vertex: Vertex, weight: int = 1) -> Edge:
-        """
-        Connect this vertex to another one.
+        """Connect this vertex to another one.
 
         Args:
             vertex: Vertex to connect to.
@@ -234,8 +227,7 @@ class Vertex(object):
         return Edge(self, vertex, weight)
 
     def connect_from(self, vertex: Vertex, weight: int = 1) -> Edge:
-        """
-        Connect another vertex to this one.
+        """Connect another vertex to this one.
 
         Args:
             vertex: Vertex to connect from.
@@ -250,20 +242,19 @@ class Vertex(object):
         return Edge(vertex, self, weight)
 
 
-class Edge(object):
+class Edge:
     """Edge class. Used in Graph class."""
 
-    def __init__(self, vertex_out, vertex_in, weight=1):
-        """
-        Initialization method.
+    def __init__(self, vertex_out: Vertex, vertex_in: Vertex, weight: int = 1) -> None:
+        """Initialization method.
 
         Args:
             vertex_out (Vertex): source vertex (edge going out).
             vertex_in (Vertex): target vertex (edge going in).
             weight (int): weight of the edge.
         """
-        self.vertex_out = None
-        self.vertex_in = None
+        self.vertex_out: Vertex | None = None
+        self.vertex_in: Vertex | None = None
         self.weight = weight
         self.go_from(vertex_out)
         self.go_in(vertex_in)
@@ -271,9 +262,8 @@ class Edge(object):
     def __str__(self):
         return f"{self.vertex_out.name} --{self.weight}--> {self.vertex_in.name}"
 
-    def go_from(self, vertex):
-        """
-        Tell the edge to go out from this vertex.
+    def go_from(self, vertex: Vertex) -> None:
+        """Tell the edge to go out from this vertex.
 
         Args:
             vertex (Vertex): vertex to go from.
@@ -283,9 +273,8 @@ class Edge(object):
         self.vertex_out = vertex
         vertex.edges_out.add(self)
 
-    def go_in(self, vertex):
-        """
-        Tell the edge to go into this vertex.
+    def go_in(self, vertex: Vertex) -> None:
+        """Tell the edge to go into this vertex.
 
         Args:
             vertex (Vertex): vertex to go into.
@@ -297,17 +286,15 @@ class Edge(object):
 
 
 class Graph(PrintMixin):
-    """
-    Graph class.
+    """Graph class.
 
     A class to build a graph given a list of nodes. After instantiation,
     it has two attributes: vertices, the set of nodes,
     and edges, the set of edges.
     """
 
-    def __init__(self, *nodes, depth=0):
-        """
-        Initialization method.
+    def __init__(self, *nodes: DSM | Package | Module, depth: int = 0) -> None:
+        """Initialization method.
 
         An intermediary matrix is built to ease the creation of the graph.
 
@@ -328,27 +315,27 @@ class Graph(PrintMixin):
                     self.edges.add(Edge(vertices[line_index], vertices[col_index], weight=cell))
         self.vertices = set(vertices)
 
-    def _to_csv(self, **kwargs):
+    def _to_csv(self, **kwargs: Any) -> str:
         header = kwargs.pop("header", True)
         text = ["vertex_out,edge_weight,vertex_in\n" if header else ""]
         for edge in self.edges:
-            text.append(f"{edge.vertex_out.name},{edge.weight},{edge.vertex_in.name}\n")
+            text.append(f"{edge.vertex_out.name},{edge.weight},{edge.vertex_in.name}\n")  # type: ignore[union-attr]
         for vertex in self.vertices:
             if not (vertex.edges_out or vertex.edges_in):
                 text.append("{vertex.name},,\n")
         return "".join(text)
 
-    def _to_json(self, **kwargs):
+    def _to_json(self, **kwargs: Any) -> str:
         return json.dumps(
             {
                 "vertices": [vertex.name for vertex in self.vertices],
                 "edges": [
-                    {"out": edge.vertex_out.name, "weight": edge.weight, "in": edge.vertex_in.name}
+                    {"out": edge.vertex_out.name, "weight": edge.weight, "in": edge.vertex_in.name}  # type: ignore[union-attr]
                     for edge in self.edges
                 ],
             },
             **kwargs,
         )
 
-    def _to_text(self, **kwargs):
+    def _to_text(self, **kwargs: Any) -> str:  # noqa: ARG002
         return ""

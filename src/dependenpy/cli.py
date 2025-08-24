@@ -1,3 +1,5 @@
+"""Module that contains the command line application."""
+
 # Why does this file exist, and why not put this in `__main__`?
 #
 # You might be tempted to import things from `__main__` later,
@@ -9,31 +11,39 @@
 # - When you import `__main__` it will get executed again (as a module) because
 #   there's no `dependenpy.__main__` in `sys.modules`.
 
-"""Module that contains the command line application."""
-
 from __future__ import annotations
 
 import argparse
 import sys
 from contextlib import contextmanager
-from typing import List
+from typing import Any, Iterator, Sequence, TextIO
 
 from colorama import init
 
-from dependenpy import __version__
+from dependenpy import debug
 from dependenpy.dsm import DSM
 from dependenpy.helpers import CSV, FORMAT, JSON, guess_depth
 
 
+class _DebugInfo(argparse.Action):
+    def __init__(self, nargs: int | str | None = 0, **kwargs: Any) -> None:
+        super().__init__(nargs=nargs, **kwargs)
+
+    def __call__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ARG002
+        debug.print_debug_info()
+        sys.exit(0)
+
+
 def get_parser() -> argparse.ArgumentParser:
-    """
-    Return the CLI argument parser.
+    """Return the CLI argument parser.
 
     Returns:
         An argparse parser.
     """
     parser = argparse.ArgumentParser(
-        prog="dependenpy", add_help=False, description="Command line tool for dependenpy Python package."
+        prog="dependenpy",
+        add_help=False,
+        description="Command line tool for dependenpy Python package.",
     )
     mxg = parser.add_mutually_exclusive_group(required=False)
 
@@ -53,7 +63,12 @@ def get_parser() -> argparse.ArgumentParser:
         help="Specify matrix or graph depth. Default: best guess.",
     )
     parser.add_argument(
-        "-f", "--format", choices=FORMAT, default="text", dest="format", help="Output format. Default: text."
+        "-f",
+        "--format",
+        choices=FORMAT,
+        default="text",
+        dest="format",
+        help="Output format. Default: text.",
     )
     mxg.add_argument(
         "-g",
@@ -73,7 +88,11 @@ def get_parser() -> argparse.ArgumentParser:
         "__init__.py file. Can make execution slower. Default: false.",
     )
     parser.add_argument(
-        "-h", "--help", action="help", default=argparse.SUPPRESS, help="Show this help message and exit."
+        "-h",
+        "--help",
+        action="help",
+        default=argparse.SUPPRESS,
+        help="Show this help message and exit.",
     )
     parser.add_argument(
         "-i",
@@ -121,7 +140,7 @@ def get_parser() -> argparse.ArgumentParser:
         "-v",
         "--version",
         action="version",
-        version=f"dependenpy {__version__}",
+        version=f"dependenpy {debug.get_version()}",
         help="Show the current version of the program and exit.",
     )
     parser.add_argument(
@@ -132,11 +151,12 @@ def get_parser() -> argparse.ArgumentParser:
         help="Character to use for cells with value=0 (text matrix display only).",
     )
 
+    parser.add_argument("--debug-info", action=_DebugInfo, help="Print debug information.")
     return parser
 
 
 @contextmanager
-def _open_if_str(output):
+def _open_if_str(output: str | TextIO) -> Iterator[TextIO]:
     if isinstance(output, str):
         with open(output, "w") as fd:
             yield fd
@@ -144,22 +164,22 @@ def _open_if_str(output):
         yield output
 
 
-def _get_indent(opts):
+def _get_indent(opts: argparse.Namespace) -> int | None:
     if opts.indent is None:
         if opts.format == CSV:
             return 0
         return 2
-    elif opts.indent < 0 and opts.format == JSON:
+    if opts.indent < 0 and opts.format == JSON:
         # special case for json.dumps indent argument
         return None
     return opts.indent
 
 
-def _get_depth(opts, packages):
+def _get_depth(opts: argparse.Namespace, packages: Sequence[str]) -> int:
     return opts.depth or guess_depth(packages)
 
 
-def _get_packages(opts):  # noqa: WPS231
+def _get_packages(opts: argparse.Namespace) -> list[str]:
     packages = []
     for arg in opts.packages:
         if "," in arg:
@@ -171,7 +191,7 @@ def _get_packages(opts):  # noqa: WPS231
     return packages
 
 
-def _run(opts, dsm):
+def _run(opts: argparse.Namespace, dsm: DSM) -> None:
     indent = _get_indent(opts)
     depth = _get_depth(opts, packages=dsm.base_packages)
     with _open_if_str(opts.output) as output:
@@ -185,13 +205,12 @@ def _run(opts, dsm):
             dsm.print_graph(format=opts.format, output=output, depth=depth, indent=indent)
 
 
-def main(args: List[str] | None = None) -> int:  # noqa: WPS231
-    """
-    Run the main program.
+def main(args: list[str] | None = None) -> int:
+    """Run the main program.
 
     This function is executed when you type `dependenpy` or `python -m dependenpy`.
 
-    Arguments:
+    Parameters:
         args: Arguments passed from the command line.
 
     Returns:

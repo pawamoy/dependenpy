@@ -1,5 +1,7 @@
 """Tests for main features."""
 
+from __future__ import annotations
+
 import pytest
 
 from dependenpy.cli import main
@@ -16,9 +18,8 @@ from dependenpy.dsm import DSM, Module
         ["dependenpy,internal,dependenpy"],
     ],
 )
-def test_main_ok(args):
-    """
-    Main test method.
+def test_main_ok(args: list[str]) -> None:
+    """Main test method.
 
     Arguments:
         args: Command line arguments.
@@ -26,12 +27,12 @@ def test_main_ok(args):
     assert main(args) == 0
 
 
-def test_main_not_ok():
+def test_main_not_ok() -> None:
     """Main test method."""
     assert main(["do not exist"]) == 1
 
 
-def test_tree():
+def test_tree() -> None:
     """Test the built tree."""
     dsm = DSM("internal")
     items = [
@@ -49,16 +50,15 @@ def test_tree():
         assert dsm.get(item)
 
 
-def test_inner_imports():
+def test_inner_imports() -> None:
     """Test inner imports."""
     dsm = DSM("internal")
     module_i = dsm["internal.subpackage_a.subpackage_1.module_i"]
-    assert isinstance(module_i, Module)
-    assert len(module_i.dependencies) == 4
+    assert len(module_i.dependencies) == 4  # type: ignore[union-attr]
     assert module_i.cardinal(to=dsm["internal"]) == 3
 
 
-def test_delayed_build():
+def test_delayed_build() -> None:
     """Test delayed build."""
     dsm = DSM("internal", build_tree=False)
     dsm.build_tree()

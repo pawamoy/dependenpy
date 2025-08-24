@@ -29,9 +29,10 @@ in `sys.path`).
 
 ```python
 from dependenpy import DSM
-django = DSM('django')
-flask = DSM('flask')
-both = DSM('django', 'flask')
+
+django = DSM("django")
+flask = DSM("flask")
+both = DSM("django", "flask")
 ```
 
 Three keyword arguments can be given to `DSM`:
@@ -74,8 +75,9 @@ Example:
 
 ```python
 from dependenpy import Package
-absolute_package = Package('django', '/my/virtualenv/lib/python3.5/site-packages/django')
-relative_package = Package('program', 'src/program')
+
+absolute_package = Package("django", "/my/virtualenv/lib/python3.5/site-packages/django")
+relative_package = Package("program", "src/program")
 ```
 
 Additionally, you can pass 6 more keyword arguments: the same three from
@@ -94,8 +96,8 @@ Argument `limit_to` can be used this way:
 
 ```python
 from dependenpy import Package
-django_auth = Package('django', 'path/to/django',
-                      limit_to=['contrib.auth'])
+
+django_auth = Package("django", "path/to/django", limit_to=["contrib.auth"])
 ```
 
 Of course, you could also have build a the `django_auth` Package by directly
@@ -104,7 +106,8 @@ to build the full tree, starting at the root (Django's directory).
 
 ```python
 from dependenpy import Package
-django_auth = Package('auth', 'path/to/django/contrib/auth')
+
+django_auth = Package("auth", "path/to/django/contrib/auth")
 ```
 
 ### Create a Module
@@ -121,7 +124,8 @@ Example:
 
 ```python
 from dependenpy import Module
-dsm_module = Module('dsm', 'path/to/dependenpy/dsm.py')
+
+dsm_module = Module("dsm", "path/to/dependenpy/dsm.py")
 ```
 
 ### Create a Dependency
@@ -203,21 +207,21 @@ Example:
 ```python
 from dependenpy import DSM
 
-dsm = DSM('django')  # full DSM object, containing Django
-django = dsm['django']  # Django Package object
+dsm = DSM("django")  # full DSM object, containing Django
+django = dsm["django"]  # Django Package object
 ```
 
 You can use dots in the element name to go further in just one instruction:
 
 ```python
-django_auth = django['contrib.auth']
-django_forms_models = dsm.get('django.forms.models')
+django_auth = django["contrib.auth"]
+django_forms_models = dsm.get("django.forms.models")
 ```
 
 Of course, accesses can be chained:
 
 ```python
-django_db_models_utils = dsm['django'].get('db')['models']['utils']
+django_db_models_utils = dsm["django"].get("db")["models"]["utils"]
 ```
 
 ## Printing contents
@@ -242,7 +246,7 @@ module:
 from dependenpy import DSM
 from dependenpy.helpers import TEXT, CSV, JSON
 
-dsm = DSM('django')
+dsm = DSM("django")
 dsm.print(format=JSON)
 ```
 
