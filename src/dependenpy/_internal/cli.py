@@ -1,5 +1,3 @@
-"""Module that contains the command line application."""
-
 # Why does this file exist, and why not put this in `__main__`?
 #
 # You might be tempted to import things from `__main__` later,
@@ -21,8 +19,8 @@ from typing import TYPE_CHECKING, Any, TextIO
 from colorama import init
 
 from dependenpy._internal import debug
-from dependenpy.dsm import DSM
-from dependenpy.helpers import CSV, FORMAT, JSON, guess_depth
+from dependenpy._internal.dsm import DSM
+from dependenpy._internal.helpers import CSV, FORMAT, JSON, guess_depth
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence

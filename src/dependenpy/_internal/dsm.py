@@ -1,12 +1,11 @@
-"""dependenpy dsm module.
-
-This is the core module of dependenpy. It contains the following classes:
-
-- [`DSM`][dependenpy.dsm.DSM]: to create a DSM-capable object for a list of packages,
-- [`Package`][dependenpy.dsm.Package]: which represents a Python package,
-- [`Module`][dependenpy.dsm.Module]: which represents a Python module,
-- [`Dependency`][dependenpy.dsm.Dependency]: which represents a dependency between two modules.
-"""
+# dependenpy dsm module.
+#
+# This is the core module of dependenpy. It contains the following classes:
+#
+# - [`DSM`][dependenpy.dsm.DSM]: to create a DSM-capable object for a list of packages,
+# - [`Package`][dependenpy.dsm.Package]: which represents a Python package,
+# - [`Module`][dependenpy.dsm.Module]: which represents a Python module,
+# - [`Dependency`][dependenpy.dsm.Dependency]: which represents a dependency between two modules.
 
 from __future__ import annotations
 
@@ -18,9 +17,9 @@ from os.path import isdir, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from dependenpy.finder import Finder, PackageSpec
-from dependenpy.helpers import PrintMixin
-from dependenpy.node import LeafNode, NodeMixin, RootNode
+from dependenpy._internal.finder import Finder, PackageSpec
+from dependenpy._internal.helpers import PrintMixin
+from dependenpy._internal.node import LeafNode, NodeMixin, RootNode
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -51,10 +50,15 @@ class DSM(RootNode, NodeMixin, PrintMixin):
             enforce_init: if True, only treat directories if they contain an `__init__.py` file.
         """
         self.base_packages = packages
+        """Packages initially specified."""
         self.finder = Finder()
+        """Finder instance for locating packages and modules."""
         self.specs = []
+        """List of package specifications found."""
         self.not_found = []
+        """List of packages that were not found."""
         self.enforce_init = enforce_init
+        """Whether to enforce the presence of `__init__.py` files."""
 
         specs = []
         for package in packages:
@@ -139,11 +143,17 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
             enforce_init: if True, only treat directories if they contain an `__init__.py` file.
         """
         self.name = name
+        """Name of the package."""
         self.path = path
+        """Path to the package."""
         self.package = package
+        """Parent package."""
         self.dsm = dsm
+        """Parent DSM."""
         self.limit_to = limit_to or []
+        """List of strings to limit the recursive tree-building."""
         self.enforce_init = enforce_init
+        """Whether to enforce the presence of `__init__.py` files."""
 
         RootNode.__init__(self, build_tree)
         LeafNode.__init__(self)
@@ -238,6 +248,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
     """
 
     RECURSIVE_NODES = (ast.ClassDef, ast.FunctionDef, ast.If, ast.IfExp, ast.Try, ast.With, ast.ExceptHandler)
+    """Nodes that can be recursive."""
 
     def __init__(self, name: str, path: str, dsm: DSM | None = None, package: Package | None = None) -> None:
         """Initialization method.
@@ -250,10 +261,15 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         """
         super().__init__()
         self.name = name
+        """Name of the module."""
         self.path = path
+        """Path to the module."""
         self.package = package
+        """Package to which the module belongs."""
         self.dsm = dsm
+        """Parent DSM."""
         self.dependencies: list[Dependency] = []
+        """List of dependencies."""
 
     def __contains__(self, item: Package | Module) -> bool:
         """Whether given item is contained inside this module.
@@ -414,9 +430,13 @@ class Dependency:
             what (str): what is imported (optional).
         """
         self.source = source
+        """Source module."""
         self.lineno = lineno
+        """Line number of the import statement."""
         self.target = target
+        """Target module or package."""
         self.what = what
+        """What is imported (optional)."""
 
     def __str__(self):
         what = f"{self.what or ''} from "

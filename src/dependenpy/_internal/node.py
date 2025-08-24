@@ -1,15 +1,13 @@
-"""dependenpy node module."""
-
 from __future__ import annotations
 
 import json
 import sys
 from typing import IO, TYPE_CHECKING, Any
 
-from dependenpy.structures import Graph, Matrix, TreeMap
+from dependenpy._internal.structures import Graph, Matrix, TreeMap
 
 if TYPE_CHECKING:
-    from dependenpy.dsm import Module, Package
+    from dependenpy._internal.dsm import Module, Package
 
 
 class NodeMixin:
@@ -59,7 +57,9 @@ class RootNode:
         self._graph_cache: dict[int, Graph] = {}
         self._treemap_cache = TreeMap()
         self.modules: list[Module] = []
+        """List of modules contained in the node."""
         self.packages: list[Package] = []
+        """List of packages contained in the node."""
 
         if build_tree:
             self.build_tree()
@@ -108,7 +108,6 @@ class RootNode:
 
         Returns:
             Result of node.empty.
-
         """
         return bool(self.modules or self.packages)
 

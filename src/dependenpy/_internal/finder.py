@@ -1,5 +1,3 @@
-"""dependenpy finder module."""
-
 from __future__ import annotations
 
 from importlib.util import find_spec
@@ -19,10 +17,17 @@ class PackageSpec:
             limit_to (list of str): limitations.
         """
         self.name = name
+        """Name of the package."""
         self.path = path
+        """Path to the package."""
         self.limit_to = limit_to or []
+        """List of limitations."""
 
     def __hash__(self):
+        """Hash method.
+
+        The hash is computed based on the package name and path.
+        """
         return hash((self.name, self.path))
 
     @property
@@ -152,10 +157,13 @@ class Finder:
             finders: list of package finder classes (not instances) in a specific
                 order. Default: [LocalPackageFinder, InstalledPackageFinder].
         """
+        self.finders: list[PackageFinder]
+        """Selected finders."""
         if finders is None:
-            self.finders = [LocalPackageFinder(), InstalledPackageFinder()]
+            finder_instances = [LocalPackageFinder(), InstalledPackageFinder()]
         else:
-            self.finders = [finder() for finder in finders]
+            finder_instances = [finder() for finder in finders]
+        self.finders = finder_instances
 
     def find(self, package: str, **kwargs: Any) -> PackageSpec | None:
         """Find a package using package finders.

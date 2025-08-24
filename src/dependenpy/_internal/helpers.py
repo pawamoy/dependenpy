@@ -1,5 +1,3 @@
-"""dependenpy printer module."""
-
 from __future__ import annotations
 
 import sys
@@ -10,9 +8,13 @@ if TYPE_CHECKING:
 
 
 CSV = "csv"
+"""CSV format."""
 JSON = "json"
+"""JSON format."""
 TEXT = "text"
+"""Plain text format."""
 FORMAT = (CSV, JSON, TEXT)
+"""Supported output formats."""
 
 
 class PrintMixin:

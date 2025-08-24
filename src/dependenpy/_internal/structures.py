@@ -1,5 +1,3 @@
-"""dependenpy structures module."""
-
 from __future__ import annotations
 
 import copy
@@ -8,10 +6,10 @@ from typing import TYPE_CHECKING, Any
 
 from colorama import Style
 
-from dependenpy.helpers import PrintMixin
+from dependenpy._internal.helpers import PrintMixin
 
 if TYPE_CHECKING:
-    from dependenpy.dsm import DSM, Module, Package
+    from dependenpy._internal.dsm import DSM, Module, Package
 
 
 class Matrix(PrintMixin):
@@ -77,8 +75,11 @@ class Matrix(PrintMixin):
                     data[row][col] = row_key.cardinal(to=col_key)
 
         self.size = size
+        """The size of the matrix."""
         self.keys = [key.absolute_name() for key in keys]
+        """The keys of the matrix."""
         self.data = data
+        """The data of the matrix."""
 
     @staticmethod
     def cast(keys: list[str], data: list[list[int]]) -> Matrix:
@@ -184,6 +185,7 @@ class TreeMap(PrintMixin):
         #             self.data[i].append([row[splits[j]:splits[j+1]] for row in rows])
 
         self.value = value
+        """The value of the current area."""
 
     def _to_csv(self, **kwargs: Any) -> str:  # noqa: ARG002
         return ""
@@ -205,8 +207,11 @@ class Vertex:
             name (str): name of the vertex.
         """
         self.name = name
+        """Name of the vertex."""
         self.edges_in: set[Edge] = set()
+        """Incoming edges."""
         self.edges_out: set[Edge] = set()
+        """Outgoing edges."""
 
     def __str__(self):
         return self.name
@@ -254,8 +259,11 @@ class Edge:
             weight (int): weight of the edge.
         """
         self.vertex_out: Vertex | None = None
+        """Outgoing vertex."""
         self.vertex_in: Vertex | None = None
+        """Incoming vertex."""
         self.weight = weight
+        """Weight of the edge."""
         self.go_from(vertex_out)
         self.go_in(vertex_in)
 
@@ -305,6 +313,7 @@ class Graph(PrintMixin):
                 the documentation for Matrix class.
         """
         self.edges = set()
+        """Set of edges in the graph."""
         vertices = []
         matrix = Matrix(*nodes, depth=depth)
         for key in matrix.keys:
@@ -314,6 +323,7 @@ class Graph(PrintMixin):
                 if cell > 0:
                     self.edges.add(Edge(vertices[line_index], vertices[col_index], weight=cell))
         self.vertices = set(vertices)
+        """Set of vertices in the graph."""
 
     def _to_csv(self, **kwargs: Any) -> str:
         header = kwargs.pop("header", True)
