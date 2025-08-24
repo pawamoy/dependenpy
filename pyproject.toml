@@ -44,7 +44,7 @@ Gitter = "https://gitter.im/dependenpy/community"
 Funding = "https://github.com/sponsors/pawamoy"
 
 [project.scripts]
-dependenpy = "dependenpy.cli:main"
+dependenpy = "dependenpy:main"
 
 [project.entry-points.archan]
 "dependenpy.InternalDependencies" = "dependenpy.plugins:InternalDependencies"
