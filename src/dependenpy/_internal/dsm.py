@@ -49,15 +49,15 @@ class DSM(RootNode, NodeMixin, PrintMixin):
             build_dependencies: auto-build the dependencies or not.
             enforce_init: if True, only treat directories if they contain an `__init__.py` file.
         """
-        self.base_packages = packages
+        self.base_packages: tuple[str, ...] = packages
         """Packages initially specified."""
-        self.finder = Finder()
+        self.finder: Finder = Finder()
         """Finder instance for locating packages and modules."""
-        self.specs = []
+        self.specs: list[PackageSpec] = []
         """List of package specifications found."""
-        self.not_found = []
+        self.not_found: list[str] = []
         """List of packages that were not found."""
-        self.enforce_init = enforce_init
+        self.enforce_init: bool = enforce_init
         """Whether to enforce the presence of `__init__.py` files."""
 
         specs = []
