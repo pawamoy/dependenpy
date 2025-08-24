@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from dependenpy.cli import main
-from dependenpy.dsm import DSM, Module
+from dependenpy._internal.cli import main
+from dependenpy._internal.dsm import DSM
 
 
 @pytest.mark.parametrize(

@@ -1,10 +1,9 @@
 # Dependenpy
 
 [![ci](https://github.com/pawamoy/dependenpy/workflows/ci/badge.svg)](https://github.com/pawamoy/dependenpy/actions?query=workflow%3Aci)
-[![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://pawamoy.github.io/dependenpy/)
+[![documentation](https://img.shields.io/badge/docs-mkdocs-708FCC.svg?style=flat)](https://pawamoy.github.io/dependenpy/)
 [![pypi version](https://img.shields.io/pypi/v/dependenpy.svg)](https://pypi.org/project/dependenpy/)
-[![gitpod](https://img.shields.io/badge/gitpod-workspace-blue.svg?style=flat)](https://gitpod.io/#https://github.com/pawamoy/dependenpy)
-[![gitter](https://badges.gitter.im/join%20chat.svg)](https://app.gitter.im/#/room/#dependenpy:gitter.im)
+[![gitter](https://img.shields.io/badge/matrix-chat-4DB798.svg?style=flat)](https://app.gitter.im/#/room/#dependenpy:gitter.im)
 
 Show the inter-dependencies between modules of Python packages.
 
@@ -15,17 +14,14 @@ To do this, it reads and searches the source code for import statements.
 
 ## Installation
 
-With `pip`:
-
 ```bash
 pip install dependenpy
 ```
 
-With [`pipx`](https://github.com/pipxproject/pipx):
+With [`uv`](https://docs.astral.sh/uv/):
 
 ```bash
-python3.8 -m pip install --user pipx
-pipx install dependenpy
+uv tool install dependenpy
 ```
 
 ## Usage (as a library)

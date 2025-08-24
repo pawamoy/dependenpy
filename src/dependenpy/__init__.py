@@ -12,7 +12,39 @@ please refer to the README.md included in this package to get the link to the of
 
 from __future__ import annotations
 
-from dependenpy.dsm import DSM, Dependency, Module, Package
-from dependenpy.structures import Matrix, TreeMap
+from dependenpy._internal.cli import get_parser, main
+from dependenpy._internal.dsm import DSM, Dependency, Module, Package
+from dependenpy._internal.finder import Finder, InstalledPackageFinder, LocalPackageFinder, PackageFinder, PackageSpec
+from dependenpy._internal.helpers import CSV, FORMAT, JSON, TEXT, PrintMixin, guess_depth
+from dependenpy._internal.node import LeafNode, NodeMixin, RootNode
+from dependenpy._internal.plugins import InternalDependencies
+from dependenpy._internal.structures import Edge, Graph, Matrix, TreeMap, Vertex
 
-__all__: list[str] = ["DSM", "Dependency", "Matrix", "Module", "Package", "TreeMap"]
+__all__: list[str] = [
+    "CSV",
+    "DSM",
+    "FORMAT",
+    "JSON",
+    "TEXT",
+    "Dependency",
+    "Edge",
+    "Finder",
+    "Graph",
+    "InstalledPackageFinder",
+    "InternalDependencies",
+    "LeafNode",
+    "LocalPackageFinder",
+    "Matrix",
+    "Module",
+    "NodeMixin",
+    "Package",
+    "PackageFinder",
+    "PackageSpec",
+    "PrintMixin",
+    "RootNode",
+    "TreeMap",
+    "Vertex",
+    "get_parser",
+    "guess_depth",
+    "main",
+]

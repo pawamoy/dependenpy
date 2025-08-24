@@ -1,59 +1,17 @@
-"""dependenpy printer module."""
+"""Deprecated. Import from `dependenpy` directly."""
 
-from __future__ import annotations
+# YORE: Bump 4: Remove file.
 
-import sys
-from typing import IO, Any, Sequence
+import warnings
+from typing import Any
 
-CSV = "csv"
-JSON = "json"
-TEXT = "text"
-FORMAT = (CSV, JSON, TEXT)
+from dependenpy._internal import helpers
 
 
-class PrintMixin:
-    """Print mixin class."""
-
-    def print(self, format: str | None = TEXT, output: IO = sys.stdout, **kwargs: Any) -> None:  # noqa: A002
-        """Print the object in a file or on standard output by default.
-
-        Args:
-            format: output format (csv, json or text).
-            output: descriptor to an opened file (default to standard output).
-            **kwargs: additional arguments.
-        """
-        if format is None:
-            format = TEXT
-
-        if format != TEXT:
-            kwargs.pop("zero", "")
-
-        if format == TEXT:
-            print(self._to_text(**kwargs), file=output)
-        elif format == CSV:
-            print(self._to_csv(**kwargs), file=output)
-        elif format == JSON:
-            print(self._to_json(**kwargs), file=output)
-
-    def _to_text(self, **kwargs: Any) -> str:
-        raise NotImplementedError
-
-    def _to_csv(self, **kwargs: Any) -> str:
-        raise NotImplementedError
-
-    def _to_json(self, **kwargs: Any) -> str:
-        raise NotImplementedError
-
-
-def guess_depth(packages: Sequence[str]) -> int:
-    """Guess the optimal depth to use for the given list of arguments.
-
-    Args:
-        packages: List of packages.
-
-    Returns:
-        Guessed depth to use.
-    """
-    if len(packages) == 1:
-        return packages[0].count(".") + 2
-    return min(package.count(".") for package in packages) + 1
+def __getattr__(name: str) -> Any:
+    warnings.warn(
+        "Importing from `dependenpy.helpers` is deprecated. Import from `dependenpy` directly.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return getattr(helpers, name)

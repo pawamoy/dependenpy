@@ -7,7 +7,28 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "run",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "dependenpy",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "docs",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "mkdocs",
+            "justMyCode": false,
+            "args": [
+                "serve",
+                "-v"
+            ]
         },
         {
             "name": "test",

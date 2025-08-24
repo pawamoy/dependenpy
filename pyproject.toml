@@ -5,10 +5,11 @@ build-backend = "pdm.backend"
 [project]
 name = "dependenpy"
 description = "Show the inter-dependencies between modules of Python packages."
-authors = [{name = "Timothée Mazzucotelli", email = "pawamoy@pm.me"}]
-license = {text = "ISC"}
+authors = [{name = "Timothée Mazzucotelli", email = "dev@pawamoy.fr"}]
+license = "ISC"
+license-files = ["LICENSE"]
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 keywords = ["dependency", "analysis", "matrix", "dsm"]
 dynamic = ["version"]
 classifiers = [
@@ -17,11 +18,13 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Documentation",
     "Topic :: Software Development",
     "Topic :: Utilities",
     "Typing :: Typed",
@@ -41,58 +44,70 @@ Gitter = "https://gitter.im/dependenpy/community"
 Funding = "https://github.com/sponsors/pawamoy"
 
 [project.scripts]
-dependenpy = "dependenpy.cli:main"
+dependenpy = "dependenpy:main"
 
 [project.entry-points.archan]
 "dependenpy.InternalDependencies" = "dependenpy.plugins:InternalDependencies"
 
-[tool.pdm]
-version = {source = "scm"}
-plugins = [
-    "pdm-multirun",
-]
+[tool.pdm.version]
+source = "call"
+getter = "scripts.get_version:get_version"
 
 [tool.pdm.build]
-package-dir = "src"
-editable-backend = "editables"
+# Include as much as possible in the source distribution, to help redistributors.
+excludes = ["**/.pytest_cache", "**/.mypy_cache"]
+source-includes = [
+    "config",
+    "docs",
+    "scripts",
+    "share",
+    "tests",
+    "duties.py",
+    "mkdocs.yml",
+    "*.md",
+    "LICENSE",
+]
 
-[tool.pdm.dev-dependencies]
-duty = ["duty>=0.10"]
-ci-quality = ["dependenpy[duty,docs,quality,typing,security]"]
-ci-tests = ["dependenpy[duty,tests]"]
-docs = [
-    "black>=23.9",
-    "markdown-callouts>=0.3",
-    "markdown-exec>=1.7",
-    "mkdocs>=1.5",
-    "mkdocs-coverage>=1.0",
-    "mkdocs-gen-files>=0.5",
-    "mkdocs-git-committers-plugin-2>=1.2",
-    "mkdocs-literate-nav>=0.6",
-    "mkdocs-material>=9.4",
-    "mkdocs-minify-plugin>=0.7",
-    "mkdocstrings[python]>=0.23",
-    "tomli>=2.0; python_version < '3.11'",
+[tool.pdm.build.wheel-data]
+# Manual pages can be included in the wheel.
+# Depending on the installation tool, they will be accessible to users.
+# pipx supports it, uv does not yet, see https://github.com/astral-sh/uv/issues/4731.
+data = [
+    {path = "share/**/*", relative-to = "."},
 ]
+
+[dependency-groups]
 maintain = [
-    "black>=23.9",
-    "blacken-docs>=1.16",
-    "git-changelog>=2.3",
+    "build>=1.2",
+    "git-changelog>=2.5",
+    "twine>=5.1",
+    "yore>=0.3.3",
 ]
-quality = [
-    "ruff>=0.0",
-]
-tests = [
-    "pytest>=7.4",
-    "pytest-cov>=4.1",
+ci = [
+    "duty>=1.6",
+    "ruff>=0.4",
+    "pytest>=8.2",
+    "pytest-cov>=5.0",
     "pytest-randomly>=3.15",
-    "pytest-xdist>=3.3",
-]
-typing = [
-    "mypy>=1.5",
-    "types-markdown>=3.5",
+    "pytest-xdist>=3.6",
+    "mypy>=1.10",
+    "types-markdown>=3.6",
     "types-pyyaml>=6.0",
 ]
-security = [
-    "safety>=2.3",
+ docs = [
+    "markdown-callouts>=0.4",
+    "markdown-exec>=1.8",
+    "mkdocs>=1.6",
+    "mkdocs-coverage>=1.0",
+    "mkdocs-git-revision-date-localized-plugin>=1.2",
+    "mkdocs-llmstxt>=0.2",
+    "mkdocs-material>=9.5",
+    "mkdocs-minify-plugin>=0.8",
+    "mkdocs-section-index>=0.3",
+    "mkdocstrings[python]>=0.29",
+    # YORE: EOL 3.10: Remove line.
+    "tomli>=2.0; python_version < '3.11'",
 ]
+
+[tool.uv]
+default-groups = ["maintain", "ci", "docs"]

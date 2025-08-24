@@ -1,106 +1,17 @@
-"""Debugging utilities."""
+"""Deprecated. Import from `dependenpy` directly."""
 
-from __future__ import annotations
+# YORE: Bump 4: Remove file.
 
-import os
-import platform
-import sys
-from dataclasses import dataclass
-from importlib import metadata
+import warnings
+from typing import Any
 
-
-@dataclass
-class Variable:
-    """Dataclass describing an environment variable."""
-
-    name: str
-    """Variable name."""
-    value: str
-    """Variable value."""
+from dependenpy._internal import debug
 
 
-@dataclass
-class Package:
-    """Dataclass describing a Python package."""
-
-    name: str
-    """Package name."""
-    version: str
-    """Package version."""
-
-
-@dataclass
-class Environment:
-    """Dataclass to store environment information."""
-
-    interpreter_name: str
-    """Python interpreter name."""
-    interpreter_version: str
-    """Python interpreter version."""
-    platform: str
-    """Operating System."""
-    packages: list[Package]
-    """Installed packages."""
-    variables: list[Variable]
-    """Environment variables."""
-
-
-def _interpreter_name_version() -> tuple[str, str]:
-    if hasattr(sys, "implementation"):
-        impl = sys.implementation.version
-        version = f"{impl.major}.{impl.minor}.{impl.micro}"
-        kind = impl.releaselevel
-        if kind != "final":
-            version += kind[0] + str(impl.serial)
-        return sys.implementation.name, version
-    return "", "0.0.0"
-
-
-def get_version(dist: str = "dependenpy") -> str:
-    """Get version of the given distribution.
-
-    Parameters:
-        dist: A distribution name.
-
-    Returns:
-        A version number.
-    """
-    try:
-        return metadata.version(dist)
-    except metadata.PackageNotFoundError:
-        return "0.0.0"
-
-
-def get_debug_info() -> Environment:
-    """Get debug/environment information.
-
-    Returns:
-        Environment information.
-    """
-    py_name, py_version = _interpreter_name_version()
-    packages = ["dependenpy"]
-    variables = ["PYTHONPATH", *[var for var in os.environ if var.startswith("DEPENDENPY")]]
-    return Environment(
-        interpreter_name=py_name,
-        interpreter_version=py_version,
-        platform=platform.platform(),
-        variables=[Variable(var, val) for var in variables if (val := os.getenv(var))],
-        packages=[Package(pkg, get_version(pkg)) for pkg in packages],
+def __getattr__(name: str) -> Any:
+    warnings.warn(
+        "Importing from `dependenpy.debug` is deprecated. Import from `dependenpy` directly.",
+        DeprecationWarning,
+        stacklevel=2,
     )
-
-
-def print_debug_info() -> None:
-    """Print debug/environment information."""
-    info = get_debug_info()
-    print(f"- __System__: {info.platform}")
-    print(f"- __Python__: {info.interpreter_name} {info.interpreter_version}")
-    print("- __Environment variables__:")
-    for var in info.variables:
-        print(f"  - `{var.name}`: `{var.value}`")
-    print("- __Installed packages__:")
-    for pkg in info.packages:
-        print(f"  - `{pkg.name}` v{pkg.version}")
-
-
-if __name__ == "__main__":
-    print_debug_info()
+    return getattr(debug, name)
