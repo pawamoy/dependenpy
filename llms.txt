@@ -1,0 +1,12 @@
+# Dependenpy
+
+> Show the inter-dependencies between modules of Python packages.
+
+## Usage
+
+- [Overview](https://pawamoy.github.io/dependenpy/index.md)
+
+## API
+
+- [API reference](https://pawamoy.github.io/dependenpy/reference/api/index.md)
+

@@ -2,87 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://pawamoy.github.io/dependenpy/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-09-19</lastmod>
     </url>
     <url>
          <loc>https://pawamoy.github.io/dependenpy/changelog/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-09-19</lastmod>
     </url>
     <url>
          <loc>https://pawamoy.github.io/dependenpy/code_of_conduct/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-09-19</lastmod>
     </url>
     <url>
          <loc>https://pawamoy.github.io/dependenpy/contributing/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-09-19</lastmod>
     </url>
     <url>
          <loc>https://pawamoy.github.io/dependenpy/credits/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-09-19</lastmod>
     </url>
     <url>
          <loc>https://pawamoy.github.io/dependenpy/license/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-09-19</lastmod>
     </url>
     <url>
          <loc>https://pawamoy.github.io/dependenpy/usage/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-09-19</lastmod>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://pawamoy.github.io/dependenpy/reference/dependenpy/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://pawamoy.github.io/dependenpy/reference/dependenpy/cli/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://pawamoy.github.io/dependenpy/reference/dependenpy/dsm/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://pawamoy.github.io/dependenpy/reference/dependenpy/finder/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://pawamoy.github.io/dependenpy/reference/dependenpy/helpers/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://pawamoy.github.io/dependenpy/reference/dependenpy/node/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://pawamoy.github.io/dependenpy/reference/dependenpy/plugins/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://pawamoy.github.io/dependenpy/reference/dependenpy/structures/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
+         <loc>https://pawamoy.github.io/dependenpy/reference/api/</loc>
+         <lastmod>2025-09-19</lastmod>
     </url>
     <url>
          <loc>https://pawamoy.github.io/dependenpy/coverage/</loc>
-         <lastmod>2022-09-04</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-09-19</lastmod>
     </url>
 </urlset>
