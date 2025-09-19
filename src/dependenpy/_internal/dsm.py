@@ -381,7 +381,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         """Return all the import statements given an AST body (AST nodes).
 
         Parameters:
-            The body to filter.
+            ast_body: The body to filter.
 
         Returns:
             The import statements.
