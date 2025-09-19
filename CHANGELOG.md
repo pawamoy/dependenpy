@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [3.3.3](https://github.com/pawamoy/dependenpy/releases/tag/3.3.3) - 2025-09-19
+
+<small>[Compare with 3.3.2](https://github.com/pawamoy/dependenpy/compare/3.3.2...3.3.3)</small>
+
+### Build
+
+- Update main entrypoint path ([907f525](https://github.com/pawamoy/dependenpy/commit/907f5252e3c5ed2de72a1bf820061e39ef42e1f7) by Timothée Mazzucotelli).
+
+### Code Refactoring
+
+- Add back previous module layout as deprecated ([dd9f563](https://github.com/pawamoy/dependenpy/commit/dd9f5639b159c78a6545da728f8b7efaec40a16b) by Timothée Mazzucotelli).
+- Move modules under internal folder, re-expose API at the top-level ([cad1295](https://github.com/pawamoy/dependenpy/commit/cad12956505ed9f5b9daf5bf4b65c176355d484a) by Timothée Mazzucotelli).
+
 ## [3.3.2](https://github.com/pawamoy/dependenpy/releases/tag/3.3.2) - 2022-09-04
 
 <small>[Compare with 3.3.1](https://github.com/pawamoy/dependenpy/compare/3.3.1...3.3.2)</small>
