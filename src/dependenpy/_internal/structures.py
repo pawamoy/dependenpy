@@ -1,3 +1,21 @@
+# SPDX-License-Identifier: ISC
+#
+# ISC License
+#
+# Copyright (c) 2020, Timothée Mazzucotelli and contributors
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 from __future__ import annotations
 
 import copy
@@ -34,9 +52,9 @@ class Matrix(PrintMixin):
         modules: list[Module] = []
         for node in nodes:
             if node.ismodule:
-                modules.append(node)  # type: ignore[arg-type]
+                modules.append(node)  # ty:ignore[invalid-argument-type]
             elif node.ispackage or node.isdsm:
-                modules.extend(node.submodules)  # type: ignore[union-attr]
+                modules.extend(node.submodules)  # ty:ignore[unresolved-attribute]
 
         if depth < 1:
             keys = modules
@@ -47,36 +65,36 @@ class Matrix(PrintMixin):
                     keys.append(module)
                     continue
                 package = module.package
-                while package.depth > depth and package.package and package not in nodes:  # type: ignore[union-attr]
-                    package = package.package  # type: ignore[union-attr]
+                while package.depth > depth and package.package and package not in nodes:  # ty:ignore[unresolved-attribute]
+                    package = package.package  # ty:ignore[unresolved-attribute]
                 if package not in keys:
-                    keys.append(package)  # type: ignore[arg-type]
+                    keys.append(package)
 
         size = len(keys)
         data = [[0] * size for _ in range(size)]
-        keys = sorted(keys, key=lambda key: key.absolute_name())
+        keys = sorted(keys, key=lambda key: key.absolute_name())  # ty:ignore[unresolved-attribute]
 
         if depth < 1:
             for index, key in enumerate(keys):
-                key.index = index  # type: ignore[attr-defined]
+                key.index = index  # ty:ignore[invalid-assignment]
             for index, key in enumerate(keys):
-                for dep in key.dependencies:
+                for dep in key.dependencies:  # ty:ignore[unresolved-attribute]
                     if dep.external:
                         continue
-                    if dep.target.ismodule and dep.target in keys:  # type: ignore[union-attr]
-                        data[index][dep.target.index] += 1  # type: ignore[index,union-attr]
-                    elif dep.target.ispackage:  # type: ignore[union-attr]
-                        init = dep.target.get("__init__")  # type: ignore[union-attr]
+                    if dep.target.ismodule and dep.target in keys:  # ty:ignore[unresolved-attribute]
+                        data[index][dep.target.index] += 1  # ty:ignore[unresolved-attribute]
+                    elif dep.target.ispackage:  # ty:ignore[unresolved-attribute]
+                        init = dep.target.get("__init__")  # ty:ignore[unresolved-attribute]
                         if init is not None and init in keys:
-                            data[index][init.index] += 1  # type: ignore[union-attr]
+                            data[index][init.index] += 1  # ty:ignore[unresolved-attribute]
         else:
             for row, row_key in enumerate(keys):
                 for col, col_key in enumerate(keys):
-                    data[row][col] = row_key.cardinal(to=col_key)
+                    data[row][col] = row_key.cardinal(to=col_key)  # ty:ignore[invalid-argument-type,unresolved-attribute]
 
         self.size = size
         """The size of the matrix."""
-        self.keys = [key.absolute_name() for key in keys]
+        self.keys = [key.absolute_name() for key in keys]  # ty:ignore[unresolved-attribute]
         """The keys of the matrix."""
         self.data = data
         """The data of the matrix."""
@@ -137,14 +155,14 @@ class Matrix(PrintMixin):
         # line of dashes
         text.append(f" {'─' * max_key_length}─┼─{'─' * key_line_length}─┼")
         for _ in range(len(self.keys) - 1):
-            text.append(f"{'─' * column_length}┼")
+            text.append(f"{'─' * column_length}┼")  # noqa: PERF401
         text.append(f"{'─' * column_length}┤")
         text.append("\n")
         # lines
         for index, key in enumerate(self.keys):
             text.append(f" {key:>{max_key_length}} │ {bold}{index:>{key_line_length}}{reset} │")
             for value in self.data[index]:
-                text.append(f"{value if value else zero:>{column_length}}│")
+                text.append(f"{value or zero:>{column_length}}│")  # noqa: PERF401
             text.append("\n")
         text.append("\n")
 
@@ -268,7 +286,7 @@ class Edge:
         self.go_in(vertex_in)
 
     def __str__(self):
-        return f"{self.vertex_out.name} --{self.weight}--> {self.vertex_in.name}"
+        return f"{self.vertex_out.name} --{self.weight}--> {self.vertex_in.name}"  # ty:ignore[unresolved-attribute]
 
     def go_from(self, vertex: Vertex) -> None:
         """Tell the edge to go out from this vertex.
@@ -317,7 +335,7 @@ class Graph(PrintMixin):
         vertices = []
         matrix = Matrix(*nodes, depth=depth)
         for key in matrix.keys:
-            vertices.append(Vertex(key))
+            vertices.append(Vertex(key))  # noqa: PERF401
         for line_index, line in enumerate(matrix.data):
             for col_index, cell in enumerate(line):
                 if cell > 0:
@@ -329,10 +347,10 @@ class Graph(PrintMixin):
         header = kwargs.pop("header", True)
         text = ["vertex_out,edge_weight,vertex_in\n" if header else ""]
         for edge in self.edges:
-            text.append(f"{edge.vertex_out.name},{edge.weight},{edge.vertex_in.name}\n")  # type: ignore[union-attr]
+            text.append(f"{edge.vertex_out.name},{edge.weight},{edge.vertex_in.name}\n")  # ty:ignore[unresolved-attribute]  # noqa: PERF401
         for vertex in self.vertices:
             if not (vertex.edges_out or vertex.edges_in):
-                text.append("{vertex.name},,\n")
+                text.append("{vertex.name},,\n")  # noqa: PERF401
         return "".join(text)
 
     def _to_json(self, **kwargs: Any) -> str:
@@ -340,7 +358,7 @@ class Graph(PrintMixin):
             {
                 "vertices": [vertex.name for vertex in self.vertices],
                 "edges": [
-                    {"out": edge.vertex_out.name, "weight": edge.weight, "in": edge.vertex_in.name}  # type: ignore[union-attr]
+                    {"out": edge.vertex_out.name, "weight": edge.weight, "in": edge.vertex_in.name}  # ty:ignore[unresolved-attribute]
                     for edge in self.edges
                 ],
             },

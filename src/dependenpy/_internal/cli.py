@@ -177,7 +177,7 @@ def get_parser() -> argparse.ArgumentParser:
 @contextmanager
 def _open_if_str(output: str | TextIO) -> Iterator[TextIO]:
     if isinstance(output, str):
-        with open(output, "w") as fd:
+        with open(output, "w") as fd:  # noqa: PTH123
             yield fd
     else:
         yield output

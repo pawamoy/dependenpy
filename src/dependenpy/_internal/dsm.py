@@ -1,3 +1,21 @@
+# SPDX-License-Identifier: ISC
+#
+# ISC License
+#
+# Copyright (c) 2020, Timothée Mazzucotelli and contributors
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 # dependenpy dsm module.
 #
 # This is the core module of dependenpy. It contains the following classes:
@@ -119,7 +137,7 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
     This class represent Python packages as nodes in a tree.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0917
         self,
         name: str,
         path: str,
@@ -207,13 +225,13 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
 
     def build_tree(self) -> None:
         """Build the tree for this package."""
-        for module in listdir(self.path):
-            abs_m = join(self.path, module)
-            if isfile(abs_m) and module.endswith(".py"):
-                name = splitext(module)[0]
+        for module in listdir(self.path):  # noqa: PTH208
+            abs_m = join(self.path, module)  # noqa: PTH118
+            if isfile(abs_m) and module.endswith(".py"):  # noqa: PTH113
+                name = splitext(module)[0]  # noqa: PTH122
                 if not self.limit_to or name in self.limit_to:
                     self.modules.append(Module(name, abs_m, self.dsm, self))
-            elif isdir(abs_m) and (isfile(join(abs_m, "__init__.py")) or not self.enforce_init):
+            elif isdir(abs_m) and (isfile(join(abs_m, "__init__.py")) or not self.enforce_init):  # noqa: PTH112, PTH113, PTH118
                 heads, new_limit_to = self.split_limits_heads()
                 if not heads or module in heads:
                     self.packages.append(
@@ -309,7 +327,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
             "dependencies": [
                 {
                     # 'source': d.source.absolute_name(),  # redundant
-                    "target": dep.target if dep.external else dep.target.absolute_name(),  # type: ignore[union-attr]
+                    "target": dep.target if dep.external else dep.target.absolute_name(),  # ty:ignore[unresolved-attribute]
                     "lineno": dep.lineno,
                     "what": dep.what,
                     "external": dep.external,
@@ -336,7 +354,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         text = ["module,path,target,lineno,what,external\n" if header else ""]
         name = self.absolute_name()
         for dep in self.dependencies:
-            target = dep.target if dep.external else dep.target.absolute_name()  # type: ignore[union-attr]
+            target = dep.target if dep.external else dep.target.absolute_name()  # ty:ignore[unresolved-attribute]
             text.append(f"{name},{self.path},{target},{dep.lineno},{dep.what or ''},{dep.external}\n")
         return "".join(text)
 
@@ -370,7 +388,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         try:
             body = ast.parse(code).body
         except SyntaxError:
-            code = code.encode("utf-8")  # type: ignore[assignment]
+            code = code.encode("utf-8")
             try:
                 body = ast.parse(code).body
             except SyntaxError:
@@ -394,10 +412,10 @@ class Module(LeafNode, NodeMixin, PrintMixin):
                 for name in node.names:
                     abs_name = self.absolute_name(self.depth - node.level) + "." if node.level > 0 else ""
                     node_module = node.module + "." if node.module else ""
-                    name = abs_name + node_module + name.name  # type: ignore[assignment]  # noqa: PLW2901
+                    name = abs_name + node_module + name.name  # noqa: PLW2901
                     imports.append({"target": name, "lineno": node.lineno})
             elif isinstance(node, Module.RECURSIVE_NODES):
-                imports.extend(self.get_imports(node.body))  # type: ignore[arg-type]
+                imports.extend(self.get_imports(node.body))  # ty:ignore[invalid-argument-type]
                 if isinstance(node, ast.Try):
                     imports.extend(self.get_imports(node.finalbody))
         return imports
@@ -411,7 +429,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         Returns:
             Number of dependencies.
         """
-        return len([dep for dep in self.dependencies if not dep.external and dep.target in to])  # type: ignore[operator]
+        return len([dep for dep in self.dependencies if not dep.external and dep.target in to])  # ty:ignore[unsupported-operator]
 
 
 class Dependency:
@@ -440,7 +458,7 @@ class Dependency:
 
     def __str__(self):
         what = f"{self.what or ''} from "
-        target = self.target if self.external else self.target.absolute_name()
+        target = self.target if self.external else self.target.absolute_name()  # ty:ignore[unresolved-attribute]
         return f"{self.source.name} imports {what}{target} (line {self.lineno})"
 
     @property

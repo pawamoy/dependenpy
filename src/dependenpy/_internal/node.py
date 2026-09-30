@@ -1,3 +1,21 @@
+# SPDX-License-Identifier: ISC
+#
+# ISC License
+#
+# Copyright (c) 2020, Timothée Mazzucotelli and contributors
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 from __future__ import annotations
 
 import json
@@ -204,7 +222,7 @@ class RootNode:
                 targ = package._get_target(parts[1])
                 if targ:
                     return targ
-                # FIXME: can lead to internal dep instead of external
+                # FIXME: can lead to internal dep instead of external  # noqa: TD001
                 # see example with django.contrib.auth.forms
                 # importing forms from django
                 # Idea: when parsing files with ast, record what objects
@@ -281,9 +299,9 @@ class RootNode:
         text = [" " * indent + str(self) + "\n"]
         new_indent = indent + base_indent
         for module in self.modules:
-            text.append(module._to_text(indent=new_indent, base_indent=base_indent))
+            text.append(module._to_text(indent=new_indent, base_indent=base_indent))  # noqa: PERF401
         for package in self.packages:
-            text.append(package._to_text(indent=new_indent, base_indent=base_indent))
+            text.append(package._to_text(indent=new_indent, base_indent=base_indent))  # noqa: PERF401
         return "".join(text)
 
     def _to_csv(self, **kwargs: Any) -> str:
@@ -291,7 +309,7 @@ class RootNode:
         modules = sorted(self.submodules, key=lambda mod: mod.absolute_name())
         text = ["module,path,target,lineno,what,external\n" if header else ""]
         for module in modules:
-            text.append(module._to_csv(header=False))
+            text.append(module._to_csv(header=False))  # noqa: PERF401
         return "".join(text)
 
     def _to_json(self, **kwargs: Any) -> str:
@@ -319,7 +337,7 @@ class RootNode:
             An instance of Graph.
         """
         if depth not in self._graph_cache:
-            self._graph_cache[depth] = Graph(self, depth=depth)  # type: ignore[arg-type]
+            self._graph_cache[depth] = Graph(self, depth=depth)  # ty:ignore[invalid-argument-type]
         return self._graph_cache[depth]
 
     def as_matrix(self, depth: int = 0) -> Matrix:
@@ -332,7 +350,7 @@ class RootNode:
             An instance of Matrix.
         """
         if depth not in self._matrix_cache:
-            self._matrix_cache[depth] = Matrix(self, depth=depth)  # type: ignore[arg-type]
+            self._matrix_cache[depth] = Matrix(self, depth=depth)  # ty:ignore[invalid-argument-type]
         return self._matrix_cache[depth]
 
     def as_treemap(self) -> TreeMap:
@@ -363,7 +381,7 @@ class LeafNode:
         Returns:
             Package: this node's root package.
         """
-        node: Package = self  # type: ignore[assignment]
+        node: Package = self  # ty:ignore[invalid-assignment]
         while node.package is not None:
             node = node.package
         return node
@@ -378,7 +396,7 @@ class LeafNode:
         if self._depth_cache is not None:
             return self._depth_cache
         node: Package
-        depth, node = 1, self  # type: ignore[assignment]
+        depth, node = 1, self  # ty:ignore[invalid-assignment]
         while node.package is not None:
             depth += 1
             node = node.package
@@ -397,7 +415,7 @@ class LeafNode:
             Absolute name of the node (until given depth is reached).
         """
         node: Package
-        node, node_depth = self, self.depth  # type: ignore[assignment]
+        node, node_depth = self, self.depth  # ty:ignore[invalid-assignment]
         if depth < 1:
             depth = node_depth
         while node_depth > depth and node.package is not None:
@@ -406,5 +424,5 @@ class LeafNode:
         names = []
         while node is not None:
             names.append(node.name)
-            node = node.package  # type: ignore[assignment]
+            node = node.package  # ty:ignore[invalid-assignment]
         return ".".join(reversed(names))
