@@ -1,7 +1,7 @@
 # Dependenpy
 
 [![ci](https://github.com/pawamoy/dependenpy/workflows/ci/badge.svg)](https://github.com/pawamoy/dependenpy/actions?query=workflow%3Aci)
-[![documentation](https://img.shields.io/badge/docs-mkdocs-708FCC.svg?style=flat)](https://pawamoy.github.io/dependenpy/)
+[![documentation](https://img.shields.io/badge/docs-zensical-FF9100.svg?style=flat)](https://pawamoy.github.io/dependenpy/)
 [![pypi version](https://img.shields.io/pypi/v/dependenpy.svg)](https://pypi.org/project/dependenpy/)
 [![gitter](https://img.shields.io/badge/matrix-chat-4DB798.svg?style=flat)](https://app.gitter.im/#/room/#dependenpy:gitter.im)
 
@@ -111,3 +111,8 @@ $ dependenpy dependenpy -z=
  dependenpy.structures │  8 │ │ │ │ │ │1│ │ │ │
 
 ```
+
+## Sponsors
+
+<!-- sponsors-start -->
+<!-- sponsors-end -->
