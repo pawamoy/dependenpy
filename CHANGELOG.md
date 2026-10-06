@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [3.3.4](https://github.com/pawamoy/dependenpy/releases/tag/3.3.4) - 2026-10-06
+
+<small>[Compare with 3.3.3](https://github.com/pawamoy/dependenpy/compare/3.3.3...3.3.4)</small>
+
+### Build
+
+- Drop support for Python 3.10 ([fc0a618](https://github.com/pawamoy/dependenpy/commit/fc0a618c0848b0cf1f146a1639c54a81a6568b17) by Timothée Mazzucotelli).
+
 ## [3.3.3](https://github.com/pawamoy/dependenpy/releases/tag/3.3.3) - 2025-09-19
 
 <small>[Compare with 3.3.2](https://github.com/pawamoy/dependenpy/compare/3.3.2...3.3.3)</small>
