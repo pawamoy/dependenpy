@@ -16,14 +16,14 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# dependenpy dsm module.
+# dependenpy scan module.
 #
 # This is the core module of dependenpy. It contains the following classes:
 #
-# - [`DSM`][dependenpy.dsm.DSM]: to create a DSM-capable object for a list of packages,
-# - [`Package`][dependenpy.dsm.Package]: which represents a Python package,
-# - [`Module`][dependenpy.dsm.Module]: which represents a Python module,
-# - [`Dependency`][dependenpy.dsm.Dependency]: which represents a dependency between two modules.
+# - [`Scan`][dependenpy.Scan]: scans packages and modules for dependencies,
+# - [`Package`][dependenpy.Package]: represents a Python package,
+# - [`Module`][dependenpy.Module]: represents a Python module,
+# - [`Dependency`][dependenpy.Dependency]: represents a dependency between two modules.
 
 from __future__ import annotations
 
@@ -34,6 +34,7 @@ from os import listdir
 from os.path import isdir, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from warnings import warn
 
 from dependenpy._internal.finder import Finder, PackageSpec
 from dependenpy._internal.helpers import PrintMixin
@@ -43,13 +44,15 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 
-class DSM(RootNode, NodeMixin, PrintMixin):
-    """DSM-capable class.
+_sentinel = object()
 
-    Technically speaking, a DSM instance is not a real DSM but more a tree
-    representing the Python packages structure. However, it has the
-    necessary methods to build a real DSM in the form of a square matrix,
-    a dictionary or a tree-map.
+
+class Scan(RootNode, NodeMixin, PrintMixin):
+    """Scan Python packages and modules for dependencies.
+
+    A scan stores the package tree and the dependencies between its modules.
+    Use `as_matrix()` to generate a square grid of dependency counts as `Matrix`.
+    The tree can also be exported as a dictionary, graph or treemap.
     """
 
     def __init__(
@@ -87,7 +90,7 @@ class DSM(RootNode, NodeMixin, PrintMixin):
                 self.not_found.append(package)
 
         if not specs:
-            print("** dependenpy: DSM empty.", file=sys.stderr)  # noqa: T201
+            print("** dependenpy: Scan empty.", file=sys.stderr)  # noqa: T201
 
         self.specs = PackageSpec.combine(specs)
 
@@ -101,28 +104,39 @@ class DSM(RootNode, NodeMixin, PrintMixin):
 
     def __str__(self):
         packages_names = ", ".join([package.name for package in self.packages])
-        return f"Dependency DSM for packages: [{packages_names}]"
+        return f"Dependency scan for packages: [{packages_names}]"
 
+    @property
+    def is_scan(self) -> bool:
+        """Inherited from NodeMixin. Always True.
+
+        Returns:
+            Whether this object is a Scan.
+        """
+        return True
+
+    # YORE: Bump 4: Remove block.
     @property
     def isdsm(self) -> bool:
         """Inherited from NodeMixin. Always True.
 
         Returns:
-            Whether this object is a DSM.
+            Whether this object is a Scan.
         """
+        warn("The `isdsm` property was renamed `is_scan`.", DeprecationWarning, stacklevel=1)
         return True
 
     def build_tree(self) -> None:
         """Build the Python packages tree."""
         for spec in self.specs:
             if spec.ismodule:
-                self.modules.append(Module(spec.name, spec.path, dsm=self))
+                self.modules.append(Module(spec.name, spec.path, scan=self))
             else:
                 self.packages.append(
                     Package(
                         spec.name,
                         spec.path,
-                        dsm=self,
+                        scan=self,
                         limit_to=spec.limit_to,
                         build_tree=True,
                         build_dependencies=False,
@@ -141,24 +155,28 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
         self,
         name: str,
         path: str,
-        dsm: DSM | None = None,
+        scan: Scan | None = None,
         package: Package | None = None,
         limit_to: list[str] | None = None,
         build_tree: bool = True,  # noqa: FBT001,FBT002
         build_dependencies: bool = True,  # noqa: FBT001,FBT002
         enforce_init: bool = True,  # noqa: FBT001,FBT002
+        # YORE: Bump 4: Remove block.
+        *,
+        dsm: Scan | None = _sentinel,  # ty:ignore[invalid-parameter-default]
     ):
         """Initialization method.
 
         Parameters:
             name: Name of the package.
             path: Path to the package.
-            dsm: Parent DSM.
+            scan: Parent scan.
             package: Parent package.
             limit_to: List of string to limit the recursive tree-building to what is specified.
             build_tree: Auto-build the tree or not.
             build_dependencies: Auto-build the dependencies or not.
             enforce_init: If True, only treat directories if they contain an `__init__.py` file.
+            dsm: Deprecated, use `scan`.
         """
         self.name = name
         """Name of the package."""
@@ -166,18 +184,30 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
         """Path to the package."""
         self.package = package
         """Parent package."""
-        self.dsm = dsm
-        """Parent DSM."""
+        self.scan = scan
+        """Parent Scan."""
         self.limit_to = limit_to or []
         """List of strings to limit the recursive tree-building."""
         self.enforce_init = enforce_init
         """Whether to enforce the presence of `__init__.py` files."""
+
+        # YORE: Bump 4: Remove block.
+        if dsm is not _sentinel:
+            warn("The `dsm` parameter was renamed `scan`.", DeprecationWarning, stacklevel=1)
+            self.scan = dsm
 
         RootNode.__init__(self, build_tree)
         LeafNode.__init__(self)
 
         if build_tree and build_dependencies:
             self.build_dependencies()
+
+    # YORE: Bump 4: Remove block.
+    @property
+    def dsm(self) -> Scan | None:
+        """Deprecated, use `scan`."""
+        warn("The `dsm` attribute was renamed `scan`.", DeprecationWarning, stacklevel=1)
+        return self.scan
 
     @property
     def ispackage(self) -> bool:
@@ -230,7 +260,7 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
             if isfile(abs_m) and module.endswith(".py"):  # noqa: PTH113
                 name = splitext(module)[0]  # noqa: PTH122
                 if not self.limit_to or name in self.limit_to:
-                    self.modules.append(Module(name, abs_m, self.dsm, self))
+                    self.modules.append(Module(name, abs_m, self.scan, self))
             elif isdir(abs_m) and (isfile(join(abs_m, "__init__.py")) or not self.enforce_init):  # noqa: PTH112, PTH113, PTH118
                 heads, new_limit_to = self.split_limits_heads()
                 if not heads or module in heads:
@@ -238,7 +268,7 @@ class Package(RootNode, LeafNode, NodeMixin, PrintMixin):
                         Package(
                             module,
                             abs_m,
-                            self.dsm,
+                            self.scan,
                             self,
                             new_limit_to,
                             build_tree=True,
@@ -268,14 +298,24 @@ class Module(LeafNode, NodeMixin, PrintMixin):
     RECURSIVE_NODES = (ast.ClassDef, ast.FunctionDef, ast.If, ast.IfExp, ast.Try, ast.With, ast.ExceptHandler)
     """Nodes that can be recursive."""
 
-    def __init__(self, name: str, path: str, dsm: DSM | None = None, package: Package | None = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        path: str,
+        scan: Scan | None = None,
+        package: Package | None = None,
+        # YORE: Bump 4: Remove block.
+        *,
+        dsm: Scan | None = _sentinel,  # ty:ignore[invalid-parameter-default]
+    ) -> None:
         """Initialization method.
 
         Parameters:
             name: Name of the module.
             path: Path to the module.
-            dsm: Parent DSM.
+            scan: Parent scan.
             package: Parent Package.
+            dsm: Deprecated, use `scan`.
         """
         super().__init__()
         self.name = name
@@ -284,10 +324,22 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         """Path to the module."""
         self.package = package
         """Package to which the module belongs."""
-        self.dsm = dsm
-        """Parent DSM."""
+        self.scan = scan
+        """Parent Scan."""
         self.dependencies: list[Dependency] = []
         """List of dependencies."""
+
+        # YORE: Bump 4: Remove block.
+        if dsm is not _sentinel:
+            warn("The `dsm` parameter was renamed `scan`.", DeprecationWarning, stacklevel=1)
+            self.scan = dsm
+
+    # YORE: Bump 4: Remove block.
+    @property
+    def dsm(self) -> Scan | None:
+        """Deprecated, use `scan`."""
+        warn("The `dsm` attribute was renamed `scan`.", DeprecationWarning, stacklevel=1)
+        return self.scan
 
     def __contains__(self, item: Package | Module) -> bool:
         """Whether given item is contained inside this module.
@@ -368,7 +420,7 @@ class Module(LeafNode, NodeMixin, PrintMixin):
         Parse the code with ast, find all the import statements, convert
         them into Dependency objects.
         """
-        highest = self.dsm or self.root
+        highest = self.scan or self.root
         for import_ in self.parse_code():
             target = highest.get_target(import_["target"])
             if target:

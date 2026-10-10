@@ -1,9 +1,19 @@
 # Usage
 
+## Dependency matrices
+
+A dependency matrix is a square grid that shows dependencies between Python modules or packages. Dependenpy reads import statements to build dependency matrices. Tools such as [archan](https://github.com/pawamoy/archan) can use the matrix data to check the structure of your software.
+
+Rows and columns list the same elements in the same order. A cell counts dependencies from the element in its row to the element in its column. For example, a value of `2` in row `app.views`, column `app.models` means that `app.views` has two dependencies on `app.models`. A value of `0` means that dependenpy found no dependencies in that direction.
+
+The `depth` argument controls whether the matrix lists individual modules or groups their dependencies by package. Dependencies on modules outside the selected packages do not contribute to the matrix.
+
+The `Scan` class stores the package tree and its dependencies. Its `as_matrix()` method returns `Matrix`, which contains the grid and its labels.
+
 ## Importing classes
 
 You can directly import the following classes from `dependenpy`:
-`DSM`, `Package`, `Module`, `Dependency`, `Matrix` and `TreeMap`.
+`Scan`, `Package`, `Module`, `Dependency`, `Matrix` and `TreeMap`.
 
 If you need to import other classes, please take a look at the structure
 of the code.
@@ -11,31 +21,31 @@ of the code.
 Example:
 
 ```python
-from dependenpy import DSM, Matrix
+from dependenpy import Matrix, Scan
 ```
 
 ## Creation of objects
 
-For basic usage, you only have to instantiate a `DSM` object, and
+For basic usage, you only have to instantiate a `Scan` object, and
 sometimes `Matrix` and `TreeMap`. But if you need to do more complicated
 stuff, you might also want to build instances of `Package`, `Module`
 or `Dependency`.
 
-### Create a DSM
+### Create a Scan
 
-To create a `DSM` object, just pass it a list of packages that can be either
+To create a `Scan` object, just pass it a list of packages that can be either
 found on the disk (absolute or relative paths), or in the Python path (like
 in `sys.path`).
 
 ```python
-from dependenpy import DSM
+from dependenpy import Scan
 
-django = DSM("django")
-flask = DSM("flask")
-both = DSM("django", "flask")
+django = Scan("django")
+flask = Scan("flask")
+both = Scan("django", "flask")
 ```
 
-Three keyword arguments can be given to `DSM`:
+Three keyword arguments can be given to `Scan`:
 
 - `build_tree`: Boolean
 - `build_dependencies`: Boolean
@@ -45,12 +55,12 @@ The three of them defaults to true.
 
 Turning `build_tree` to false will delay the build of the Python package
 tree (the exploration of files on the file system).
-You can later call `dsm.build_tree()` to build the tree.
+You can later call `scan.build_tree()` to build the tree.
 
 Turning `build_dependencies` to false will delay the build of the
 dependencies (the parsing of the source code to determine the
 inter-dependencies).
-You can later call `dsm.build_dependencies()` to build the dependencies.
+You can later call `scan.build_dependencies()` to build the dependencies.
 Note that you won't be able to build the dependencies before the tree has
 been built.
 
@@ -81,15 +91,15 @@ relative_package = Package("program", "src/program")
 ```
 
 Additionally, you can pass 6 more keyword arguments: the same three from
-`DSM` (`build_tree`, `build_dependencies` and `enforce_init`), and
+`Scan` (`build_tree`, `build_dependencies` and `enforce_init`), and
 the three following:
 
-- `dsm`: parent DSM (instance of DSM).
+- `scan`: parent Scan (instance of Scan).
 - `package`: parent package (instance of Package).
 - `limit_to`: list of strings to limit the exploration to a subset of
   directories.
 
-These three arguments default to `None`. Both `dsm` and `package`
+These three arguments default to `None`. Both `scan` and `package`
 arguments are useful to build a tree.
 
 Argument `limit_to` can be used this way:
@@ -117,7 +127,7 @@ These two arguments are the only one required. Name should be the name of
 the Python module (the file without the `.py` extension), and path should be
 the path to the file on the file system.
 
-As for `Package`, `dsm` and `package` arguments can be passed when
+As for `Package`, `scan` and `package` arguments can be passed when
 creating a module.
 
 Example:
@@ -125,7 +135,7 @@ Example:
 ```python
 from dependenpy import Module
 
-dsm_module = Module("dsm", "path/to/dependenpy/dsm.py")
+views = Module("views", "path/to/app/views.py")
 ```
 
 ### Create a Dependency
@@ -138,18 +148,18 @@ A dependency is a simple object that require:
 - and an optional `what` argument which defaults to None: the name of the
   imported item.
 
-### Create a Matrix
+### Create matrix data
 
-From an instance of `DSM` or `Package` called `node`:
+From an instance of `Scan` or `Package` called `node`:
 
 ```python
-matrix = node.as_matrix(depth=2)
+data = node.as_matrix(depth=2)
 ```
 
-From a list of nodes (DSMs, packages or modules):
+From a list of nodes (scans, packages or modules):
 
 ```python
-matrix = Matrix(*node_list, depth=2)
+data = Matrix(*node_list, depth=2)
 ```
 
 An instance of `Matrix` has a `data` attribute, which is a two-dimensions
@@ -158,13 +168,13 @@ in the same order as rows in data.
 
 ### Create a TreeMap
 
-From an instance of `DSM` or `Package` called `node`:
+From an instance of `Scan` or `Package` called `node`:
 
 ```python
 treemap = node.as_treemap(depth=2)
 ```
 
-From a list of nodes (DSMs, packages or modules):
+From a list of nodes (scans, packages or modules):
 
 ```python
 matrix = TreeMap(*node_list, depth=2)
@@ -177,13 +187,13 @@ total number of dependencies in the treemap.
 
 ### Create a Graph
 
-From an instance of `DSM` or `Package` called `node`:
+From an instance of `Scan` or `Package` called `node`:
 
 ```python
 graph = node.as_graph(depth=2)
 ```
 
-From a list of nodes (DSMs, packages or modules):
+From a list of nodes (scans, packages or modules):
 
 ```python
 graph = Graph(*node_list, depth=2)
@@ -196,7 +206,7 @@ information.
 
 ## Accessing elements
 
-Accessing elements in a DSM or a Package is very easy. Just like for a
+Accessing elements in a Scan or a Package is very easy. Just like for a
 dictionary, you can use the `[]` notation to search for a sub-package or
 a sub-module. You can also use the `get` method, which is equivalent to
 the brackets accessor, but will return `None` if the element is not found
@@ -205,29 +215,28 @@ whereas brackets accessor will raise a `KeyError`.
 Example:
 
 ```python
-from dependenpy import DSM
+from dependenpy import Scan
 
-dsm = DSM("django")  # full DSM object, containing Django
-django = dsm["django"]  # Django Package object
+scan = Scan("django")  # full Scan object, containing Django
+django = scan["django"]  # Django Package object
 ```
 
 You can use dots in the element name to go further in just one instruction:
 
 ```python
 django_auth = django["contrib.auth"]
-django_forms_models = dsm.get("django.forms.models")
+django_forms_models = scan.get("django.forms.models")
 ```
 
 Of course, accesses can be chained:
 
 ```python
-django_db_models_utils = dsm["django"].get("db")["models"]["utils"]
+django_db_models_utils = scan["django"].get("db")["models"]["utils"]
 ```
 
 ## Printing contents
 
-Contents of DSMs, packages, modules, matrices, treemaps and graphs can be printed
-with their `print` method. The contents printed are the dependencies.
+Instances of `Scan`, `Package`, `Module`, `Matrix`, `TreeMap` and `Graph` can print their contents with `print()`.
 With some exception, each one of them can output contents in three different formats:
 
 - text (by default)
@@ -239,15 +248,13 @@ JSON or CSV.)
 
 To choose one of these format, just pass the `format` argument, which accepts
 values `'text'`, `'csv'` and `'json'`. Please note that these values
-can be replaced by constants imported from `dependenpy.helpers`
-module:
+can be replaced by constants imported from `dependenpy`:
 
 ```python
-from dependenpy import DSM
-from dependenpy.helpers import TEXT, CSV, JSON
+from dependenpy import CSV, JSON, TEXT, Scan
 
-dsm = DSM("django")
-dsm.print(format=JSON)
+scan = Scan("django")
+scan.print(format=JSON)
 ```
 
 Depending on the chosen format, additional keyword arguments can be passed
@@ -259,7 +266,7 @@ to the print method:
   of a `Module` instance, `absolute` Boolean to switch between output
   of absolute and relative paths.
 
-For `DSM` and `Package` instances, shortcuts to print a matrix, a treemap
+For `Scan` and `Package` instances, shortcuts to print a matrix, a treemap
 or a graph are available with `print_matrix`, `print_treemap` and
 `print_graph` methods.
 These methods will first create the related object and then call

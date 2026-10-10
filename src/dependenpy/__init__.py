@@ -31,15 +31,22 @@ please refer to the README.md included in this package to get the link to the of
 from __future__ import annotations
 
 from dependenpy._internal.cli import get_parser, main
-from dependenpy._internal.dsm import DSM, Dependency, Module, Package
 from dependenpy._internal.finder import Finder, InstalledPackageFinder, LocalPackageFinder, PackageFinder, PackageSpec
 from dependenpy._internal.helpers import CSV, FORMAT, JSON, TEXT, PrintMixin, guess_depth
 from dependenpy._internal.node import LeafNode, NodeMixin, RootNode
 from dependenpy._internal.plugins import InternalDependencies
+from dependenpy._internal.scan import Dependency, Module, Package, Scan
 from dependenpy._internal.structures import Edge, Graph, Matrix, TreeMap, Vertex
+
+
+# YORE: Bump 4: Remove block.
+class DSM(Scan):
+    """Deprecated and renamed `Scan`."""
+
 
 __all__: list[str] = [
     "CSV",
+    # YORE: Bump 4: Remove line.
     "DSM",
     "FORMAT",
     "JSON",
@@ -60,6 +67,7 @@ __all__: list[str] = [
     "PackageSpec",
     "PrintMixin",
     "RootNode",
+    "Scan",
     "TreeMap",
     "Vertex",
     "get_parser",

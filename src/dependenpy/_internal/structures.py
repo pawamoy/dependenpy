@@ -27,18 +27,17 @@ from colorama import Style
 from dependenpy._internal.helpers import PrintMixin
 
 if TYPE_CHECKING:
-    from dependenpy._internal.dsm import DSM, Module, Package
+    from dependenpy._internal.scan import Module, Package, Scan
 
 
 class Matrix(PrintMixin):
-    """Matrix class.
+    """Store a square grid of dependency counts for a list of nodes.
 
-    A class to build a matrix given a list of nodes. After instantiation,
-    it has two attributes: data, a 2-dimensions array, and keys, the names
-    of the entities in the corresponding order.
+    The `keys` attribute lists the module or package names for both axes.
+    Each cell in `data` counts dependencies from its row to its column.
     """
 
-    def __init__(self, *nodes: DSM | Package | Module, depth: int = 0):
+    def __init__(self, *nodes: Scan | Package | Module, depth: int = 0):
         """Initialization method.
 
         Parameters:
@@ -53,7 +52,7 @@ class Matrix(PrintMixin):
         for node in nodes:
             if node.ismodule:
                 modules.append(node)  # ty:ignore[invalid-argument-type]
-            elif node.ispackage or node.isdsm:
+            elif node.ispackage or node.is_scan:
                 modules.extend(node.submodules)  # ty:ignore[unresolved-attribute]
 
         if depth < 1:
@@ -319,13 +318,13 @@ class Graph(PrintMixin):
     and edges, the set of edges.
     """
 
-    def __init__(self, *nodes: DSM | Package | Module, depth: int = 0) -> None:
+    def __init__(self, *nodes: Scan | Package | Module, depth: int = 0) -> None:
         """Initialization method.
 
         An intermediary matrix is built to ease the creation of the graph.
 
         Parameters:
-            *nodes (list of DSM/Package/Module):
+            *nodes (list of Scan/Package/Module):
                 the nodes on which to build the graph.
             depth (int): the depth of the intermediary matrix. See
                 the documentation for Matrix class.

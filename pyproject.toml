@@ -10,7 +10,7 @@ license = "ISC"
 license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.11"
-keywords = ["dependency", "analysis", "matrix", "dsm"]
+keywords = ["dependency", "analysis", "matrix"]
 dynamic = ["version"]
 classifiers = [
     "Development Status :: 4 - Beta",

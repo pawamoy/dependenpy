@@ -23,13 +23,13 @@
 import warnings
 from typing import Any
 
-from dependenpy._internal import dsm
+from dependenpy._internal import scan
 
 
 def __getattr__(name: str) -> Any:
     warnings.warn(
-        "Importing from `dependenpy.dsm` is deprecated. Import from `dependenpy` directly.",
+        "Importing from `dependenpy.dsm` is deprecated. Import from `dependenpy` directly; use `Scan` instead of `DSM`.",
         DeprecationWarning,
         stacklevel=2,
     )
-    return getattr(dsm, name)
+    return getattr(scan, "Scan" if name == "DSM" else name)

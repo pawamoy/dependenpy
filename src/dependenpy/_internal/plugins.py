@@ -18,8 +18,8 @@
 
 from __future__ import annotations
 
-from dependenpy._internal.dsm import DSM as DependenpyDSM  # noqa: N811
 from dependenpy._internal.helpers import guess_depth
+from dependenpy._internal.scan import Scan
 
 try:
     import archan  # ty:ignore[unresolved-import]
@@ -56,7 +56,7 @@ else:
             packages: list[str],
             enforce_init: bool = True,  # noqa: FBT001,FBT002
             depth: int | None = None,
-        ) -> archan.DSM:
+        ) -> archan.DesignStructureMatrix:
             """Provide matrix data for internal dependencies in a set of packages.
 
             Parameters:
@@ -65,10 +65,10 @@ else:
                 depth: The depth of the matrix to generate.
 
             Returns:
-                Instance of archan DSM.
+                A dependency matrix for archan.
             """
-            dsm = DependenpyDSM(*packages, enforce_init=enforce_init)
+            dependencies = Scan(*packages, enforce_init=enforce_init)
             if depth is None:
                 depth = guess_depth(packages)
-            matrix = dsm.as_matrix(depth=depth)
+            matrix = dependencies.as_matrix(depth=depth)
             return archan.DesignStructureMatrix(data=matrix.data, entities=matrix.keys)

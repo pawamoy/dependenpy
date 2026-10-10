@@ -37,8 +37,8 @@ from typing import TYPE_CHECKING, Any, TextIO
 from colorama import init
 
 from dependenpy._internal import debug
-from dependenpy._internal.dsm import DSM
 from dependenpy._internal.helpers import CSV, FORMAT, JSON, guess_depth
+from dependenpy._internal.scan import Scan
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
@@ -210,18 +210,18 @@ def _get_packages(opts: argparse.Namespace) -> list[str]:
     return packages
 
 
-def _run(opts: argparse.Namespace, dsm: DSM) -> None:
+def _run(opts: argparse.Namespace, scan: Scan) -> None:
     indent = _get_indent(opts)
-    depth = _get_depth(opts, packages=dsm.base_packages)
+    depth = _get_depth(opts, packages=scan.base_packages)
     with _open_if_str(opts.output) as output:
         if opts.dependencies:
-            dsm.print(format=opts.format, output=output, indent=indent)
+            scan.print(format=opts.format, output=output, indent=indent)
         elif opts.matrix:
-            dsm.print_matrix(format=opts.format, output=output, depth=depth, indent=indent, zero=opts.zero)
+            scan.print_matrix(format=opts.format, output=output, depth=depth, indent=indent, zero=opts.zero)
         elif opts.treemap:
-            dsm.print_treemap(format=opts.format, output=output)
+            scan.print_treemap(format=opts.format, output=output)
         elif opts.graph:
-            dsm.print_graph(format=opts.format, output=output, depth=depth, indent=indent)
+            scan.print_graph(format=opts.format, output=output, depth=depth, indent=indent)
 
 
 def main(args: list[str] | None = None) -> int:
@@ -233,22 +233,22 @@ def main(args: list[str] | None = None) -> int:
         args: Arguments passed from the command line.
 
     Returns:
-        An exit code. 0 (OK), 1 (dsm empty) or 2 (error).
+        An exit code. 0 (OK), 1 (scan empty) or 2 (error).
     """
     parser = get_parser()
     opts = parser.parse_args(args=args)
     if not (opts.matrix or opts.dependencies or opts.treemap or opts.graph):
         opts.matrix = True
 
-    dsm = DSM(*_get_packages(opts), build_tree=True, build_dependencies=True, enforce_init=not opts.greedy)
-    if dsm.empty:
+    scan = Scan(*_get_packages(opts), build_tree=True, build_dependencies=True, enforce_init=not opts.greedy)
+    if scan.empty:
         return 1
 
     # init colorama
     init()
 
     try:
-        _run(opts, dsm)
+        _run(opts, scan)
     except BrokenPipeError:
         # avoid traceback
         return 2

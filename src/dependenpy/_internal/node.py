@@ -21,15 +21,16 @@ from __future__ import annotations
 import json
 import sys
 from typing import IO, TYPE_CHECKING, Any
+from warnings import warn
 
 from dependenpy._internal.structures import Graph, Matrix, TreeMap
 
 if TYPE_CHECKING:
-    from dependenpy._internal.dsm import Module, Package
+    from dependenpy._internal.scan import Module, Package
 
 
 class NodeMixin:
-    """Shared code between DSM, Package and Module."""
+    """Shared code between Scan, Package and Module."""
 
     @property
     def ismodule(self) -> bool:
@@ -50,17 +51,28 @@ class NodeMixin:
         return False
 
     @property
-    def isdsm(self) -> bool:
-        """Property to check if object is instance of DSM.
+    def is_scan(self) -> bool:
+        """Property to check if object is instance of Scan.
 
         Returns:
-            Whether this object is a DSM.
+            Whether this object is a Scan.
         """
+        return False
+
+    # YORE: Bump 4: Remove block.
+    @property
+    def isdsm(self) -> bool:
+        """Property to check if object is instance of Scan.
+
+        Returns:
+            Whether this object is a Scan.
+        """
+        warn("The `isdsm` property was renamed `is_scan`.", DeprecationWarning, stacklevel=1)
         return False
 
 
 class RootNode:
-    """Shared code between DSM and Package."""
+    """Shared code between Scan and Package."""
 
     def __init__(self, build_tree: bool = True):  # noqa: FBT001,FBT002
         """Initialization method.

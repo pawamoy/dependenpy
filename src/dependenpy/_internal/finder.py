@@ -24,7 +24,7 @@ from typing import Any
 
 
 class PackageSpec:
-    """Holder for a package specification (given as argument to DSM)."""
+    """Holder for a package specification (given as argument to Scan)."""
 
     def __init__(self, name: str, path: str, limit_to: list[str] | None = None) -> None:
         """Initialization method.

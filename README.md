@@ -7,8 +7,9 @@
 
 Show the inter-dependencies between modules of Python packages.
 
-`dependenpy` allows you to build a dependency matrix for a set of Python packages.
-To do this, it reads and searches the source code for import statements.
+`dependenpy` allows you to build a dependency matrix for a set of Python packages. To do this, it reads and searches the source code for import statements.
+
+A dependency matrix is a square grid that shows dependencies between Python modules or packages. Each cell counts dependencies from its row to its column. Tools such as [archan](https://github.com/pawamoy/archan) can use the matrix data to check the structure of your software.
 
 ![demo](demo.svg)
 
@@ -27,24 +28,24 @@ uv tool install dependenpy
 ## Usage (as a library)
 
 ```python
-from dependenpy import DSM
+from dependenpy import Scan
 
-# create DSM
-dsm = DSM('django')
+# build the package tree and its dependencies
+scan = Scan('django')
 
-# transform as matrix
-matrix = dsm.as_matrix(depth=2)
+# generate a grid of dependency counts
+data = scan.as_matrix(depth=2)
 
 # initialize with many packages
-dsm = DSM('django', 'meerkat', 'appsettings', 'dependenpy', 'archan')
+scan = Scan('django', 'meerkat', 'appsettings', 'dependenpy', 'archan')
 with open('output', 'w') as output:
-    dsm.print(format='json', indent=2, output=output)
+    scan.print(format='json', indent=2, output=output)
 
 # access packages and modules
-meerkat = dsm['meerkat']  # or dsm.get('meerkat')
-finder = dsm['dependenpy.finder']  # or even dsm['dependenpy']['finder']
+meerkat = scan['meerkat']  # or scan.get('meerkat')
+finder = scan['dependenpy.finder']  # or even scan['dependenpy']['finder']
 
-# instances of DSM and Package all have print, as_matrix, etc. methods
+# instances of Scan and Package all have print, as_matrix, etc. methods
 meerkat.print_matrix(depth=2)
 ```
 
@@ -95,21 +96,13 @@ optional arguments:
 Example:
 
 ```console
-$ # running dependenpy on itself
-$ dependenpy dependenpy -z=
+$ dependenpy tests/fixtures/internal -z=
 
-                Module │ Id │0│1│2│3│4│5│6│7│8│
- ──────────────────────┼────┼─┼─┼─┼─┼─┼─┼─┼─┼─┤
-   dependenpy.__init__ │  0 │ │ │ │4│ │ │ │ │2│
-   dependenpy.__main__ │  1 │ │ │1│ │ │ │ │ │ │
-        dependenpy.cli │  2 │1│ │ │1│ │4│ │ │ │
-        dependenpy.dsm │  3 │ │ │ │ │2│1│3│ │ │
-     dependenpy.finder │  4 │ │ │ │ │ │ │ │ │ │
-    dependenpy.helpers │  5 │ │ │ │ │ │ │ │ │ │
-       dependenpy.node │  6 │ │ │ │ │ │ │ │ │3│
-    dependenpy.plugins │  7 │ │ │ │1│ │1│ │ │ │
- dependenpy.structures │  8 │ │ │ │ │ │1│ │ │ │
-
+                Module │ Id │0│1│2│
+ ──────────────────────┼────┼─┼─┼─┤
+     internal.__init__ │  0 │1│ │ │
+     internal.module_a │  1 │1│ │2│
+ internal.subpackage_a │  2 │ │1│3│
 ```
 
 ## Sponsors
