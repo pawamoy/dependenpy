@@ -252,5 +252,9 @@ def main(args: list[str] | None = None) -> int:
     except BrokenPipeError:
         # avoid traceback
         return 2
+    except OSError as error:
+        # e.g. the `-o` output file cannot be opened: report cleanly
+        print(f"dependenpy: error: cannot write to {opts.output}: {error.strerror or error}", file=sys.stderr)
+        return 2
 
     return 0
